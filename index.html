@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Дневник тренировок</title>
+<title>Р”РЅРµРІРЅРёРє С‚СЂРµРЅРёСЂРѕРІРѕРє</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root {
   --bg: #0e0e14;
@@ -122,7 +123,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 }
 .btn-sm:active { transform: scale(0.95); }
 
-/* ═══════════════ HOME SCREEN ═══════════════ */
+/* в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ HOME SCREEN в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ */
 .hero {
   background: linear-gradient(135deg, #1e0a2e 0%, #0e1a2e 100%);
   border-radius: var(--r);
@@ -168,7 +169,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .recent-date { font-size: 12px; color: var(--muted); }
 .recent-score { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--gold); }
 
-/* ═══════════════ WORKOUT LOG ═══════════════ */
+/* в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ WORKOUT LOG в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ */
 .exercise-row {
   background: var(--surface);
   border-radius: 12px;
@@ -233,7 +234,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .star.filled { color: var(--gold); }
 .star:active { transform: scale(1.3); }
 
-/* ═══════════════ PARAMS ═══════════════ */
+/* в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ PARAMS в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ */
 .param-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .param-card {
   background: var(--surface);
@@ -249,7 +250,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .progress-bar { height: 6px; background: var(--border); border-radius: 3px; margin-top: 8px; overflow: hidden; }
 .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: 3px; transition: width 0.5s ease; }
 
-/* ═══════════════ TRACKER GRID ═══════════════ */
+/* в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ TRACKER GRID в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ */
 .tracker-months { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .tracker-month { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 10px; }
 .tm-title { font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: var(--muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
@@ -269,7 +270,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .day-dot.rest { background: rgba(6,182,212,0.15); border-color: var(--accent3); color: var(--accent3); }
 .day-dot.future { opacity: 0.3; cursor: default; }
 
-/* ═══════════════ HABITS ═══════════════ */
+/* в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ HABITS в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ */
 .habit-row {
   background: var(--card); border: 1px solid var(--border);
   border-radius: 12px; padding: 12px; margin-bottom: 8px;
@@ -289,7 +290,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .habit-dot.done { background: var(--success); border-color: var(--success); color: white; font-size: 10px; }
 .habit-dot:active { transform: scale(0.85); }
 
-/* ═══════════════ CHALLENGE ═══════════════ */
+/* в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ CHALLENGE в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ */
 .challenge-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; margin-bottom: 10px; }
 .challenge-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .challenge-num { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--accent); }
@@ -310,7 +311,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .ch-progress-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
 .ch-progress-val { font-weight: 800; color: var(--accent); }
 
-/* ═══════════════ STEPS ═══════════════ */
+/* в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ STEPS в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ */
 .steps-month { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; margin-bottom: 10px; }
 .steps-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .steps-month-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; }
@@ -387,6 +388,49 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .note-date { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
 .note-text { font-size: 14px; line-height: 1.5; }
 
+/* CHARTS */
+.chart-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px; }
+.chart-tabs::-webkit-scrollbar { display: none; }
+.chart-tab {
+  flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 800; cursor: pointer;
+  border: 1px solid var(--border); background: var(--card); color: var(--muted);
+  transition: all 0.15s;
+}
+.chart-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+.chart-wrap {
+  position: relative; background: var(--surface); border-radius: 14px;
+  border: 1px solid var(--border); padding: 12px; margin-bottom: 10px;
+}
+.chart-wrap canvas { max-height: 200px; }
+.chart-title { font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: var(--muted); letter-spacing: 1px; margin-bottom: 10px; }
+.chart-empty { text-align: center; color: var(--muted); font-size: 13px; padding: 30px 0; }
+
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.stats-tile { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 8px; text-align: center; }
+.stats-tile-val { font-family: 'Bebas Neue', sans-serif; font-size: 26px; }
+.stats-tile-lbl { font-size: 10px; color: var(--muted); font-weight: 700; line-height: 1.3; margin-top: 2px; }
+
+/* EDIT WORKOUT */
+.wo-item {
+  background: var(--surface); border-radius: 12px; border: 1px solid var(--border);
+  padding: 12px; margin-bottom: 8px;
+}
+.wo-item-head { display: flex; align-items: flex-start; gap: 10px; }
+.wo-item-info { flex: 1; }
+.wo-item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.btn-edit { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; color: var(--muted); font-size: 14px; cursor: pointer; transition: all 0.15s; }
+.btn-edit:hover, .btn-edit:active { border-color: var(--accent3); color: var(--accent3); }
+.btn-del { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; color: var(--muted); font-size: 14px; cursor: pointer; }
+.btn-del:active { border-color: var(--accent); color: var(--accent); }
+
+.wo-detail { margin-top: 10px; display: none; }
+.wo-detail.open { display: block; }
+.ex-detail-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.ex-detail-row:last-child { border-bottom: none; }
+.ex-detail-name { font-weight: 700; flex: 1; }
+.ex-detail-sets { font-size: 12px; color: var(--muted); }
+
 /* Profile */
 .profile-avatar { width: 72px; height: 72px; background: linear-gradient(135deg, var(--accent2), var(--accent)); border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 32px; }
 .profile-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
@@ -402,30 +446,30 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 </head>
 <body>
 
-<!-- ═══════════════ HOME ═══════════════ -->
+<!-- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ HOME в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
 <div class="screen active" id="screen-home">
   <div class="topbar">
-    <div class="topbar-title">ДНЕВНИК 🔥</div>
-    <button class="btn-icon" onclick="openModal('modal-profile-edit')">⚙️</button>
+    <div class="topbar-title">Р”РќР•Р’РќРРљ рџ”Ґ</div>
+    <button class="btn-icon" onclick="openModal('modal-profile-edit')">вљ™пёЏ</button>
   </div>
   <div class="scroll">
     <!-- Hero -->
     <div class="hero">
-      <div class="hero-label">Добро пожаловать</div>
-      <div class="hero-name" id="home-name">Атлет</div>
-      <div class="hero-goal" id="home-goal">Цель не задана</div>
+      <div class="hero-label">Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ</div>
+      <div class="hero-name" id="home-name">РђС‚Р»РµС‚</div>
+      <div class="hero-goal" id="home-goal">Р¦РµР»СЊ РЅРµ Р·Р°РґР°РЅР°</div>
       <div class="hero-stats">
         <div class="hero-stat">
           <div class="hero-stat-val" id="stat-workouts">0</div>
-          <div class="hero-stat-lbl">Трен.</div>
+          <div class="hero-stat-lbl">РўСЂРµРЅ.</div>
         </div>
         <div class="hero-stat">
           <div class="hero-stat-val" id="stat-streak">0</div>
-          <div class="hero-stat-lbl">Серия</div>
+          <div class="hero-stat-lbl">РЎРµСЂРёСЏ</div>
         </div>
         <div class="hero-stat">
-          <div class="hero-stat-val" id="stat-weight">—</div>
-          <div class="hero-stat-lbl">Вес кг</div>
+          <div class="hero-stat-val" id="stat-weight">вЂ”</div>
+          <div class="hero-stat-lbl">Р’РµСЃ РєРі</div>
         </div>
       </div>
     </div>
@@ -433,181 +477,237 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
     <!-- Quick actions -->
     <div class="quick-btns">
       <div class="quick-btn" onclick="goTo('workouts'); showNewWorkout()">
-        <div class="ico">💪</div>
-        <div class="lbl">Тренировка</div>
-        <div class="sub">Записать</div>
+        <div class="ico">рџ’Є</div>
+        <div class="lbl">РўСЂРµРЅРёСЂРѕРІРєР°</div>
+        <div class="sub">Р—Р°РїРёСЃР°С‚СЊ</div>
       </div>
       <div class="quick-btn" onclick="goTo('tracker')">
-        <div class="ico">📅</div>
-        <div class="lbl">Трекер</div>
-        <div class="sub">Отметить день</div>
+        <div class="ico">рџ“…</div>
+        <div class="lbl">РўСЂРµРєРµСЂ</div>
+        <div class="sub">РћС‚РјРµС‚РёС‚СЊ РґРµРЅСЊ</div>
       </div>
       <div class="quick-btn" onclick="goTo('params')">
-        <div class="ico">📊</div>
-        <div class="lbl">Параметры</div>
-        <div class="sub">Замеры</div>
+        <div class="ico">рџ“Љ</div>
+        <div class="lbl">РџР°СЂР°РјРµС‚СЂС‹</div>
+        <div class="sub">Р—Р°РјРµСЂС‹</div>
       </div>
       <div class="quick-btn" onclick="goTo('habits')">
-        <div class="ico">✅</div>
-        <div class="lbl">Привычки</div>
-        <div class="sub">Отметить</div>
+        <div class="ico">вњ…</div>
+        <div class="lbl">РџСЂРёРІС‹С‡РєРё</div>
+        <div class="sub">РћС‚РјРµС‚РёС‚СЊ</div>
       </div>
     </div>
 
     <!-- Recent -->
     <div class="card">
-      <div class="card-title"><span></span> ПОСЛЕДНИЕ ТРЕНИРОВКИ</div>
+      <div class="card-title"><span></span> РџРћРЎР›Р•Р”РќРР• РўР Р•РќРР РћР’РљР</div>
       <div id="recent-list">
         <div style="text-align:center;color:var(--muted);font-size:13px;padding:16px 0;">
-          Тренировок пока нет — добавь первую! 💪
+          РўСЂРµРЅРёСЂРѕРІРѕРє РїРѕРєР° РЅРµС‚ вЂ” РґРѕР±Р°РІСЊ РїРµСЂРІСѓСЋ! рџ’Є
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════ WORKOUTS ═══════════════ -->
+<!-- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ WORKOUTS в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
 <div class="screen" id="screen-workouts">
   <div class="topbar">
-    <div class="topbar-title">ТРЕНИРОВКИ</div>
-    <button class="btn-icon" onclick="showNewWorkout()">➕</button>
+    <div class="topbar-title">РўР Р•РќРР РћР’РљР</div>
+    <button class="btn-icon" onclick="showNewWorkout()">вћ•</button>
   </div>
   <div class="scroll">
     <!-- New workout form -->
     <div id="new-workout-form" style="display:none">
       <div class="card">
-        <div class="card-title"><span></span> НОВАЯ ТРЕНИРОВКА</div>
+        <div class="card-title"><span></span> РќРћР’РђРЇ РўР Р•РќРР РћР’РљРђ</div>
         <div class="row2">
           <div class="field">
-            <label>Дата</label>
+            <label>Р”Р°С‚Р°</label>
             <input type="date" id="wo-date">
           </div>
           <div class="field">
-            <label>Настроение</label>
+            <label>РќР°СЃС‚СЂРѕРµРЅРёРµ</label>
             <div class="mood-bar" id="mood-bar">
-              <div class="mood-btn" data-mood="😴" onclick="selectMood(this)">😴</div>
-              <div class="mood-btn" data-mood="😐" onclick="selectMood(this)">😐</div>
-              <div class="mood-btn" data-mood="😊" onclick="selectMood(this)">😊</div>
-              <div class="mood-btn" data-mood="🔥" onclick="selectMood(this)">🔥</div>
+              <div class="mood-btn" data-mood="рџґ" onclick="selectMood(this)">рџґ</div>
+              <div class="mood-btn" data-mood="рџђ" onclick="selectMood(this)">рџђ</div>
+              <div class="mood-btn" data-mood="рџЉ" onclick="selectMood(this)">рџЉ</div>
+              <div class="mood-btn" data-mood="рџ”Ґ" onclick="selectMood(this)">рџ”Ґ</div>
             </div>
           </div>
         </div>
         <div class="row3">
           <div class="field">
-            <label>Сон (ч)</label>
+            <label>РЎРѕРЅ (С‡)</label>
             <input type="number" id="wo-sleep" placeholder="8" min="0" max="24">
           </div>
           <div class="field">
-            <label>Энергия</label>
+            <label>Р­РЅРµСЂРіРёСЏ</label>
             <select id="wo-energy">
-              <option>⭐⭐⭐⭐⭐</option>
-              <option>⭐⭐⭐⭐</option>
-              <option>⭐⭐⭐</option>
-              <option>⭐⭐</option>
-              <option>⭐</option>
+              <option>в­ђв­ђв­ђв­ђв­ђ</option>
+              <option>в­ђв­ђв­ђв­ђ</option>
+              <option>в­ђв­ђв­ђ</option>
+              <option>в­ђв­ђ</option>
+              <option>в­ђ</option>
             </select>
           </div>
           <div class="field">
-            <label>Тип</label>
+            <label>РўРёРї</label>
             <select id="wo-type">
-              <option>Силовая</option>
-              <option>Кардио</option>
-              <option>Смешанная</option>
-              <option>Растяжка</option>
+              <option>РЎРёР»РѕРІР°СЏ</option>
+              <option>РљР°СЂРґРёРѕ</option>
+              <option>РЎРјРµС€Р°РЅРЅР°СЏ</option>
+              <option>Р Р°СЃС‚СЏР¶РєР°</option>
             </select>
           </div>
         </div>
 
-        <div class="card-title" style="margin-top:4px"><span></span> ГРУППЫ МЫШЦ</div>
+        <div class="card-title" style="margin-top:4px"><span></span> Р“Р РЈРџРџР« РњР«РЁР¦</div>
         <div class="muscles-row">
-          <div class="muscle-chip" onclick="toggleMuscle(this)">Пресс</div>
-          <div class="muscle-chip" onclick="toggleMuscle(this)">Ноги</div>
-          <div class="muscle-chip" onclick="toggleMuscle(this)">Руки</div>
-          <div class="muscle-chip" onclick="toggleMuscle(this)">Спина</div>
-          <div class="muscle-chip" onclick="toggleMuscle(this)">Грудь</div>
-          <div class="muscle-chip" onclick="toggleMuscle(this)">Ягодицы</div>
-          <div class="muscle-chip" onclick="toggleMuscle(this)">Плечи</div>
+          <div class="muscle-chip" onclick="toggleMuscle(this)">РџСЂРµСЃСЃ</div>
+          <div class="muscle-chip" onclick="toggleMuscle(this)">РќРѕРіРё</div>
+          <div class="muscle-chip" onclick="toggleMuscle(this)">Р СѓРєРё</div>
+          <div class="muscle-chip" onclick="toggleMuscle(this)">РЎРїРёРЅР°</div>
+          <div class="muscle-chip" onclick="toggleMuscle(this)">Р“СЂСѓРґСЊ</div>
+          <div class="muscle-chip" onclick="toggleMuscle(this)">РЇРіРѕРґРёС†С‹</div>
+          <div class="muscle-chip" onclick="toggleMuscle(this)">РџР»РµС‡Рё</div>
         </div>
       </div>
 
       <!-- Exercises -->
       <div id="exercises-list"></div>
-      <button class="btn btn-secondary" style="margin-bottom:8px" onclick="addExercise()">➕ Добавить упражнение</button>
+      <button class="btn btn-secondary" style="margin-bottom:8px" onclick="addExercise()">вћ• Р”РѕР±Р°РІРёС‚СЊ СѓРїСЂР°Р¶РЅРµРЅРёРµ</button>
 
       <!-- Cardio section -->
       <div class="card" id="cardio-section">
-        <div class="card-title"><span></span> КАРДИО</div>
+        <div class="card-title"><span></span> РљРђР Р”РРћ</div>
         <div class="row3">
-          <div class="field"><label>Время (мин)</label><input type="number" id="card-time" placeholder="30"></div>
-          <div class="field"><label>Дистанция (км)</label><input type="number" id="card-dist" step="0.1" placeholder="3.0"></div>
-          <div class="field"><label>Пульс (ср)</label><input type="number" id="card-pulse" placeholder="140"></div>
+          <div class="field"><label>Р’СЂРµРјСЏ (РјРёРЅ)</label><input type="number" id="card-time" placeholder="30"></div>
+          <div class="field"><label>Р”РёСЃС‚Р°РЅС†РёСЏ (РєРј)</label><input type="number" id="card-dist" step="0.1" placeholder="3.0"></div>
+          <div class="field"><label>РџСѓР»СЊСЃ (СЃСЂ)</label><input type="number" id="card-pulse" placeholder="140"></div>
         </div>
         <div class="row2">
-          <div class="field"><label>Тип</label>
+          <div class="field"><label>РўРёРї</label>
             <select id="card-type">
-              <option>Бег</option><option>Ходьба</option><option>Велосипед</option>
-              <option>Скакалка</option><option>Эллипс</option><option>Другое</option>
+              <option>Р‘РµРі</option><option>РҐРѕРґСЊР±Р°</option><option>Р’РµР»РѕСЃРёРїРµРґ</option>
+              <option>РЎРєР°РєР°Р»РєР°</option><option>Р­Р»Р»РёРїСЃ</option><option>Р”СЂСѓРіРѕРµ</option>
             </select>
           </div>
-          <div class="field"><label>Калории</label><input type="number" id="card-cals" placeholder="250"></div>
+          <div class="field"><label>РљР°Р»РѕСЂРёРё</label><input type="number" id="card-cals" placeholder="250"></div>
         </div>
       </div>
 
       <!-- Rating & Notes -->
       <div class="card">
-        <div class="card-title"><span></span> ОЦЕНКА ТРЕНИРОВКИ</div>
+        <div class="card-title"><span></span> РћР¦Р•РќРљРђ РўР Р•РќРР РћР’РљР</div>
         <div class="stars" id="rating-stars">
-          <span class="star" onclick="setRating(1)">★</span>
-          <span class="star" onclick="setRating(2)">★</span>
-          <span class="star" onclick="setRating(3)">★</span>
-          <span class="star" onclick="setRating(4)">★</span>
-          <span class="star" onclick="setRating(5)">★</span>
+          <span class="star" onclick="setRating(1)">в…</span>
+          <span class="star" onclick="setRating(2)">в…</span>
+          <span class="star" onclick="setRating(3)">в…</span>
+          <span class="star" onclick="setRating(4)">в…</span>
+          <span class="star" onclick="setRating(5)">в…</span>
         </div>
         <div class="field" style="margin-top:10px">
-          <label>Заметки</label>
-          <textarea id="wo-notes" placeholder="Как прошла тренировка?"></textarea>
+          <label>Р—Р°РјРµС‚РєРё</label>
+          <textarea id="wo-notes" placeholder="РљР°Рє РїСЂРѕС€Р»Р° С‚СЂРµРЅРёСЂРѕРІРєР°?"></textarea>
         </div>
       </div>
-      <button class="btn btn-primary" onclick="saveWorkout()">💾 Сохранить тренировку</button>
+      <button class="btn btn-primary" onclick="saveWorkout()">рџ’ѕ РЎРѕС…СЂР°РЅРёС‚СЊ С‚СЂРµРЅРёСЂРѕРІРєСѓ</button>
       <div style="height:8px"></div>
-      <button class="btn btn-secondary" onclick="hideNewWorkout()">Отмена</button>
+      <button class="btn btn-secondary" onclick="hideNewWorkout()">РћС‚РјРµРЅР°</button>
     </div>
 
     <!-- Workouts history -->
     <div id="workouts-history">
       <div class="card">
-        <div class="card-title"><span></span> ИСТОРИЯ ТРЕНИРОВОК</div>
+        <div class="card-title"><span></span> РРЎРўРћР РРЇ РўР Р•РќРР РћР’РћРљ</div>
         <div id="history-list">
-          <div style="text-align:center;color:var(--muted);font-size:13px;padding:16px 0;">Нажми ➕ чтобы добавить первую тренировку</div>
+          <div style="text-align:center;color:var(--muted);font-size:13px;padding:16px 0;">РќР°Р¶РјРё вћ• С‡С‚РѕР±С‹ РґРѕР±Р°РІРёС‚СЊ РїРµСЂРІСѓСЋ С‚СЂРµРЅРёСЂРѕРІРєСѓ</div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════ TRACKER ═══════════════ -->
+<!-- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ CHARTS в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
+<div class="screen" id="screen-charts">
+  <div class="topbar">
+    <div class="topbar-title">Р“Р РђР¤РРљР</div>
+  </div>
+  <div class="scroll">
+    <!-- Summary stats -->
+    <div class="stats-grid" id="charts-stats"></div>
+
+    <!-- Tab switcher -->
+    <div class="chart-tabs">
+      <div class="chart-tab active" onclick="switchChartTab('weight', this)">вљ–пёЏ Р’РµСЃ</div>
+      <div class="chart-tab" onclick="switchChartTab('waist', this)">рџ“Џ РўР°Р»РёСЏ</div>
+      <div class="chart-tab" onclick="switchChartTab('hips', this)">рџ“ђ Р‘С‘РґСЂР°</div>
+      <div class="chart-tab" onclick="switchChartTab('chest', this)">рџ’™ Р“СЂСѓРґСЊ</div>
+      <div class="chart-tab" onclick="switchChartTab('fat', this)">рџ”Ґ % Р¶РёСЂР°</div>
+      <div class="chart-tab" onclick="switchChartTab('workouts', this)">рџ’Є РђРєС‚РёРІРЅРѕСЃС‚СЊ</div>
+    </div>
+
+    <!-- Main chart -->
+    <div class="chart-wrap">
+      <div class="chart-title" id="chart-main-title">РР—РњР•РќР•РќРР• Р’Р•РЎРђ</div>
+      <canvas id="chart-main"></canvas>
+      <div class="chart-empty" id="chart-main-empty" style="display:none">
+        Р”РѕР±Р°РІСЊ Р·Р°РјРµСЂС‹ РІ СЂР°Р·РґРµР»Рµ В«РџР°СЂР°РјРµС‚СЂС‹В» С‡С‚РѕР±С‹ СѓРІРёРґРµС‚СЊ РіСЂР°С„РёРє рџ“Љ
+      </div>
+    </div>
+
+    <!-- Progress delta -->
+    <div class="card" id="charts-delta-card">
+      <div class="card-title"><span></span> РР—РњР•РќР•РќРР• Р—Рђ РџР•Р РРћР”</div>
+      <div id="charts-delta"></div>
+    </div>
+
+    <!-- Workouts by muscle group -->
+    <div class="chart-wrap">
+      <div class="chart-title">РўР Р•РќРР РћР’РљР РџРћ Р“Р РЈРџРџРђРњ РњР«РЁР¦</div>
+      <canvas id="chart-muscles"></canvas>
+      <div class="chart-empty" id="chart-muscles-empty" style="display:none">
+        Р—Р°РїРёСЃС‹РІР°Р№ С‚СЂРµРЅРёСЂРѕРІРєРё СЃ РіСЂСѓРїРїР°РјРё РјС‹С€С† рџ’Є
+      </div>
+    </div>
+
+    <!-- Monthly workouts bar -->
+    <div class="chart-wrap">
+      <div class="chart-title">РђРљРўРР’РќРћРЎРўР¬ РџРћ РњР•РЎРЇР¦РђРњ</div>
+      <canvas id="chart-monthly"></canvas>
+    </div>
+
+    <!-- Tracker streak -->
+    <div class="card">
+      <div class="card-title"><span></span> Р Р•РљРћР Р”Р«</div>
+      <div id="charts-records"></div>
+    </div>
+  </div>
+</div>
+
+<!-- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ TRACKER в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
 <div class="screen" id="screen-tracker">
   <div class="topbar">
-    <div class="topbar-title">ТРЕКЕР</div>
-    <div class="badge cyan" id="tracker-total">0 тренировок</div>
+    <div class="topbar-title">РўР Р•РљР•Р </div>
+    <div class="badge cyan" id="tracker-total">0 С‚СЂРµРЅРёСЂРѕРІРѕРє</div>
   </div>
   <div class="scroll">
     <div class="chip-scroll" id="tracker-year-select"></div>
     <div class="tracker-months" id="tracker-grid"></div>
-
     <div style="height:10px"></div>
     <div class="card">
-      <div class="card-title"><span></span> ИТОГИ ПО МЕСЯЦАМ</div>
+      <div class="card-title"><span></span> РРўРћР“Р РџРћ РњР•РЎРЇР¦РђРњ</div>
       <div id="monthly-stats-list"></div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════ PARAMS ═══════════════ -->
+<!-- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ PARAMS в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
 <div class="screen" id="screen-params">
   <div class="topbar">
-    <div class="topbar-title">ПАРАМЕТРЫ</div>
-    <button class="btn-icon" onclick="openModal('modal-add-params')">➕</button>
+    <div class="topbar-title">РџРђР РђРњР•РўР Р«</div>
+    <button class="btn-icon" onclick="openModal('modal-add-params')">вћ•</button>
   </div>
   <div class="scroll">
     <!-- Current -->
@@ -616,55 +716,55 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 
     <!-- History table -->
     <div class="card">
-      <div class="card-title"><span></span> ИСТОРИЯ ЗАМЕРОВ</div>
+      <div class="card-title"><span></span> РРЎРўРћР РРЇ Р—РђРњР•Р РћР’</div>
       <div id="params-history" style="overflow-x:auto;"></div>
     </div>
 
     <!-- Steps tracker -->
     <div class="card">
-      <div class="card-title"><span></span> ТРЕКЕР ШАГОВ</div>
+      <div class="card-title"><span></span> РўР Р•РљР•Р  РЁРђР“РћР’</div>
       <div id="steps-list"></div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════ HABITS ═══════════════ -->
+<!-- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ HABITS в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
 <div class="screen" id="screen-habits">
   <div class="topbar">
-    <div class="topbar-title">ПРИВЫЧКИ</div>
-    <button class="btn-icon" onclick="openModal('modal-add-habit')">➕</button>
+    <div class="topbar-title">РџР РР’Р«Р§РљР</div>
+    <button class="btn-icon" onclick="openModal('modal-add-habit')">вћ•</button>
   </div>
   <div class="scroll">
     <div class="chip-scroll" id="habit-month-select"></div>
     <div id="habits-list"></div>
 
     <div class="card">
-      <div class="card-title"><span></span> 30-ДНЕВНЫЙ ЧЕЛЛЕНДЖ</div>
+      <div class="card-title"><span></span> 30-Р”РќР•Р’РќР«Р™ Р§Р•Р›Р›Р•РќР”Р–</div>
       <div id="challenges-list"></div>
-      <button class="btn btn-secondary" style="margin-top:8px" onclick="openModal('modal-add-challenge')">➕ Добавить челлендж</button>
+      <button class="btn btn-secondary" style="margin-top:8px" onclick="openModal('modal-add-challenge')">вћ• Р”РѕР±Р°РІРёС‚СЊ С‡РµР»Р»РµРЅРґР¶</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════ MODALS ═══════════════ -->
+<!-- в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ MODALS в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ -->
 
 <!-- Profile edit -->
 <div class="modal-overlay" id="modal-profile-edit" onclick="closeModalOutside(event, 'modal-profile-edit')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">МОЙ ПРОФИЛЬ</div>
-    <div class="field"><label>Имя</label><input type="text" id="prof-name" placeholder="Введи имя"></div>
+    <div class="modal-title">РњРћР™ РџР РћР¤РР›Р¬</div>
+    <div class="field"><label>РРјСЏ</label><input type="text" id="prof-name" placeholder="Р’РІРµРґРё РёРјСЏ"></div>
     <div class="row2">
-      <div class="field"><label>Возраст</label><input type="number" id="prof-age" placeholder="25"></div>
-      <div class="field"><label>Рост (см)</label><input type="number" id="prof-height" placeholder="170"></div>
+      <div class="field"><label>Р’РѕР·СЂР°СЃС‚</label><input type="number" id="prof-age" placeholder="25"></div>
+      <div class="field"><label>Р РѕСЃС‚ (СЃРј)</label><input type="number" id="prof-height" placeholder="170"></div>
     </div>
     <div class="row2">
-      <div class="field"><label>Вес сейчас (кг)</label><input type="number" id="prof-weight" step="0.1" placeholder="65"></div>
-      <div class="field"><label>Желаемый вес (кг)</label><input type="number" id="prof-target" step="0.1" placeholder="60"></div>
+      <div class="field"><label>Р’РµСЃ СЃРµР№С‡Р°СЃ (РєРі)</label><input type="number" id="prof-weight" step="0.1" placeholder="65"></div>
+      <div class="field"><label>Р–РµР»Р°РµРјС‹Р№ РІРµСЃ (РєРі)</label><input type="number" id="prof-target" step="0.1" placeholder="60"></div>
     </div>
-    <div class="field"><label>Моя цель</label><input type="text" id="prof-goal" placeholder="Например: похудеть на 5 кг"></div>
-    <div class="field"><label>Дата начала</label><input type="date" id="prof-start"></div>
-    <button class="btn btn-primary" onclick="saveProfile()">💾 Сохранить</button>
+    <div class="field"><label>РњРѕСЏ С†РµР»СЊ</label><input type="text" id="prof-goal" placeholder="РќР°РїСЂРёРјРµСЂ: РїРѕС…СѓРґРµС‚СЊ РЅР° 5 РєРі"></div>
+    <div class="field"><label>Р”Р°С‚Р° РЅР°С‡Р°Р»Р°</label><input type="date" id="prof-start"></div>
+    <button class="btn btn-primary" onclick="saveProfile()">рџ’ѕ РЎРѕС…СЂР°РЅРёС‚СЊ</button>
   </div>
 </div>
 
@@ -672,26 +772,26 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 <div class="modal-overlay" id="modal-add-params" onclick="closeModalOutside(event, 'modal-add-params')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">НОВЫЙ ЗАМЕР</div>
-    <div class="field"><label>Дата</label><input type="date" id="pm-date"></div>
+    <div class="modal-title">РќРћР’Р«Р™ Р—РђРњР•Р </div>
+    <div class="field"><label>Р”Р°С‚Р°</label><input type="date" id="pm-date"></div>
     <div class="row2">
-      <div class="field"><label>Вес (кг)</label><input type="number" id="pm-weight" step="0.1" placeholder="65.5"></div>
-      <div class="field"><label>% жира</label><input type="number" id="pm-fat" step="0.1" placeholder="20"></div>
+      <div class="field"><label>Р’РµСЃ (РєРі)</label><input type="number" id="pm-weight" step="0.1" placeholder="65.5"></div>
+      <div class="field"><label>% Р¶РёСЂР°</label><input type="number" id="pm-fat" step="0.1" placeholder="20"></div>
     </div>
     <div class="row2">
-      <div class="field"><label>Грудь (см)</label><input type="number" id="pm-chest" step="0.1" placeholder="90"></div>
-      <div class="field"><label>Талия (см)</label><input type="number" id="pm-waist" step="0.1" placeholder="70"></div>
+      <div class="field"><label>Р“СЂСѓРґСЊ (СЃРј)</label><input type="number" id="pm-chest" step="0.1" placeholder="90"></div>
+      <div class="field"><label>РўР°Р»РёСЏ (СЃРј)</label><input type="number" id="pm-waist" step="0.1" placeholder="70"></div>
     </div>
     <div class="row2">
-      <div class="field"><label>Бёдра (см)</label><input type="number" id="pm-hips" step="0.1" placeholder="95"></div>
-      <div class="field"><label>Бедро (см)</label><input type="number" id="pm-thigh" step="0.1" placeholder="55"></div>
+      <div class="field"><label>Р‘С‘РґСЂР° (СЃРј)</label><input type="number" id="pm-hips" step="0.1" placeholder="95"></div>
+      <div class="field"><label>Р‘РµРґСЂРѕ (СЃРј)</label><input type="number" id="pm-thigh" step="0.1" placeholder="55"></div>
     </div>
     <div class="row3">
-      <div class="field"><label>Икры</label><input type="number" id="pm-calves" step="0.1" placeholder="35"></div>
-      <div class="field"><label>Бицепс</label><input type="number" id="pm-bicep" step="0.1" placeholder="28"></div>
-      <div class="field"><label>Шея</label><input type="number" id="pm-neck" step="0.1" placeholder="34"></div>
+      <div class="field"><label>РРєСЂС‹</label><input type="number" id="pm-calves" step="0.1" placeholder="35"></div>
+      <div class="field"><label>Р‘РёС†РµРїСЃ</label><input type="number" id="pm-bicep" step="0.1" placeholder="28"></div>
+      <div class="field"><label>РЁРµСЏ</label><input type="number" id="pm-neck" step="0.1" placeholder="34"></div>
     </div>
-    <button class="btn btn-primary" onclick="saveParams()">💾 Сохранить замер</button>
+    <button class="btn btn-primary" onclick="saveParams()">рџ’ѕ РЎРѕС…СЂР°РЅРёС‚СЊ Р·Р°РјРµСЂ</button>
   </div>
 </div>
 
@@ -699,24 +799,24 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 <div class="modal-overlay" id="modal-add-habit" onclick="closeModalOutside(event, 'modal-add-habit')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">НОВАЯ ПРИВЫЧКА</div>
-    <div class="field"><label>Название привычки</label><input type="text" id="hab-name" placeholder="Пить 2 л воды"></div>
-    <div class="field"><label>Иконка</label>
+    <div class="modal-title">РќРћР’РђРЇ РџР РР’Р«Р§РљРђ</div>
+    <div class="field"><label>РќР°Р·РІР°РЅРёРµ РїСЂРёРІС‹С‡РєРё</label><input type="text" id="hab-name" placeholder="РџРёС‚СЊ 2 Р» РІРѕРґС‹"></div>
+    <div class="field"><label>РРєРѕРЅРєР°</label>
       <div class="chip-scroll">
-        <div class="chip active" onclick="selectHabitIcon(this)" data-icon="💧">💧</div>
-        <div class="chip" onclick="selectHabitIcon(this)" data-icon="🏃">🏃</div>
-        <div class="chip" onclick="selectHabitIcon(this)" data-icon="🥗">🥗</div>
-        <div class="chip" onclick="selectHabitIcon(this)" data-icon="😴">😴</div>
-        <div class="chip" onclick="selectHabitIcon(this)" data-icon="🧘">🧘</div>
-        <div class="chip" onclick="selectHabitIcon(this)" data-icon="📚">📚</div>
-        <div class="chip" onclick="selectHabitIcon(this)" data-icon="🚫">🚫</div>
-        <div class="chip" onclick="selectHabitIcon(this)" data-icon="⭐">⭐</div>
-        <div class="chip" onclick="selectHabitIcon(this)" data-icon="💊">💊</div>
-        <div class="chip" onclick="selectHabitIcon(this)" data-icon="🎯">🎯</div>
+        <div class="chip active" onclick="selectHabitIcon(this)" data-icon="рџ’§">рџ’§</div>
+        <div class="chip" onclick="selectHabitIcon(this)" data-icon="рџЏѓ">рџЏѓ</div>
+        <div class="chip" onclick="selectHabitIcon(this)" data-icon="рџҐ—">рџҐ—</div>
+        <div class="chip" onclick="selectHabitIcon(this)" data-icon="рџґ">рџґ</div>
+        <div class="chip" onclick="selectHabitIcon(this)" data-icon="рџ§">рџ§</div>
+        <div class="chip" onclick="selectHabitIcon(this)" data-icon="рџ“љ">рџ“љ</div>
+        <div class="chip" onclick="selectHabitIcon(this)" data-icon="рџљ«">рџљ«</div>
+        <div class="chip" onclick="selectHabitIcon(this)" data-icon="в­ђ">в­ђ</div>
+        <div class="chip" onclick="selectHabitIcon(this)" data-icon="рџ’Љ">рџ’Љ</div>
+        <div class="chip" onclick="selectHabitIcon(this)" data-icon="рџЋЇ">рџЋЇ</div>
       </div>
     </div>
-    <div class="field"><label>Дата начала</label><input type="date" id="hab-start"></div>
-    <button class="btn btn-primary" onclick="saveHabit()">💾 Добавить привычку</button>
+    <div class="field"><label>Р”Р°С‚Р° РЅР°С‡Р°Р»Р°</label><input type="date" id="hab-start"></div>
+    <button class="btn btn-primary" onclick="saveHabit()">рџ’ѕ Р”РѕР±Р°РІРёС‚СЊ РїСЂРёРІС‹С‡РєСѓ</button>
   </div>
 </div>
 
@@ -724,41 +824,97 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 <div class="modal-overlay" id="modal-add-challenge" onclick="closeModalOutside(event, 'modal-add-challenge')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">30-ДНЕВНЫЙ ЧЕЛЛЕНДЖ</div>
-    <div class="field"><label>Что буду делать</label><input type="text" id="ch-name" placeholder="Ежедневно стоять в планке"></div>
+    <div class="modal-title">30-Р”РќР•Р’РќР«Р™ Р§Р•Р›Р›Р•РќР”Р–</div>
+    <div class="field"><label>Р§С‚Рѕ Р±СѓРґСѓ РґРµР»Р°С‚СЊ</label><input type="text" id="ch-name" placeholder="Р•Р¶РµРґРЅРµРІРЅРѕ СЃС‚РѕСЏС‚СЊ РІ РїР»Р°РЅРєРµ"></div>
     <div class="row2">
-      <div class="field"><label>Дата начала</label><input type="date" id="ch-start"></div>
-      <div class="field"><label>Дата конца</label><input type="date" id="ch-end"></div>
+      <div class="field"><label>Р”Р°С‚Р° РЅР°С‡Р°Р»Р°</label><input type="date" id="ch-start"></div>
+      <div class="field"><label>Р”Р°С‚Р° РєРѕРЅС†Р°</label><input type="date" id="ch-end"></div>
     </div>
-    <div class="field"><label>Результат в первый день</label><input type="text" id="ch-first" placeholder="30 сек"></div>
-    <button class="btn btn-primary" onclick="saveChallenge()">🚀 Запустить челлендж</button>
+    <div class="field"><label>Р РµР·СѓР»СЊС‚Р°С‚ РІ РїРµСЂРІС‹Р№ РґРµРЅСЊ</label><input type="text" id="ch-first" placeholder="30 СЃРµРє"></div>
+    <button class="btn btn-primary" onclick="saveChallenge()">рџљЂ Р—Р°РїСѓСЃС‚РёС‚СЊ С‡РµР»Р»РµРЅРґР¶</button>
   </div>
 </div>
 
-<!-- Toast -->
+<!-- Edit workout modal -->
+<div class="modal-overlay" id="modal-edit-workout" onclick="closeModalOutside(event, 'modal-edit-workout')">
+  <div class="modal" style="max-height:92dvh">
+    <div class="modal-handle"></div>
+    <div class="modal-title">вњЏпёЏ Р Р•Р”РђРљРўРР РћР’РђРўР¬ РўР Р•РќРР РћР’РљРЈ</div>
+    <input type="hidden" id="edit-wo-id">
+    <div class="row2">
+      <div class="field"><label>Р”Р°С‚Р°</label><input type="date" id="edit-wo-date"></div>
+      <div class="field"><label>РўРёРї</label>
+        <select id="edit-wo-type">
+          <option>РЎРёР»РѕРІР°СЏ</option><option>РљР°СЂРґРёРѕ</option><option>РЎРјРµС€Р°РЅРЅР°СЏ</option><option>Р Р°СЃС‚СЏР¶РєР°</option>
+        </select>
+      </div>
+    </div>
+    <div class="row3">
+      <div class="field"><label>РЎРѕРЅ (С‡)</label><input type="number" id="edit-wo-sleep" placeholder="8"></div>
+      <div class="field"><label>Р­РЅРµСЂРіРёСЏ</label>
+        <select id="edit-wo-energy">
+          <option>в­ђв­ђв­ђв­ђв­ђ</option><option>в­ђв­ђв­ђв­ђ</option><option>в­ђв­ђв­ђ</option><option>в­ђв­ђ</option><option>в­ђ</option>
+        </select>
+      </div>
+      <div class="field"><label>РќР°СЃС‚СЂРѕРµРЅРёРµ</label><input type="text" id="edit-wo-mood" placeholder="рџ”Ґ"></div>
+    </div>
+    <div class="card-title" style="margin:4px 0 8px"><span></span> Р“Р РЈРџРџР« РњР«РЁР¦</div>
+    <div class="muscles-row" id="edit-muscles-row">
+      <div class="muscle-chip" onclick="toggleMuscle(this)">РџСЂРµСЃСЃ</div>
+      <div class="muscle-chip" onclick="toggleMuscle(this)">РќРѕРіРё</div>
+      <div class="muscle-chip" onclick="toggleMuscle(this)">Р СѓРєРё</div>
+      <div class="muscle-chip" onclick="toggleMuscle(this)">РЎРїРёРЅР°</div>
+      <div class="muscle-chip" onclick="toggleMuscle(this)">Р“СЂСѓРґСЊ</div>
+      <div class="muscle-chip" onclick="toggleMuscle(this)">РЇРіРѕРґРёС†С‹</div>
+      <div class="muscle-chip" onclick="toggleMuscle(this)">РџР»РµС‡Рё</div>
+    </div>
+    <div class="card-title" style="margin:12px 0 8px"><span></span> РЈРџР РђР–РќР•РќРРЇ</div>
+    <div id="edit-exercises-list"></div>
+    <button class="btn btn-secondary" style="margin-bottom:10px" onclick="addEditExercise()">вћ• РЈРїСЂР°Р¶РЅРµРЅРёРµ</button>
+    <div class="card-title" style="margin-bottom:8px"><span></span> РљРђР Р”РРћ</div>
+    <div class="row3">
+      <div class="field"><label>Р’СЂРµРјСЏ (РјРёРЅ)</label><input type="number" id="edit-card-time" placeholder="30"></div>
+      <div class="field"><label>Р”РёСЃС‚Р°РЅС†РёСЏ</label><input type="number" id="edit-card-dist" step="0.1" placeholder="3.0"></div>
+      <div class="field"><label>РљР°Р»РѕСЂРёРё</label><input type="number" id="edit-card-cals" placeholder="250"></div>
+    </div>
+    <div class="field"><label>РћС†РµРЅРєР° (1вЂ“5)</label>
+      <div class="stars" id="edit-rating-stars">
+        <span class="star" onclick="setEditRating(1)">в…</span>
+        <span class="star" onclick="setEditRating(2)">в…</span>
+        <span class="star" onclick="setEditRating(3)">в…</span>
+        <span class="star" onclick="setEditRating(4)">в…</span>
+        <span class="star" onclick="setEditRating(5)">в…</span>
+      </div>
+    </div>
+    <div class="field"><label>Р—Р°РјРµС‚РєРё</label><textarea id="edit-wo-notes" placeholder="РљР°Рє РїСЂРѕС€Р»Р° С‚СЂРµРЅРёСЂРѕРІРєР°?"></textarea></div>
+    <button class="btn btn-primary" onclick="saveEditedWorkout()">рџ’ѕ РЎРѕС…СЂР°РЅРёС‚СЊ РёР·РјРµРЅРµРЅРёСЏ</button>
+    <div style="height:6px"></div>
+    <button class="btn btn-secondary" onclick="closeModal('modal-edit-workout')">РћС‚РјРµРЅР°</button>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <!-- Bottom nav -->
 <div class="bottom-nav">
   <button class="nav-btn active" id="nav-home" onclick="goTo('home')">
-    <span class="ico">🏠</span>Главная
+    <span class="ico">рџЏ </span>Р“Р»Р°РІРЅР°СЏ
   </button>
   <button class="nav-btn" id="nav-workouts" onclick="goTo('workouts')">
-    <span class="ico">💪</span>Трен.
+    <span class="ico">рџ’Є</span>РўСЂРµРЅ.
   </button>
-  <button class="nav-btn" id="nav-tracker" onclick="goTo('tracker')">
-    <span class="ico">📅</span>Трекер
+  <button class="nav-btn" id="nav-charts" onclick="goTo('charts')">
+    <span class="ico">рџ“€</span>Р“СЂР°С„РёРєРё
   </button>
   <button class="nav-btn" id="nav-params" onclick="goTo('params')">
-    <span class="ico">📊</span>Парам.
+    <span class="ico">рџ“Љ</span>РџР°СЂР°Рј.
   </button>
   <button class="nav-btn" id="nav-habits" onclick="goTo('habits')">
-    <span class="ico">✅</span>Привычки
+    <span class="ico">вњ…</span>РџСЂРёРІС‹С‡РєРё
   </button>
 </div>
 
 <script>
-// ═══════════════ DATA ═══════════════
+// в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ DATA в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
 let data = JSON.parse(localStorage.getItem('workout_diary_v2') || '{}');
 if (!data.profile) data.profile = {};
 if (!data.workouts) data.workouts = [];
@@ -770,24 +926,26 @@ if (!data.steps) data.steps = {};
 
 function save() { localStorage.setItem('workout_diary_v2', JSON.stringify(data)); }
 
-// ═══════════════ NAVIGATION ═══════════════
+// в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ NAVIGATION в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
 function goTo(page) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('screen-' + page).classList.add('active');
-  document.getElementById('nav-' + page).classList.add('active');
+  const navBtn = document.getElementById('nav-' + page);
+  if (navBtn) navBtn.classList.add('active');
   renderPage(page);
 }
 
 function renderPage(page) {
   if (page === 'home') renderHome();
   if (page === 'workouts') renderWorkoutsHistory();
+  if (page === 'charts') renderCharts();
   if (page === 'tracker') renderTracker();
   if (page === 'params') renderParams();
   if (page === 'habits') renderHabits();
 }
 
-// ═══════════════ MODALS ═══════════════
+// в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ MODALS в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
 function openModal(id) {
   document.getElementById(id).classList.add('open');
   // Set default dates
@@ -798,7 +956,7 @@ function openModal(id) {
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function closeModalOutside(e, id) { if (e.target.id === id) closeModal(id); }
 
-// ═══════════════ TOAST ═══════════════
+// в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ TOAST в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -806,13 +964,13 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// ═══════════════ HOME ═══════════════
+// в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ HOME в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
 function renderHome() {
   const p = data.profile;
-  document.getElementById('home-name').textContent = p.name || 'Атлет';
-  document.getElementById('home-goal').textContent = p.goal || 'Цель не задана — добавь в настройках ⚙️';
+  document.getElementById('home-name').textContent = p.name || 'РђС‚Р»РµС‚';
+  document.getElementById('home-goal').textContent = p.goal || 'Р¦РµР»СЊ РЅРµ Р·Р°РґР°РЅР° вЂ” РґРѕР±Р°РІСЊ РІ РЅР°СЃС‚СЂРѕР№РєР°С… вљ™пёЏ';
   document.getElementById('stat-workouts').textContent = data.workouts.length;
-  document.getElementById('stat-weight').textContent = p.weight || '—';
+  document.getElementById('stat-weight').textContent = p.weight || 'вЂ”';
 
   // Streak
   const sorted = [...data.workouts].sort((a,b) => b.date.localeCompare(a.date));
@@ -828,17 +986,17 @@ function renderHome() {
   // Recent
   const recentDiv = document.getElementById('recent-list');
   if (data.workouts.length === 0) {
-    recentDiv.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px 0;">Тренировок пока нет — добавь первую! 💪</div>';
+    recentDiv.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px 0;">РўСЂРµРЅРёСЂРѕРІРѕРє РїРѕРєР° РЅРµС‚ вЂ” РґРѕР±Р°РІСЊ РїРµСЂРІСѓСЋ! рџ’Є</div>';
   } else {
     const recent = [...data.workouts].sort((a,b) => b.date.localeCompare(a.date)).slice(0,5);
     recentDiv.innerHTML = recent.map(w => `
       <div class="recent-item">
         <div class="recent-dot"></div>
         <div class="recent-info">
-          <div class="recent-name">${w.type || 'Тренировка'} ${w.muscles ? '· ' + w.muscles.join(', ') : ''}</div>
+          <div class="recent-name">${w.type || 'РўСЂРµРЅРёСЂРѕРІРєР°'} ${w.muscles ? 'В· ' + w.muscles.join(', ') : ''}</div>
           <div class="recent-date">${formatDate(w.date)}</div>
         </div>
-        <div class="recent-score">${'★'.repeat(w.rating || 0)}</div>
+        <div class="recent-score">${'в…'.repeat(w.rating || 0)}</div>
       </div>
     `).join('');
   }
@@ -847,11 +1005,11 @@ function renderHome() {
 function formatDate(d) {
   if (!d) return '';
   const [y,m,day] = d.split('-');
-  const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  const months = ['СЏРЅРІ','С„РµРІ','РјР°СЂ','Р°РїСЂ','РјР°Р№','РёСЋРЅ','РёСЋР»','Р°РІРі','СЃРµРЅ','РѕРєС‚','РЅРѕСЏ','РґРµРє'];
   return `${parseInt(day)} ${months[parseInt(m)-1]} ${y}`;
 }
 
-// ═══════════════ PROFILE ═══════════════
+// в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ PROFILE в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
 function saveProfile() {
   data.profile = {
     name: document.getElementById('prof-name').value,
@@ -862,7 +1020,7 @@ function saveProfile() {
     goal: document.getElementById('prof-goal').value,
     start: document.getElementById('prof-start').value,
   };
-  save(); closeModal('modal-profile-edit'); renderHome(); toast('✅ Профиль сохранён!');
+  save(); closeModal('modal-profile-edit'); renderHome(); toast('вњ… РџСЂРѕС„РёР»СЊ СЃРѕС…СЂР°РЅС‘РЅ!');
 }
 
 // Fill profile modal on open
@@ -894,7 +1052,7 @@ window.openModal = function(id) {
   origOpen(id);
 };
 
-// ═══════════════ WORKOUTS ═══════════════
+// в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ WORKOUTS в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
 let exerciseCount = 0;
 let currentRating = 0;
 let currentMood = '';
@@ -922,14 +1080,14 @@ function addExercise() {
   div.innerHTML = `
     <div class="ex-head">
       <div class="ex-num">${exerciseCount}</div>
-      <input class="ex-name-input" placeholder="Название упражнения" id="ex-name-${exerciseCount}">
-      <button class="btn-icon" onclick="removeExercise(${exerciseCount})" style="color:var(--accent)">✕</button>
+      <input class="ex-name-input" placeholder="РќР°Р·РІР°РЅРёРµ СѓРїСЂР°Р¶РЅРµРЅРёСЏ" id="ex-name-${exerciseCount}">
+      <button class="btn-icon" onclick="removeExercise(${exerciseCount})" style="color:var(--accent)">вњ•</button>
     </div>
     <div class="sets-grid">
       ${[1,2,3,4,5].map(s => `
         <div class="set-cell">
-          <div class="set-label">П${s}</div>
-          <input class="set-input" placeholder="—" id="ex${exerciseCount}-s${s}">
+          <div class="set-label">Рџ${s}</div>
+          <input class="set-input" placeholder="вЂ”" id="ex${exerciseCount}-s${s}">
         </div>
       `).join('')}
     </div>
@@ -1008,7 +1166,7 @@ function saveWorkout() {
   hideNewWorkout();
   renderWorkoutsHistory();
   renderHome();
-  toast('🔥 Тренировка сохранена!');
+  toast('рџ”Ґ РўСЂРµРЅРёСЂРѕРІРєР° СЃРѕС…СЂР°РЅРµРЅР°!');
   // Reset forms
   document.querySelectorAll('.muscle-chip').forEach(c => c.classList.remove('selected'));
   document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
@@ -1020,40 +1178,177 @@ function renderWorkoutsHistory() {
   if (document.getElementById('new-workout-form').style.display === 'block') return;
   const list = document.getElementById('history-list');
   if (data.workouts.length === 0) {
-    list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px 0;">Нажми ➕ чтобы добавить первую тренировку</div>';
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px 0;">РќР°Р¶РјРё вћ• С‡С‚РѕР±С‹ РґРѕР±Р°РІРёС‚СЊ РїРµСЂРІСѓСЋ С‚СЂРµРЅРёСЂРѕРІРєСѓ</div>';
     return;
   }
   const sorted = [...data.workouts].sort((a,b) => b.date.localeCompare(a.date));
-  list.innerHTML = sorted.map(w => `
-    <div style="padding:10px 0;border-bottom:1px solid var(--border)">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <div>
-          <span style="font-weight:800;font-size:14px">${w.type || 'Тренировка'}</span>
-          ${w.mood ? '<span style="margin-left:6px">' + w.mood + '</span>' : ''}
+  list.innerHTML = sorted.map(w => {
+    const exRows = (w.exercises||[]).map(e => {
+      const setsStr = e.sets.filter(s=>s).join(' | ');
+      return `<div class="ex-detail-row"><span class="ex-detail-name">${e.name}</span><span class="ex-detail-sets">${setsStr||'вЂ”'}</span></div>`;
+    }).join('');
+    const cardioStr = w.cardio && (w.cardio.time||w.cardio.dist) ?
+      `<div style="margin-top:6px;font-size:12px;color:var(--accent3)">рџЏѓ ${w.cardio.type||'РљР°СЂРґРёРѕ'}: ${w.cardio.time||'вЂ”'} РјРёРЅ В· ${w.cardio.dist||'вЂ”'} РєРј В· ${w.cardio.cals||'вЂ”'} РєРєР°Р»</div>` : '';
+
+    return `
+      <div class="wo-item">
+        <div class="wo-item-head">
+          <div class="wo-item-info">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <span style="font-weight:800;font-size:15px">${w.type||'РўСЂРµРЅРёСЂРѕРІРєР°'}</span>
+              ${w.mood ? '<span>'+w.mood+'</span>' : ''}
+              ${w.rating ? '<span style="color:var(--gold);font-size:13px">${"в…".repeat(w.rating)}</span>' : ''}
+            </div>
+            <div style="font-size:12px;color:var(--muted)">${formatDate(w.date)}${w.sleep ? ' В· РЎРѕРЅ: '+w.sleep+' С‡' : ''}${w.energy ? ' В· '+w.energy : ''}</div>
+            ${w.muscles && w.muscles.length ? '<div style="margin-top:5px">'+w.muscles.map(m=>`<span class="badge blue" style="margin-right:3px;margin-bottom:2px;display:inline-block;font-size:10px">${m}</span>`).join('')+'</div>' : ''}
+          </div>
+          <div class="wo-item-actions">
+            <button class="btn-edit" onclick="openEditWorkout(${w.id})">вњЏпёЏ</button>
+            <button class="btn-del" onclick="deleteWorkout(${w.id})">рџ—‘</button>
+          </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="color:var(--gold);font-size:13px">${'★'.repeat(w.rating||0)}</span>
-          <button onclick="deleteWorkout(${w.id})" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer">🗑</button>
-        </div>
+        ${(w.exercises||[]).length || w.cardio?.time ? `
+          <button onclick="toggleWoDetail(${w.id})" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:4px 0;font-family:'Nunito',sans-serif;font-weight:700" id="btn-detail-${w.id}">
+            в–ј РџРѕРєР°Р·Р°С‚СЊ РґРµС‚Р°Р»Рё (${(w.exercises||[]).length} СѓРїСЂ.)
+          </button>
+          <div class="wo-detail" id="detail-${w.id}">
+            ${exRows}
+            ${cardioStr}
+            ${w.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;font-style:italic">"${w.notes}"</div>` : ''}
+          </div>
+        ` : w.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic">"${w.notes}"</div>` : ''}
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">${formatDate(w.date)} · Сон: ${w.sleep||'—'} ч · ${w.energy||''}</div>
-      ${w.muscles && w.muscles.length ? '<div style="margin-bottom:6px">' + w.muscles.map(m => `<span class="badge blue" style="margin-right:4px;margin-bottom:3px;display:inline-block">${m}</span>`).join('') + '</div>' : ''}
-      ${w.exercises && w.exercises.length ? `<div style="font-size:12px;color:var(--muted)">${w.exercises.slice(0,3).map(e => e.name).join(' · ')}${w.exercises.length > 3 ? ' +ещё' : ''}</div>` : ''}
-      ${w.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;font-style:italic">"${w.notes}"</div>` : ''}
-    </div>
-  `).join('');
+    `;
+  }).join('');
+}
+
+function toggleWoDetail(id) {
+  const detail = document.getElementById('detail-' + id);
+  const btn = document.getElementById('btn-detail-' + id);
+  const open = detail.classList.toggle('open');
+  btn.textContent = open
+    ? `в–І РЎРєСЂС‹С‚СЊ РґРµС‚Р°Р»Рё`
+    : `в–ј РџРѕРєР°Р·Р°С‚СЊ РґРµС‚Р°Р»Рё (${detail.querySelectorAll('.ex-detail-row').length} СѓРїСЂ.)`;
 }
 
 function deleteWorkout(id) {
-  if (!confirm('Удалить тренировку?')) return;
+  if (!confirm('РЈРґР°Р»РёС‚СЊ С‚СЂРµРЅРёСЂРѕРІРєСѓ?')) return;
   data.workouts = data.workouts.filter(w => w.id !== id);
   save();
   renderWorkoutsHistory();
   renderHome();
-  toast('🗑 Удалено');
+  toast('рџ—‘ РЈРґР°Р»РµРЅРѕ');
 }
 
-// ═══════════════ TRACKER ═══════════════
+// в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ EDIT WORKOUT в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
+let editRating = 0;
+let editExCount = 0;
+
+function openEditWorkout(id) {
+  const w = data.workouts.find(x => x.id === id);
+  if (!w) return;
+  document.getElementById('edit-wo-id').value = id;
+  document.getElementById('edit-wo-date').value = w.date || '';
+  document.getElementById('edit-wo-type').value = w.type || 'РЎРёР»РѕРІР°СЏ';
+  document.getElementById('edit-wo-sleep').value = w.sleep || '';
+  document.getElementById('edit-wo-energy').value = w.energy || 'в­ђв­ђв­ђв­ђв­ђ';
+  document.getElementById('edit-wo-mood').value = w.mood || '';
+  document.getElementById('edit-wo-notes').value = w.notes || '';
+  document.getElementById('edit-card-time').value = w.cardio?.time || '';
+  document.getElementById('edit-card-dist').value = w.cardio?.dist || '';
+  document.getElementById('edit-card-cals').value = w.cardio?.cals || '';
+
+  // Muscles
+  document.querySelectorAll('#edit-muscles-row .muscle-chip').forEach(c => {
+    c.classList.toggle('selected', (w.muscles||[]).includes(c.textContent));
+  });
+
+  // Exercises
+  editExCount = 0;
+  const exList = document.getElementById('edit-exercises-list');
+  exList.innerHTML = '';
+  (w.exercises || []).forEach(ex => addEditExercise(ex));
+  if ((w.exercises||[]).length === 0) addEditExercise();
+
+  // Rating
+  editRating = w.rating || 0;
+  updateEditStars();
+
+  document.getElementById('modal-edit-workout').classList.add('open');
+}
+
+function addEditExercise(ex) {
+  editExCount++;
+  const n = editExCount;
+  const div = document.createElement('div');
+  div.className = 'exercise-row';
+  div.id = 'edit-ex-' + n;
+  div.innerHTML = `
+    <div class="ex-head">
+      <div class="ex-num">${n}</div>
+      <input class="ex-name-input" placeholder="РЈРїСЂР°Р¶РЅРµРЅРёРµ" id="edit-ex-name-${n}" value="${ex?.name||''}">
+      <button class="btn-icon" onclick="document.getElementById('edit-ex-${n}').remove()" style="color:var(--accent)">вњ•</button>
+    </div>
+    <div class="sets-grid">
+      ${[1,2,3,4,5].map(s => `
+        <div class="set-cell">
+          <div class="set-label">Рџ${s}</div>
+          <input class="set-input" placeholder="вЂ”" id="edit-ex${n}-s${s}" value="${ex?.sets?.[s-1]||''}">
+        </div>`).join('')}
+    </div>
+  `;
+  document.getElementById('edit-exercises-list').appendChild(div);
+}
+
+function setEditRating(n) { editRating = n; updateEditStars(); }
+function updateEditStars() {
+  document.querySelectorAll('#edit-rating-stars .star').forEach((s,i) => s.classList.toggle('filled', i < editRating));
+}
+
+function saveEditedWorkout() {
+  const id = parseInt(document.getElementById('edit-wo-id').value);
+  const idx = data.workouts.findIndex(x => x.id === id);
+  if (idx === -1) return;
+
+  const exercises = [];
+  for (let i = 1; i <= editExCount + 10; i++) {
+    const nameEl = document.getElementById('edit-ex-name-' + i);
+    if (!nameEl) continue;
+    const name = nameEl.value.trim();
+    if (!name) continue;
+    const sets = [1,2,3,4,5].map(s => { const el = document.getElementById(`edit-ex${i}-s${s}`); return el ? el.value.trim() : ''; });
+    exercises.push({ name, sets });
+  }
+
+  const muscles = [...document.querySelectorAll('#edit-muscles-row .muscle-chip.selected')].map(c => c.textContent);
+
+  data.workouts[idx] = {
+    ...data.workouts[idx],
+    date: document.getElementById('edit-wo-date').value,
+    type: document.getElementById('edit-wo-type').value,
+    sleep: document.getElementById('edit-wo-sleep').value,
+    energy: document.getElementById('edit-wo-energy').value,
+    mood: document.getElementById('edit-wo-mood').value,
+    muscles,
+    exercises,
+    cardio: {
+      ...data.workouts[idx].cardio,
+      time: document.getElementById('edit-card-time').value,
+      dist: document.getElementById('edit-card-dist').value,
+      cals: document.getElementById('edit-card-cals').value,
+    },
+    rating: editRating,
+    notes: document.getElementById('edit-wo-notes').value,
+  };
+
+  save();
+  closeModal('modal-edit-workout');
+  renderWorkoutsHistory();
+  renderHome();
+  toast('вњ… РўСЂРµРЅРёСЂРѕРІРєР° РѕР±РЅРѕРІР»РµРЅР°!');
+}
+
+// в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ TRACKER в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
 function renderTracker() {
   const year = new Date().getFullYear();
   
@@ -1071,7 +1366,7 @@ function renderTrackerYear(year) {
     c.classList.toggle('active', c.textContent == year);
   });
   
-  const monthNames = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+  const monthNames = ['РЇРЅРІР°СЂСЊ','Р¤РµРІСЂР°Р»СЊ','РњР°СЂС‚','РђРїСЂРµР»СЊ','РњР°Р№','РСЋРЅСЊ','РСЋР»СЊ','РђРІРіСѓСЃС‚','РЎРµРЅС‚СЏР±СЂСЊ','РћРєС‚СЏР±СЂСЊ','РќРѕСЏР±СЂСЊ','Р”РµРєР°Р±СЂСЊ'];
   const grid = document.getElementById('tracker-grid');
   const today = new Date().toISOString().split('T')[0];
   let totalDone = 0;
@@ -1097,7 +1392,7 @@ function renderTrackerYear(year) {
     `;
   }).join('');
 
-  document.getElementById('tracker-total').textContent = totalDone + ' трен.';
+  document.getElementById('tracker-total').textContent = totalDone + ' С‚СЂРµРЅ.';
 
   // Monthly stats
   const statsDiv = document.getElementById('monthly-stats-list');
@@ -1130,10 +1425,10 @@ function toggleTrackerDay(date, el) {
   // Update count
   const year = date.split('-')[0];
   const totalDone = Object.entries(data.tracker).filter(([k,v]) => k.startsWith(year) && v === 'done').length;
-  document.getElementById('tracker-total').textContent = totalDone + ' трен.';
+  document.getElementById('tracker-total').textContent = totalDone + ' С‚СЂРµРЅ.';
 }
 
-// ═══════════════ PARAMS ═══════════════
+// в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ PARAMS в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
 function saveParams() {
   const entry = {
     id: Date.now(),
@@ -1154,7 +1449,7 @@ function saveParams() {
   closeModal('modal-add-params');
   renderParams();
   renderHome();
-  toast('📊 Замер сохранён!');
+  toast('рџ“Љ Р—Р°РјРµСЂ СЃРѕС…СЂР°РЅС‘РЅ!');
   ['pm-weight','pm-fat','pm-chest','pm-waist','pm-hips','pm-thigh','pm-calves','pm-bicep','pm-neck'].forEach(id => { document.getElementById(id).value = ''; });
 }
 
@@ -1164,17 +1459,17 @@ function renderParams() {
   const prev = sorted[1] || {};
 
   const metrics = [
-    { k: 'weight', label: 'Вес', unit: 'кг', icon: '⚖️' },
-    { k: 'waist', label: 'Талия', unit: 'см', icon: '📏' },
-    { k: 'hips', label: 'Бёдра', unit: 'см', icon: '📐' },
-    { k: 'chest', label: 'Грудь', unit: 'см', icon: '💙' },
-    { k: 'thigh', label: 'Бедро', unit: 'см', icon: '🦵' },
-    { k: 'fat', label: '% жира', unit: '%', icon: '🔥' },
+    { k: 'weight', label: 'Р’РµСЃ', unit: 'РєРі', icon: 'вљ–пёЏ' },
+    { k: 'waist', label: 'РўР°Р»РёСЏ', unit: 'СЃРј', icon: 'рџ“Џ' },
+    { k: 'hips', label: 'Р‘С‘РґСЂР°', unit: 'СЃРј', icon: 'рџ“ђ' },
+    { k: 'chest', label: 'Р“СЂСѓРґСЊ', unit: 'СЃРј', icon: 'рџ’™' },
+    { k: 'thigh', label: 'Р‘РµРґСЂРѕ', unit: 'СЃРј', icon: 'рџ¦µ' },
+    { k: 'fat', label: '% Р¶РёСЂР°', unit: '%', icon: 'рџ”Ґ' },
   ];
 
   const grid = document.getElementById('param-grid');
   grid.innerHTML = metrics.map(m => {
-    const val = latest[m.k] || '—';
+    const val = latest[m.k] || 'вЂ”';
     const diff = latest[m.k] && prev[m.k] ? (parseFloat(latest[m.k]) - parseFloat(prev[m.k])).toFixed(1) : null;
     const isGood = diff !== null && (m.k === 'weight' || m.k === 'waist' || m.k === 'hips' || m.k === 'fat') ? parseFloat(diff) < 0 : parseFloat(diff) > 0;
     return `
@@ -1190,27 +1485,27 @@ function renderParams() {
   // History table
   const hist = document.getElementById('params-history');
   if (sorted.length === 0) {
-    hist.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:12px 0;">Нажми ➕ чтобы добавить замер</div>';
+    hist.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:12px 0;">РќР°Р¶РјРё вћ• С‡С‚РѕР±С‹ РґРѕР±Р°РІРёС‚СЊ Р·Р°РјРµСЂ</div>';
   } else {
     hist.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:12px;min-width:400px">
       <tr style="background:var(--surface)">
-        <th style="padding:6px 8px;text-align:left;color:var(--muted)">Дата</th>
-        <th style="padding:6px 4px;color:var(--muted)">Вес</th>
-        <th style="padding:6px 4px;color:var(--muted)">Талия</th>
-        <th style="padding:6px 4px;color:var(--muted)">Бёдра</th>
-        <th style="padding:6px 4px;color:var(--muted)">Грудь</th>
-        <th style="padding:6px 4px;color:var(--muted)">% жира</th>
-        <th style="padding:6px 4px;color:var(--muted)">🗑</th>
+        <th style="padding:6px 8px;text-align:left;color:var(--muted)">Р”Р°С‚Р°</th>
+        <th style="padding:6px 4px;color:var(--muted)">Р’РµСЃ</th>
+        <th style="padding:6px 4px;color:var(--muted)">РўР°Р»РёСЏ</th>
+        <th style="padding:6px 4px;color:var(--muted)">Р‘С‘РґСЂР°</th>
+        <th style="padding:6px 4px;color:var(--muted)">Р“СЂСѓРґСЊ</th>
+        <th style="padding:6px 4px;color:var(--muted)">% Р¶РёСЂР°</th>
+        <th style="padding:6px 4px;color:var(--muted)">рџ—‘</th>
       </tr>
       ${sorted.map(e => `
         <tr style="border-top:1px solid var(--border)">
           <td style="padding:6px 8px;font-weight:700">${formatDate(e.date)}</td>
-          <td style="padding:6px 4px;text-align:center">${e.weight||'—'}</td>
-          <td style="padding:6px 4px;text-align:center">${e.waist||'—'}</td>
-          <td style="padding:6px 4px;text-align:center">${e.hips||'—'}</td>
-          <td style="padding:6px 4px;text-align:center">${e.chest||'—'}</td>
-          <td style="padding:6px 4px;text-align:center">${e.fat||'—'}</td>
-          <td style="padding:6px 4px;text-align:center"><button onclick="deleteParam(${e.id})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px">🗑</button></td>
+          <td style="padding:6px 4px;text-align:center">${e.weight||'вЂ”'}</td>
+          <td style="padding:6px 4px;text-align:center">${e.waist||'вЂ”'}</td>
+          <td style="padding:6px 4px;text-align:center">${e.hips||'вЂ”'}</td>
+          <td style="padding:6px 4px;text-align:center">${e.chest||'вЂ”'}</td>
+          <td style="padding:6px 4px;text-align:center">${e.fat||'вЂ”'}</td>
+          <td style="padding:6px 4px;text-align:center"><button onclick="deleteParam(${e.id})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px">рџ—‘</button></td>
         </tr>
       `).join('')}
     </table>`;
@@ -1222,13 +1517,13 @@ function renderParams() {
 
 function deleteParam(id) {
   data.params = data.params.filter(p => p.id !== id);
-  save(); renderParams(); toast('🗑 Удалено');
+  save(); renderParams(); toast('рџ—‘ РЈРґР°Р»РµРЅРѕ');
 }
 
 function renderSteps() {
   const year = new Date().getFullYear();
   const month = new Date().getMonth();
-  const monthName = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][month];
+  const monthName = ['РЇРЅРІР°СЂСЊ','Р¤РµРІСЂР°Р»СЊ','РњР°СЂС‚','РђРїСЂРµР»СЊ','РњР°Р№','РСЋРЅСЊ','РСЋР»СЊ','РђРІРіСѓСЃС‚','РЎРµРЅС‚СЏР±СЂСЊ','РћРєС‚СЏР±СЂСЊ','РќРѕСЏР±СЂСЊ','Р”РµРєР°Р±СЂСЊ'][month];
   const daysInMonth = new Date(year, month+1, 0).getDate();
   const key = `${year}-${month}`;
   if (!data.steps[key]) data.steps[key] = {};
@@ -1239,7 +1534,7 @@ function renderSteps() {
   list.innerHTML = `
     <div style="display:flex;justify-content:space-between;margin-bottom:8px">
       <span style="font-weight:700">${monthName} ${year}</span>
-      <span style="font-size:12px;color:var(--muted)">Цель: <b style="color:var(--accent3)">10 000</b> шагов</span>
+      <span style="font-size:12px;color:var(--muted)">Р¦РµР»СЊ: <b style="color:var(--accent3)">10 000</b> С€Р°РіРѕРІ</span>
     </div>
   ` + Array.from({length: daysInMonth}, (_, i) => {
     const d = i + 1;
@@ -1267,11 +1562,11 @@ function setSteps(day, val, key) {
   data.steps[key][day] = parseInt(val) || 0;
   save();
   renderSteps();
-  toast('👟 Шаги сохранены!');
+  toast('рџ‘џ РЁР°РіРё СЃРѕС…СЂР°РЅРµРЅС‹!');
 }
 
-// ═══════════════ HABITS ═══════════════
-let selectedHabitIcon = '💧';
+// в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ HABITS в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
+let selectedHabitIcon = 'рџ’§';
 function selectHabitIcon(el) {
   document.querySelectorAll('#modal-add-habit .chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
@@ -1291,7 +1586,7 @@ function saveHabit() {
   save();
   closeModal('modal-add-habit');
   renderHabits();
-  toast('✅ Привычка добавлена!');
+  toast('вњ… РџСЂРёРІС‹С‡РєР° РґРѕР±Р°РІР»РµРЅР°!');
   document.getElementById('hab-name').value = '';
 }
 
@@ -1299,7 +1594,7 @@ function renderHabits() {
   // Month chips
   const now = new Date();
   const year = now.getFullYear();
-  const monthNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+  const monthNames = ['РЇРЅРІ','Р¤РµРІ','РњР°СЂ','РђРїСЂ','РњР°Р№','РСЋРЅ','РСЋР»','РђРІРі','РЎРµРЅ','РћРєС‚','РќРѕСЏ','Р”РµРє'];
   const monthSel = document.getElementById('habit-month-select');
   monthSel.innerHTML = monthNames.map((m, i) => 
     `<div class="chip ${i === now.getMonth() ? 'active' : ''}" onclick="renderHabitsMonth(${year}, ${i})">${m} ${year}</div>`
@@ -1314,7 +1609,7 @@ function renderHabitsMonth(year, month) {
 
   const list = document.getElementById('habits-list');
   if (data.habits.length === 0) {
-    list.innerHTML = '<div class="card" style="text-align:center;color:var(--muted);font-size:13px;padding:20px;">Нажми ➕ чтобы добавить привычку</div>';
+    list.innerHTML = '<div class="card" style="text-align:center;color:var(--muted);font-size:13px;padding:20px;">РќР°Р¶РјРё вћ• С‡С‚РѕР±С‹ РґРѕР±Р°РІРёС‚СЊ РїСЂРёРІС‹С‡РєСѓ</div>';
   } else {
     list.innerHTML = data.habits.map(h => {
       const key = `${year}-${month}`;
@@ -1323,7 +1618,7 @@ function renderHabitsMonth(year, month) {
       const dots = Array.from({length:30}, (_, i) => {
         const d = i + 1;
         const done = h.days[key][d];
-        return `<div class="habit-dot ${done ? 'done' : ''}" onclick="toggleHabit(${h.id}, ${d}, '${key}', this)">✓</div>`;
+        return `<div class="habit-dot ${done ? 'done' : ''}" onclick="toggleHabit(${h.id}, ${d}, '${key}', this)">вњ“</div>`;
       }).join('');
       return `
         <div class="habit-row">
@@ -1331,11 +1626,11 @@ function renderHabitsMonth(year, month) {
             <div class="habit-icon">${h.icon}</div>
             <div class="habit-title">${h.name}</div>
             <div class="habit-counter" style="color:${doneCount>=21?'var(--success)':'var(--accent)'}">${doneCount}/30</div>
-            <button onclick="deleteHabit(${h.id})" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer">🗑</button>
+            <button onclick="deleteHabit(${h.id})" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer">рџ—‘</button>
           </div>
           <div class="habit-dots">${dots}</div>
           <div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:${doneCount/30*100}%"></div></div>
-          ${doneCount >= 21 ? '<div style="text-align:center;font-size:12px;color:var(--success);margin-top:4px;font-weight:700">🎉 Привычка сформирована!</div>' : ''}
+          ${doneCount >= 21 ? '<div style="text-align:center;font-size:12px;color:var(--success);margin-top:4px;font-weight:700">рџЋ‰ РџСЂРёРІС‹С‡РєР° СЃС„РѕСЂРјРёСЂРѕРІР°РЅР°!</div>' : ''}
         </div>
       `;
     }).join('');
@@ -1358,12 +1653,12 @@ function toggleHabit(id, day, key, el) {
 }
 
 function deleteHabit(id) {
-  if (!confirm('Удалить привычку?')) return;
+  if (!confirm('РЈРґР°Р»РёС‚СЊ РїСЂРёРІС‹С‡РєСѓ?')) return;
   data.habits = data.habits.filter(h => h.id !== id);
-  save(); renderHabits(); toast('🗑 Удалено');
+  save(); renderHabits(); toast('рџ—‘ РЈРґР°Р»РµРЅРѕ');
 }
 
-// ═══════════════ CHALLENGES ═══════════════
+// в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ CHALLENGES в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
 function saveChallenge() {
   const name = document.getElementById('ch-name').value.trim();
   if (!name) return;
@@ -1378,7 +1673,7 @@ function saveChallenge() {
   save();
   closeModal('modal-add-challenge');
   renderChallenges();
-  toast('🎯 Челлендж запущен!');
+  toast('рџЋЇ Р§РµР»Р»РµРЅРґР¶ Р·Р°РїСѓС‰РµРЅ!');
   document.getElementById('ch-name').value = '';
   document.getElementById('ch-first').value = '';
 }
@@ -1386,7 +1681,7 @@ function saveChallenge() {
 function renderChallenges() {
   const list = document.getElementById('challenges-list');
   if (data.challenges.length === 0) {
-    list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:12px 0;">Нет активных челленджей</div>';
+    list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:12px 0;">РќРµС‚ Р°РєС‚РёРІРЅС‹С… С‡РµР»Р»РµРЅРґР¶РµР№</div>';
     return;
   }
   list.innerHTML = data.challenges.map((c, ci) => {
@@ -1400,18 +1695,18 @@ function renderChallenges() {
       <div style="margin-bottom:12px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
           <div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent)">ЧЕЛЛЕНДЖ №${ci+1}</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent)">Р§Р•Р›Р›Р•РќР”Р– в„–${ci+1}</div>
             <div style="font-size:14px;font-weight:800">${c.name}</div>
-            ${c.start ? `<div style="font-size:11px;color:var(--muted)">${formatDate(c.start)} → ${formatDate(c.end)||'...'}</div>` : ''}
+            ${c.start ? `<div style="font-size:11px;color:var(--muted)">${formatDate(c.start)} в†’ ${formatDate(c.end)||'...'}</div>` : ''}
           </div>
           <div style="text-align:right">
             <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent)">${doneCount}<span style="font-size:16px;color:var(--muted)">/30</span></div>
-            <button onclick="deleteChallenge(${c.id})" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer">🗑 Удалить</button>
+            <button onclick="deleteChallenge(${c.id})" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer">рџ—‘ РЈРґР°Р»РёС‚СЊ</button>
           </div>
         </div>
         <div class="challenge-days">${days}</div>
         <div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:${pct}%"></div></div>
-        ${c.firstResult ? `<div style="font-size:12px;color:var(--muted);margin-top:4px">Старт: <b style="color:var(--text)">${c.firstResult}</b></div>` : ''}
+        ${c.firstResult ? `<div style="font-size:12px;color:var(--muted);margin-top:4px">РЎС‚Р°СЂС‚: <b style="color:var(--text)">${c.firstResult}</b></div>` : ''}
       </div>
     `;
   }).join('');
@@ -1428,12 +1723,286 @@ function toggleChallenge(id, day, el) {
 }
 
 function deleteChallenge(id) {
-  if (!confirm('Удалить челлендж?')) return;
+  if (!confirm('РЈРґР°Р»РёС‚СЊ С‡РµР»Р»РµРЅРґР¶?')) return;
   data.challenges = data.challenges.filter(c => c.id !== id);
-  save(); renderChallenges(); toast('🗑 Удалено');
+  save(); renderChallenges(); toast('рџ—‘ РЈРґР°Р»РµРЅРѕ');
 }
 
-// ═══════════════ INIT ═══════════════
+// в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ CHARTS в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
+let activeChart = null;
+let musclesChart = null;
+let monthlyChart = null;
+let currentChartMetric = 'weight';
+
+const CHART_DEFAULTS = {
+  responsive: true,
+  maintainAspectRatio: true,
+  plugins: { legend: { display: false }, tooltip: {
+    backgroundColor: '#1e1e2a', titleColor: '#f0f0f8', bodyColor: '#6b6b88',
+    borderColor: '#2a2a38', borderWidth: 1,
+    callbacks: {}
+  }},
+  scales: {
+    x: { grid: { color: '#2a2a38' }, ticks: { color: '#6b6b88', font: { family: 'Nunito', size: 10 } } },
+    y: { grid: { color: '#2a2a38' }, ticks: { color: '#6b6b88', font: { family: 'Nunito', size: 10 } } }
+  }
+};
+
+const METRIC_META = {
+  weight: { label: 'Р’РµСЃ (РєРі)', title: 'РР—РњР•РќР•РќРР• Р’Р•РЎРђ', color: '#ff4d6d', good: 'down' },
+  waist:  { label: 'РўР°Р»РёСЏ (СЃРј)', title: 'РР—РњР•РќР•РќРР• РўРђР›РР', color: '#06b6d4', good: 'down' },
+  hips:   { label: 'Р‘С‘РґСЂР° (СЃРј)', title: 'РР—РњР•РќР•РќРР• Р‘РЃР”Р•Р ', color: '#7c3aed', good: 'down' },
+  chest:  { label: 'Р“СЂСѓРґСЊ (СЃРј)', title: 'РР—РњР•РќР•РќРР• Р“Р РЈР”Р', color: '#10b981', good: 'up' },
+  fat:    { label: '% Р¶РёСЂР°', title: 'РР—РњР•РќР•РќРР• % Р–РР Рђ', color: '#f59e0b', good: 'down' },
+  workouts: { label: 'РўСЂРµРЅРёСЂРѕРІРѕРє', title: 'РђРљРўРР’РќРћРЎРўР¬', color: '#ff4d6d', good: 'up' },
+};
+
+function switchChartTab(metric, el) {
+  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentChartMetric = metric;
+  renderMainChart(metric);
+  renderDelta(metric);
+}
+
+function renderCharts() {
+  const sorted = [...data.params].sort((a,b) => a.date.localeCompare(b.date));
+  const workouts = [...data.workouts].sort((a,b) => a.date.localeCompare(b.date));
+
+  // Summary stats
+  const statsEl = document.getElementById('charts-stats');
+  const totalWo = workouts.length;
+  const avgRating = workouts.filter(w=>w.rating).length
+    ? (workouts.filter(w=>w.rating).reduce((s,w)=>s+w.rating,0) / workouts.filter(w=>w.rating).length).toFixed(1)
+    : 'вЂ”';
+  const weightChange = sorted.length >= 2
+    ? (parseFloat(sorted[sorted.length-1].weight||0) - parseFloat(sorted[0].weight||0)).toFixed(1)
+    : null;
+  statsEl.innerHTML = `
+    <div class="stats-tile"><div class="stats-tile-val" style="color:var(--accent)">${totalWo}</div><div class="stats-tile-lbl">Р’СЃРµРіРѕ С‚СЂРµРЅРёСЂРѕРІРѕРє</div></div>
+    <div class="stats-tile"><div class="stats-tile-val" style="color:var(--gold)">${avgRating}</div><div class="stats-tile-lbl">РЎСЂРµРґРЅСЏСЏ РѕС†РµРЅРєР°</div></div>
+    <div class="stats-tile"><div class="stats-tile-val" style="color:${weightChange < 0 ? 'var(--success)' : 'var(--accent)'}">${weightChange !== null ? (weightChange > 0 ? '+' : '') + weightChange : 'вЂ”'}</div><div class="stats-tile-lbl">РР·Рј. РІРµСЃР° (РєРі)</div></div>
+  `;
+
+  renderMainChart(currentChartMetric);
+  renderDelta(currentChartMetric);
+  renderMusclesChart();
+  renderMonthlyChart();
+  renderRecords();
+}
+
+function renderMainChart(metric) {
+  const meta = METRIC_META[metric];
+  document.getElementById('chart-main-title').textContent = meta.title;
+
+  if (activeChart) { activeChart.destroy(); activeChart = null; }
+
+  let labels, values;
+
+  if (metric === 'workouts') {
+    // Workouts per month
+    const months = {};
+    data.workouts.forEach(w => {
+      if (!w.date) return;
+      const key = w.date.slice(0, 7);
+      months[key] = (months[key] || 0) + 1;
+    });
+    const keys = Object.keys(months).sort();
+    labels = keys.map(k => { const [y,m] = k.split('-'); return ['РЇРЅРІ','Р¤РµРІ','РњР°СЂ','РђРїСЂ','РњР°Р№','РСЋРЅ','РСЋР»','РђРІРі','РЎРµРЅ','РћРєС‚','РќРѕСЏ','Р”РµРє'][parseInt(m)-1]; });
+    values = keys.map(k => months[k]);
+  } else {
+    const sorted = [...data.params].filter(p => p[metric]).sort((a,b) => a.date.localeCompare(b.date));
+    labels = sorted.map(p => formatDate(p.date).split(' ').slice(0,2).join(' '));
+    values = sorted.map(p => parseFloat(p[metric]));
+  }
+
+  const empty = document.getElementById('chart-main-empty');
+  const canvas = document.getElementById('chart-main');
+
+  if (values.length < 2) {
+    canvas.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+  canvas.style.display = 'block';
+  empty.style.display = 'none';
+
+  const gradient = canvas.getContext('2d').createLinearGradient(0, 0, 0, 180);
+  gradient.addColorStop(0, meta.color + '44');
+  gradient.addColorStop(1, meta.color + '00');
+
+  activeChart = new Chart(canvas, {
+    type: metric === 'workouts' ? 'bar' : 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: meta.label,
+        data: values,
+        borderColor: meta.color,
+        backgroundColor: metric === 'workouts' ? meta.color + '88' : gradient,
+        borderWidth: 2.5,
+        pointBackgroundColor: meta.color,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        fill: metric !== 'workouts',
+        tension: 0.4,
+      }]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: { ...CHART_DEFAULTS.plugins, tooltip: {
+        ...CHART_DEFAULTS.plugins.tooltip,
+        callbacks: { label: ctx => `${meta.label}: ${ctx.parsed.y}` }
+      }}
+    }
+  });
+}
+
+function renderDelta(metric) {
+  const el = document.getElementById('charts-delta');
+  if (metric === 'workouts') {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:4px 0">РћР±С‰Р°СЏ СЃС‚Р°С‚РёСЃС‚РёРєР° Р°РєС‚РёРІРЅРѕСЃС‚Рё РІС‹С€Рµ в†‘</div>';
+    return;
+  }
+  const sorted = [...data.params].filter(p => p[metric]).sort((a,b) => a.date.localeCompare(b.date));
+  if (sorted.length < 2) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:4px 0">РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РґР°РЅРЅС‹С… вЂ” РґРѕР±Р°РІСЊ РµС‰С‘ Р·Р°РјРµСЂС‹</div>';
+    return;
+  }
+  const first = parseFloat(sorted[0][metric]);
+  const last = parseFloat(sorted[sorted.length-1][metric]);
+  const diff = (last - first).toFixed(1);
+  const pct = ((last - first) / first * 100).toFixed(1);
+  const meta = METRIC_META[metric];
+  const isGood = (meta.good === 'down' && diff < 0) || (meta.good === 'up' && diff > 0);
+  const color = isGood ? 'var(--success)' : 'var(--accent)';
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <div style="text-align:center">
+        <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:3px">РЎРўРђР Рў</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px">${first}</div>
+        <div style="font-size:10px;color:var(--muted)">${formatDate(sorted[0].date)}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:3px">РЎР•Р™Р§РђРЎ</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px">${last}</div>
+        <div style="font-size:10px;color:var(--muted)">${formatDate(sorted[sorted.length-1].date)}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:3px">РР—РњР•РќР•РќРР•</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:${color}">${diff > 0 ? '+' : ''}${diff}</div>
+        <div style="font-size:10px;color:${color};font-weight:700">${pct > 0 ? '+' : ''}${pct}%</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderMusclesChart() {
+  if (musclesChart) { musclesChart.destroy(); musclesChart = null; }
+  const counts = {};
+  data.workouts.forEach(w => (w.muscles||[]).forEach(m => counts[m] = (counts[m]||0) + 1));
+  const entries = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+  const empty = document.getElementById('chart-muscles-empty');
+  const canvas = document.getElementById('chart-muscles');
+  if (entries.length === 0) { canvas.style.display='none'; empty.style.display='block'; return; }
+  canvas.style.display='block'; empty.style.display='none';
+  const colors = ['#ff4d6d','#7c3aed','#06b6d4','#10b981','#f59e0b','#ec4899','#8b5cf6'];
+  musclesChart = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: entries.map(e=>e[0]),
+      datasets: [{ data: entries.map(e=>e[1]), backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { color: '#6b6b88', font: { family: 'Nunito', size: 11 }, padding: 12, boxWidth: 12 } },
+        tooltip: { ...CHART_DEFAULTS.plugins.tooltip, callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} С‚СЂРµРЅРёСЂРѕРІРѕРє` } }
+      }
+    }
+  });
+}
+
+function renderMonthlyChart() {
+  if (monthlyChart) { monthlyChart.destroy(); monthlyChart = null; }
+  const months = {};
+  const monthNames = ['РЇРЅРІ','Р¤РµРІ','РњР°СЂ','РђРїСЂ','РњР°Р№','РСЋРЅ','РСЋР»','РђРІРі','РЎРµРЅ','РћРєС‚','РќРѕСЏ','Р”РµРє'];
+  data.workouts.forEach(w => {
+    if (!w.date) return;
+    const [y, m] = w.date.split('-');
+    const key = `${y}-${m}`;
+    months[key] = (months[key]||0) + 1;
+  });
+  const keys = Object.keys(months).sort().slice(-12);
+  const labels = keys.map(k => { const [y,m] = k.split('-'); return monthNames[parseInt(m)-1] + ' ' + y.slice(2); });
+  const values = keys.map(k => months[k]);
+  if (values.length === 0) return;
+
+  monthlyChart = new Chart(document.getElementById('chart-monthly'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'РўСЂРµРЅРёСЂРѕРІРѕРє',
+        data: values,
+        backgroundColor: values.map((v, i) => i === values.length - 1 ? '#ff4d6d' : '#7c3aed88'),
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: { ...CHART_DEFAULTS.plugins, tooltip: {
+        ...CHART_DEFAULTS.plugins.tooltip,
+        callbacks: { label: ctx => ` ${ctx.parsed.y} С‚СЂРµРЅРёСЂРѕРІРѕРє` }
+      }}
+    }
+  });
+}
+
+function renderRecords() {
+  const el = document.getElementById('charts-records');
+  const sorted = [...data.workouts].sort((a,b) => a.date.localeCompare(b.date));
+  if (sorted.length === 0) { el.innerHTML = '<div style="color:var(--muted);font-size:13px">РџРѕРєР° РЅРµС‚ РґР°РЅРЅС‹С…</div>'; return; }
+
+  // Best streak
+  let maxStreak = 0, curStreak = 0;
+  let prev = null;
+  [...data.workouts].sort((a,b)=>a.date.localeCompare(b.date)).forEach(w => {
+    if (!prev) { curStreak = 1; }
+    else {
+      const diff = (new Date(w.date) - new Date(prev)) / 86400000;
+      curStreak = diff === 1 ? curStreak + 1 : 1;
+    }
+    maxStreak = Math.max(maxStreak, curStreak);
+    prev = w.date;
+  });
+
+  // Most trained muscle
+  const muscCounts = {};
+  data.workouts.forEach(w => (w.muscles||[]).forEach(m => muscCounts[m] = (muscCounts[m]||0)+1));
+  const topMuscle = Object.entries(muscCounts).sort((a,b)=>b[1]-a[1])[0];
+
+  // Best rated
+  const bestRated = [...data.workouts].filter(w=>w.rating).sort((a,b)=>b.rating-a.rating)[0];
+
+  const rows = [
+    ['рџ”Ґ', 'Р›СѓС‡С€Р°СЏ СЃРµСЂРёСЏ', maxStreak + ' РґРЅРµР№ РїРѕРґСЂСЏРґ'],
+    ['рџ’Є', 'Р›СЋР±РёРјР°СЏ РіСЂСѓРїРїР° РјС‹С€С†', topMuscle ? `${topMuscle[0]} (${topMuscle[1]}Г—)` : 'вЂ”'],
+    ['в­ђ', 'Р›СѓС‡С€Р°СЏ С‚СЂРµРЅРёСЂРѕРІРєР°', bestRated ? `${bestRated.type} ${formatDate(bestRated.date)} ${'в…'.repeat(bestRated.rating)}` : 'вЂ”'],
+    ['рџ“…', 'РџРµСЂРІР°СЏ С‚СЂРµРЅРёСЂРѕРІРєР°', sorted[0] ? formatDate(sorted[0].date) : 'вЂ”'],
+    ['рџЏ†', 'Р’СЃРµРіРѕ С‚СЂРµРЅРёСЂРѕРІРѕРє', data.workouts.length + ' С€С‚СѓРє'],
+  ];
+
+  el.innerHTML = rows.map(([ico, lbl, val]) => `
+    <div class="stat-row">
+      <span class="stat-label">${ico} ${lbl}</span>
+      <span class="stat-val">${val}</span>
+    </div>
+  `).join('');
+}
+
+// в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ INIT в•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђв•ђ
 renderHome();
 </script>
 </body>
