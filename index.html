@@ -63,7 +63,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   color: var(--muted); font-size: 9px; font-family: 'Nunito', sans-serif; font-weight: 700;
   transition: color 0.2s;
 }
-.nav-btn .ico { font-size: 18px; }
+.nav-btn .ico { font-size: 16px; }
 .nav-btn.active { color: var(--accent); }
 
 /* CARDS */
@@ -172,6 +172,35 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .recent-score { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--gold); }
 
 /* ═══════════════ WORKOUT LOG ═══════════════ */
+/* TEMPLATES */
+.tpl-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px; margin-bottom: 10px;
+  cursor: pointer; transition: border-color 0.15s;
+}
+.tpl-card:hover { border-color: var(--accent2); }
+.tpl-card.selected { border-color: var(--accent2); background: rgba(124,58,237,0.08); }
+.tpl-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.tpl-letter {
+  width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: white;
+}
+.tpl-name { font-weight: 800; font-size: 15px; }
+.tpl-meta { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.tpl-ex-list { display: flex; flex-direction: column; gap: 4px; }
+.tpl-ex-row { font-size: 12px; color: var(--muted); display: flex; align-items: baseline; gap: 6px; }
+.tpl-ex-name { font-weight: 700; color: var(--text); }
+.tpl-ex-sets { color: var(--accent3); font-size: 11px; }
+.tpl-picker-banner {
+  background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(255,62,98,0.1));
+  border: 1px solid var(--accent2); border-radius: 12px;
+  padding: 12px 14px; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.tpl-selected-info { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
 .exercise-row {
   background: var(--surface);
   border-radius: 12px;
@@ -339,25 +368,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .ch-progress-val { font-weight: 800; color: var(--accent); }
 
 /* ═══════════════ STEPS ═══════════════ */
-.steps-month { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; margin-bottom: 10px; }
-.steps-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.steps-month-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; }
-.steps-stats { display: flex; gap: 16px; font-size: 12px; color: var(--muted); }
-.steps-stats b { color: var(--success); }
-.steps-list { display: flex; flex-direction: column; gap: 4px; }
-.step-row { display: flex; align-items: center; gap: 8px; }
-.step-num { width: 20px; font-size: 11px; color: var(--muted); font-weight: 700; text-align: right; flex-shrink: 0; }
-.step-bar-wrap { flex: 1; height: 22px; background: var(--surface); border-radius: 6px; overflow: hidden; position: relative; }
-.step-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--accent3), var(--accent2)); transition: width 0.3s; }
-.step-val {
-  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-  font-size: 11px; font-weight: 800; color: white;
-}
-.step-input-overlay {
-  position: absolute; inset: 0; background: transparent;
-  border: none; color: transparent; cursor: pointer;
-  font-size: 1px; width: 100%;
-}
+
 
 /* Modal */
 .modal-overlay {
@@ -573,11 +584,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <div class="lbl">Тренировка</div>
         <div class="sub">Записать</div>
       </div>
-      <div class="quick-btn" onclick="goTo('tracker')">
-        <div class="ico">📅</div>
-        <div class="lbl">Трекер</div>
-        <div class="sub">Отметить день</div>
-      </div>
+
       <div class="quick-btn" onclick="goTo('params')">
         <div class="ico">📊</div>
         <div class="lbl">Параметры</div>
@@ -611,6 +618,30 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   <div class="scroll">
     <!-- New workout form -->
     <div id="new-workout-form" style="display:none">
+
+      <!-- Template picker -->
+      <div id="tpl-picker-area">
+        <div id="tpl-none-banner" class="card" style="padding:12px 14px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-weight:800;font-size:13px">📋 Шаблон тренировки</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">Выбери шаблон или тренируйся без него</div>
+            </div>
+            <button class="btn btn-secondary" style="padding:8px 12px;font-size:12px" onclick="openTplPicker()">Выбрать</button>
+          </div>
+        </div>
+        <div id="tpl-selected-banner" class="tpl-picker-banner" style="display:none">
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:800;font-size:13px" id="tpl-banner-name">—</div>
+            <div class="tpl-selected-info" id="tpl-banner-info">—</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-secondary" style="padding:6px 10px;font-size:11px" onclick="openTplPicker()">Сменить</button>
+            <button class="btn-icon" onclick="clearTplSelection()" style="color:var(--muted)">✕</button>
+          </div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-title"><span></span> НОВАЯ ТРЕНИРОВКА</div>
         <div class="row2">
@@ -795,6 +826,76 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   </div>
 </div>
 
+<!-- ═══════════════ TEMPLATES ═══════════════ -->
+<div class="screen" id="screen-templates">
+  <div class="topbar">
+    <div class="topbar-title">📋 ШАБЛОНЫ</div>
+    <button class="btn-icon" onclick="openNewTplModal()">➕</button>
+  </div>
+  <div class="scroll">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">
+      Создай шаблоны (День A, День B…) — при добавлении тренировки выбери нужный, упражнения заполнятся автоматически. Прогрессия сохраняется в шаблоне.
+    </div>
+    <div id="templates-list"></div>
+    <button class="btn btn-secondary" style="margin-top:4px" onclick="openNewTplModal()">➕ Новый шаблон</button>
+  </div>
+</div>
+
+<!-- Modal: template picker (from workout form) -->
+<div class="modal-overlay" id="modal-tpl-picker" onclick="closeModalOutside(event,'modal-tpl-picker')">
+  <div class="modal" style="max-height:80vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-title">ВЫБРАТЬ ШАБЛОН</div>
+    <div id="tpl-picker-list" style="margin-bottom:12px"></div>
+    <button class="btn btn-secondary" onclick="closeModal('modal-tpl-picker')">Отмена</button>
+  </div>
+</div>
+
+<!-- Modal: create/edit template -->
+<div class="modal-overlay" id="modal-edit-tpl" onclick="closeModalOutside(event,'modal-edit-tpl')">
+  <div class="modal" style="max-height:92vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="tpl-modal-title">НОВЫЙ ШАБЛОН</div>
+    <input type="hidden" id="tpl-edit-id">
+
+    <div class="field">
+      <label>Название (День A, Грудь/трицепс…)</label>
+      <input type="text" id="tpl-edit-name" placeholder="День A">
+    </div>
+    <div class="field">
+      <label>Тип тренировки</label>
+      <select id="tpl-edit-type">
+        <option>Силовая</option><option>Кардио</option>
+        <option>Смешанная</option><option>Растяжка</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Группы мышц</label>
+      <div class="muscles-row" id="tpl-muscles-row">
+        <div class="muscle-chip" onclick="this.classList.toggle('selected')">Пресс</div>
+        <div class="muscle-chip" onclick="this.classList.toggle('selected')">Ноги</div>
+        <div class="muscle-chip" onclick="this.classList.toggle('selected')">Руки</div>
+        <div class="muscle-chip" onclick="this.classList.toggle('selected')">Спина</div>
+        <div class="muscle-chip" onclick="this.classList.toggle('selected')">Грудь</div>
+        <div class="muscle-chip" onclick="this.classList.toggle('selected')">Ягодицы</div>
+        <div class="muscle-chip" onclick="this.classList.toggle('selected')">Плечи</div>
+      </div>
+    </div>
+
+    <div class="card-title" style="margin:12px 0 8px"><span></span> УПРАЖНЕНИЯ</div>
+    <div id="tpl-exercises-list"></div>
+    <button class="btn btn-secondary" style="margin-bottom:12px" onclick="addTplExercise()">➕ Добавить упражнение</button>
+
+    <div class="card-title" style="margin-bottom:8px"><span></span> ЗАМЕТКА К ШАБЛОНУ</div>
+    <div class="field">
+      <textarea id="tpl-edit-notes" placeholder="Программа, советы, суперсеты…" rows="3"></textarea>
+    </div>
+
+    <button class="btn btn-primary" onclick="saveTpl()">💾 Сохранить шаблон</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="closeModal('modal-edit-tpl')">Отмена</button>
+  </div>
+</div>
+
 <!-- ═══════════════ PARAMS ═══════════════ -->
 <div class="screen" id="screen-params">
   <div class="topbar">
@@ -812,11 +913,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <div id="params-history" style="overflow-x:auto;"></div>
     </div>
 
-    <!-- Steps tracker -->
-    <div class="card">
-      <div class="card-title"><span></span> ТРЕКЕР ШАГОВ</div>
-      <div id="steps-list"></div>
-    </div>
+
   </div>
 </div>
 
@@ -1154,6 +1251,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   <button class="nav-btn" id="nav-workouts" onclick="goTo('workouts')">
     <span class="ico">💪</span>Трен.
   </button>
+  <button class="nav-btn" id="nav-templates" onclick="goTo('templates')">
+    <span class="ico">📋</span>Шаблоны
+  </button>
   <button class="nav-btn" id="nav-food" onclick="goTo('food')">
     <span class="ico">🥗</span>Еда
   </button>
@@ -1173,11 +1273,11 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 let data = JSON.parse(localStorage.getItem('workout_diary_v2') || '{}');
 if (!data.profile) data.profile = {};
 if (!data.workouts) data.workouts = [];
+if (!data.templates) data.templates = [];
 if (!data.params) data.params = [];
 if (!data.habits) data.habits = [];
 if (!data.challenges) data.challenges = [];
 if (!data.tracker) data.tracker = {};
-if (!data.steps) data.steps = {};
 if (!data.food) data.food = {};
 
 function save() { localStorage.setItem('workout_diary_v2', JSON.stringify(data)); }
@@ -1200,6 +1300,7 @@ function renderPage(page) {
   if (page === 'params') renderParams();
   if (page === 'habits') renderHabits();
   if (page === 'food') renderFood();
+  if (page === 'templates') renderTemplates();
 }
 
 // ═══════════════ MODALS ═══════════════
@@ -1309,6 +1410,271 @@ window.openModal = function(id) {
   origOpen(id);
 };
 
+// ═══════════════ TEMPLATES ═══════════════
+let tplExCount = 0;
+let currentTplId = null; // selected template id when creating workout
+
+function renderTemplates() {
+  const list = document.getElementById('templates-list');
+  if (!list) return;
+  if (!data.templates.length) {
+    list.innerHTML = '<div class="card" style="text-align:center;color:var(--muted);padding:20px;font-size:13px">Нет шаблонов. Нажми ➕ чтобы создать первый.</div>';
+    return;
+  }
+  list.innerHTML = data.templates.map(t => renderTplCard(t, false)).join('');
+}
+
+function renderTplCard(t, picker = false) {
+  const exList = (t.exercises || []).map(e => {
+    const setsStr = (e.sets || []).filter(s => s && (s.w || s.r)).map(s => {
+      if (s.w && s.r) return `${s.w}кг×${s.r}`;
+      if (s.w) return `${s.w}кг`;
+      if (s.r) return `×${s.r}`;
+      return '—';
+    }).join(' · ');
+    return `<div class="tpl-ex-row">
+      <span class="tpl-ex-name">${e.name}</span>
+      ${setsStr ? `<span class="tpl-ex-sets">${setsStr}</span>` : ''}
+    </div>`;
+  }).join('');
+
+  const muscles = (t.muscles || []).join(', ');
+  const letter = (t.name || 'A')[0].toUpperCase();
+
+  if (picker) {
+    return `<div class="tpl-card" onclick="selectTemplate(${t.id})">
+      <div class="tpl-card-head">
+        <div class="tpl-letter">${letter}</div>
+        <div>
+          <div class="tpl-name">${t.name}</div>
+          <div class="tpl-meta">${t.type || 'Силовая'}${muscles ? ' · ' + muscles : ''} · ${(t.exercises||[]).length} упр.</div>
+        </div>
+      </div>
+      ${exList ? `<div class="tpl-ex-list">${exList}</div>` : ''}
+    </div>`;
+  }
+
+  return `<div class="tpl-card">
+    <div class="tpl-card-head">
+      <div class="tpl-letter">${letter}</div>
+      <div style="flex:1">
+        <div class="tpl-name">${t.name}</div>
+        <div class="tpl-meta">${t.type || 'Силовая'}${muscles ? ' · ' + muscles : ''} · ${(t.exercises||[]).length} упр.</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-secondary" style="padding:6px 10px;font-size:11px" onclick="editTpl(${t.id})">✏️</button>
+        <button class="btn-icon" style="color:var(--muted)" onclick="deleteTpl(${t.id})">🗑</button>
+      </div>
+    </div>
+    ${exList ? `<div class="tpl-ex-list">${exList}</div>` : ''}
+    ${t.notes ? `<div style="margin-top:8px;font-size:11px;color:var(--muted);font-style:italic">${t.notes}</div>` : ''}
+    <div style="margin-top:10px;display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1;padding:10px;font-size:12px" onclick="startWorkoutFromTpl(${t.id})">▶ Тренироваться по шаблону</button>
+    </div>
+  </div>`;
+}
+
+function openNewTplModal() {
+  document.getElementById('tpl-edit-id').value = '';
+  document.getElementById('tpl-modal-title').textContent = 'НОВЫЙ ШАБЛОН';
+  document.getElementById('tpl-edit-name').value = '';
+  document.getElementById('tpl-edit-notes').value = '';
+  document.getElementById('tpl-edit-type').value = 'Силовая';
+  document.querySelectorAll('#tpl-muscles-row .muscle-chip').forEach(c => c.classList.remove('selected'));
+  tplExCount = 0;
+  document.getElementById('tpl-exercises-list').innerHTML = '';
+  addTplExercise();
+  openModal('modal-edit-tpl');
+}
+
+function editTpl(id) {
+  const t = data.templates.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById('tpl-edit-id').value = id;
+  document.getElementById('tpl-modal-title').textContent = 'РЕДАКТИРОВАТЬ: ' + t.name;
+  document.getElementById('tpl-edit-name').value = t.name;
+  document.getElementById('tpl-edit-notes').value = t.notes || '';
+  document.getElementById('tpl-edit-type').value = t.type || 'Силовая';
+  // Muscles
+  document.querySelectorAll('#tpl-muscles-row .muscle-chip').forEach(c => {
+    c.classList.toggle('selected', (t.muscles || []).includes(c.textContent));
+  });
+  // Exercises
+  tplExCount = 0;
+  document.getElementById('tpl-exercises-list').innerHTML = '';
+  (t.exercises || [{ name:'', sets: Array(5).fill({w:'',r:''}) }]).forEach(ex => addTplExercise(ex));
+  openModal('modal-edit-tpl');
+}
+
+function addTplExercise(ex) {
+  tplExCount++;
+  const n = tplExCount;
+  const div = document.createElement('div');
+  div.className = 'exercise-row';
+  div.id = 'tpl-ex-' + n;
+  div.innerHTML = `
+    <div class="ex-head">
+      <div class="ex-num">${n}</div>
+      <input class="ex-name-input" placeholder="Название упражнения" id="tpl-ex-name-${n}" value="${ex?.name||''}">
+      <button class="btn-icon" onclick="document.getElementById('tpl-ex-${n}').remove()" style="color:var(--accent)">✕</button>
+    </div>
+    <div class="sets-grid">
+      ${[1,2,3,4,5].map(s => {
+        const sv = ex?.sets?.[s-1];
+        const wv = sv && typeof sv === 'object' ? (sv.w||'') : '';
+        const rv = sv && typeof sv === 'object' ? (sv.r||'') : (sv||'');
+        return `<div class="set-cell">
+          <div class="set-label">П${s}</div>
+          <div class="set-sublabel">кг</div>
+          <input class="set-input" placeholder="—" id="tpl-ex${n}-w${s}" type="number" min="0" step="0.5" value="${wv}" style="color:var(--accent3)">
+          <div class="set-divider"></div>
+          <div class="set-sublabel">повт</div>
+          <input class="set-input" placeholder="—" id="tpl-ex${n}-r${s}" type="number" min="0" step="1" value="${rv}">
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+  document.getElementById('tpl-exercises-list').appendChild(div);
+  if (!ex) div.querySelector('.ex-name-input').focus();
+}
+
+function saveTpl() {
+  const name = document.getElementById('tpl-edit-name').value.trim();
+  if (!name) { toast('Введи название шаблона'); return; }
+  const exercises = [];
+  for (let i = 1; i <= tplExCount + 5; i++) {
+    const nameEl = document.getElementById(`tpl-ex-name-${i}`);
+    if (!nameEl) continue;
+    const exName = nameEl.value.trim();
+    if (!exName) continue;
+    const sets = [1,2,3,4,5].map(s => {
+      const w = document.getElementById(`tpl-ex${i}-w${s}`)?.value.trim() || '';
+      const r = document.getElementById(`tpl-ex${i}-r${s}`)?.value.trim() || '';
+      return (w||r) ? {w,r} : null;
+    }).filter(Boolean);
+    exercises.push({ name: exName, sets });
+  }
+  const muscles = [...document.querySelectorAll('#tpl-muscles-row .muscle-chip.selected')].map(c => c.textContent);
+  const editId = document.getElementById('tpl-edit-id').value;
+
+  if (editId) {
+    const idx = data.templates.findIndex(x => x.id === +editId);
+    if (idx !== -1) {
+      data.templates[idx] = { ...data.templates[idx], name, type: document.getElementById('tpl-edit-type').value, muscles, exercises, notes: document.getElementById('tpl-edit-notes').value.trim() };
+      toast('✅ Шаблон обновлён!');
+    }
+  } else {
+    data.templates.push({ id: Date.now(), name, type: document.getElementById('tpl-edit-type').value, muscles, exercises, notes: document.getElementById('tpl-edit-notes').value.trim() });
+    toast('✅ Шаблон создан!');
+  }
+  save();
+  closeModal('modal-edit-tpl');
+  renderTemplates();
+}
+
+function deleteTpl(id) {
+  if (!confirm('Удалить шаблон?')) return;
+  data.templates = data.templates.filter(t => t.id !== id);
+  save(); renderTemplates(); toast('🗑 Удалено');
+}
+
+// Open picker from workout form
+function openTplPicker() {
+  const list = document.getElementById('tpl-picker-list');
+  if (!data.templates.length) {
+    list.innerHTML = `<div style="text-align:center;color:var(--muted);padding:16px;font-size:13px">
+      Нет шаблонов. <br><br>
+      <button class="btn btn-secondary" onclick="closeModal('modal-tpl-picker');goTo('templates');openNewTplModal()">Создать шаблон</button>
+    </div>`;
+  } else {
+    list.innerHTML = data.templates.map(t => renderTplCard(t, true)).join('');
+  }
+  openModal('modal-tpl-picker');
+}
+
+function selectTemplate(id) {
+  const t = data.templates.find(x => x.id === id);
+  if (!t) return;
+  currentTplId = id;
+  // Fill workout form with template data
+  document.getElementById('wo-type').value = t.type || 'Силовая';
+  document.querySelectorAll('#new-workout-form .muscle-chip').forEach(c => {
+    c.classList.toggle('selected', (t.muscles||[]).includes(c.textContent));
+  });
+  // Replace exercises
+  exerciseCount = 0;
+  document.getElementById('exercises-list').innerHTML = '';
+  if (t.exercises && t.exercises.length) {
+    t.exercises.forEach(ex => {
+      exerciseCount++;
+      const n = exerciseCount;
+      const div = document.createElement('div');
+      div.className = 'exercise-row';
+      div.id = 'ex-' + n;
+      div.innerHTML = `
+        <div class="ex-head">
+          <div class="ex-num">${n}</div>
+          <input class="ex-name-input" placeholder="Название упражнения" id="ex-name-${n}" value="${ex.name||''}">
+          <button class="btn-icon" onclick="removeExercise(${n})" style="color:var(--accent)">✕</button>
+        </div>
+        <div class="sets-grid">
+          ${[1,2,3,4,5].map(s => {
+            const sv = ex.sets?.[s-1];
+            const wv = sv ? (sv.w||'') : '';
+            const rv = sv ? (sv.r||'') : '';
+            return `<div class="set-cell">
+              <div class="set-label">П${s}</div>
+              <div class="set-sublabel">кг</div>
+              <input class="set-input" placeholder="—" id="ex${n}-w${s}" type="number" min="0" step="0.5" value="${wv}" style="color:var(--accent3)">
+              <div class="set-divider"></div>
+              <div class="set-sublabel">повт</div>
+              <input class="set-input" placeholder="—" id="ex${n}-r${s}" type="number" min="0" step="1" value="${rv}">
+            </div>`;
+          }).join('')}
+        </div>
+      `;
+      document.getElementById('exercises-list').appendChild(div);
+    });
+  } else {
+    addExercise();
+  }
+  // Update banner
+  document.getElementById('tpl-none-banner').style.display = 'none';
+  document.getElementById('tpl-selected-banner').style.display = 'flex';
+  document.getElementById('tpl-banner-name').textContent = t.name;
+  document.getElementById('tpl-banner-info').textContent = `${t.type||'Силовая'} · ${t.exercises?.length||0} упр. · редактируй веса и жми «Сохранить»`;
+  closeModal('modal-tpl-picker');
+  toast('📋 Шаблон «' + t.name + '» загружен');
+}
+
+function clearTplSelection() {
+  currentTplId = null;
+  document.getElementById('tpl-none-banner').style.display = 'block';
+  document.getElementById('tpl-selected-banner').style.display = 'none';
+  exerciseCount = 0;
+  document.getElementById('exercises-list').innerHTML = '';
+  addExercise();
+}
+
+// Start workout from template card on templates screen
+function startWorkoutFromTpl(id) {
+  goTo('workouts');
+  showNewWorkout();
+  selectTemplate(id);
+}
+
+// After saving workout — offer to update template with new weights
+function offerTplUpdate(workout) {
+  if (!currentTplId) return;
+  const t = data.templates.find(x => x.id === currentTplId);
+  if (!t) return;
+  if (!confirm(`Обновить шаблон «${t.name}» новыми весами из этой тренировки?`)) return;
+  t.exercises = workout.exercises.map(e => ({ name: e.name, sets: e.sets }));
+  save();
+  renderTemplates();
+  toast('📋 Шаблон обновлён!');
+}
+
 // ═══════════════ WORKOUTS ═══════════════
 let exerciseCount = 0;
 let currentRating = 0;
@@ -1318,11 +1684,17 @@ function showNewWorkout() {
   document.getElementById('new-workout-form').style.display = 'block';
   document.getElementById('workouts-history').style.display = 'none';
   exerciseCount = 0;
+  currentTplId = null;
   document.getElementById('exercises-list').innerHTML = '';
   document.getElementById('wo-date').value = new Date().toISOString().split('T')[0];
   currentRating = 0;
   updateStars();
   addExercise();
+  // Reset template banner
+  const noneBanner = document.getElementById('tpl-none-banner');
+  const selBanner  = document.getElementById('tpl-selected-banner');
+  if (noneBanner) noneBanner.style.display = 'block';
+  if (selBanner)  selBanner.style.display  = 'none';
 }
 function hideNewWorkout() {
   document.getElementById('new-workout-form').style.display = 'none';
@@ -1437,6 +1809,11 @@ function saveWorkout() {
   renderWorkoutsHistory();
   renderHome();
   toast('🔥 Тренировка сохранена!');
+
+  // Offer to update template with new weights
+  offerTplUpdate(workout);
+  currentTplId = null;
+
   // Reset forms
   document.querySelectorAll('.muscle-chip').forEach(c => c.classList.remove('selected'));
   document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
@@ -1808,7 +2185,6 @@ function renderParams() {
   }
 
   // Steps
-  renderSteps();
 }
 
 function deleteParam(id) {
@@ -1816,50 +2192,6 @@ function deleteParam(id) {
   save(); renderParams(); toast('🗑 Удалено');
 }
 
-function renderSteps() {
-  const year = new Date().getFullYear();
-  const month = new Date().getMonth();
-  const monthName = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][month];
-  const daysInMonth = new Date(year, month+1, 0).getDate();
-  const key = `${year}-${month}`;
-  if (!data.steps[key]) data.steps[key] = {};
-
-  const maxSteps = Math.max(10000, ...Object.values(data.steps[key]).map(Number).filter(Boolean));
-
-  const list = document.getElementById('steps-list');
-  list.innerHTML = `
-    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
-      <span style="font-weight:700">${monthName} ${year}</span>
-      <span style="font-size:12px;color:var(--muted)">Цель: <b style="color:var(--accent3)">10 000</b> шагов</span>
-    </div>
-  ` + Array.from({length: daysInMonth}, (_, i) => {
-    const d = i + 1;
-    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const steps = data.steps[key][d] || 0;
-    const pct = steps ? Math.min(100, Math.round(steps / 10000 * 100)) : 0;
-    return `
-      <div class="step-row">
-        <div class="step-num">${d}</div>
-        <div class="step-bar-wrap">
-          <div class="step-bar-fill" style="width:${pct}%"></div>
-          ${steps ? `<div class="step-val">${steps >= 1000 ? (steps/1000).toFixed(1)+'k' : steps}</div>` : ''}
-          <input type="number" class="step-input-overlay" placeholder=" " 
-            value="${steps || ''}"
-            onchange="setSteps(${d}, this.value, '${key}')"
-            style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;border:none;background:transparent">
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function setSteps(day, val, key) {
-  if (!data.steps[key]) data.steps[key] = {};
-  data.steps[key][day] = parseInt(val) || 0;
-  save();
-  renderSteps();
-  toast('👟 Шаги сохранены!');
-}
 
 // ═══════════════ HABITS ═══════════════
 let selectedHabitIcon = '💧';
