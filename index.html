@@ -286,6 +286,19 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 /* ═══════════════ TRACKER GRID ═══════════════ */
 .tracker-months { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .tracker-month { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 10px; }
+
+/* STEPS */
+.steps-day-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--surface); }
+.steps-day-row:last-child { border-bottom: none; }
+.steps-day-label { width: 28px; font-size: 11px; color: var(--muted); font-weight: 800; flex-shrink: 0; text-align: right; }
+.steps-bar-wrap { flex: 1; height: 18px; background: var(--surface); border-radius: 6px; position: relative; overflow: hidden; }
+.steps-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--accent3), var(--accent2)); transition: width 0.3s; }
+.steps-count { min-width: 46px; font-size: 11px; font-weight: 800; text-align: right; flex-shrink: 0; }
+.steps-count.goal-reached { color: var(--success); }
+.steps-summary { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.steps-stat { flex: 1; min-width: 80px; background: var(--surface); border-radius: 10px; padding: 8px 10px; text-align: center; }
+.steps-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--accent3); }
+.steps-stat-lbl { font-size: 10px; color: var(--muted); font-weight: 700; }
 .tm-title { font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: var(--muted); margin-bottom: 8px; display: flex; justify-content: space-between; }
 .tm-count { color: var(--accent); }
 .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
@@ -585,10 +598,21 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <div class="sub">Записать</div>
       </div>
 
+      <div class="quick-btn" onclick="goTo('food')">
+        <div class="ico">🥗</div>
+        <div class="lbl">Питание</div>
+        <div class="sub">Записать день</div>
+      </div>
+
       <div class="quick-btn" onclick="goTo('params')">
         <div class="ico">📊</div>
         <div class="lbl">Параметры</div>
         <div class="sub">Замеры</div>
+      </div>
+      <div class="quick-btn" onclick="openStepsModal()">
+        <div class="ico">👟</div>
+        <div class="lbl">Шаги</div>
+        <div class="sub" id="home-steps-sub">Добавить за день</div>
       </div>
       <div class="quick-btn" onclick="goTo('habits')">
         <div class="ico">✅</div>
@@ -913,7 +937,52 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <div id="params-history" style="overflow-x:auto;"></div>
     </div>
 
+    <!-- Steps tracker -->
+    <div class="card">
+      <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span><span></span> 👟 ТРЕКЕР ШАГОВ</span>
+        <button class="btn btn-secondary" style="font-size:11px;padding:5px 10px" onclick="openStepsGoalModal()">⚙ Цель</button>
+      </div>
+      <div id="steps-section"></div>
+    </div>
 
+  </div>
+</div>
+
+<!-- Modal: add steps for today -->
+<div class="modal-overlay" id="modal-steps" onclick="closeModalOutside(event,'modal-steps')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">👟 ШАГИ ЗА ДЕНЬ</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:12px" id="steps-modal-date">Сегодня</div>
+    <div class="field">
+      <label>Количество шагов</label>
+      <input type="number" id="steps-input-val" placeholder="10 000" min="0" step="100"
+        style="font-size:24px;text-align:center;font-weight:800">
+    </div>
+    <div id="steps-goal-hint" style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:12px"></div>
+    <button class="btn btn-primary" onclick="saveStepsFromModal()">💾 Сохранить</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="closeModal('modal-steps')">Отмена</button>
+  </div>
+</div>
+
+<!-- Modal: steps goal -->
+<div class="modal-overlay" id="modal-steps-goal" onclick="closeModalOutside(event,'modal-steps-goal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚙ ЦЕЛЬ ШАГОВ</div>
+    <div class="field">
+      <label>Шагов в день</label>
+      <input type="number" id="steps-goal-input" placeholder="10000" min="1000" step="500"
+        style="font-size:22px;text-align:center;font-weight:800">
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+      <button class="btn btn-secondary" style="flex:1;min-width:80px" onclick="document.getElementById('steps-goal-input').value=6000">6 000</button>
+      <button class="btn btn-secondary" style="flex:1;min-width:80px" onclick="document.getElementById('steps-goal-input').value=8000">8 000</button>
+      <button class="btn btn-secondary" style="flex:1;min-width:80px" onclick="document.getElementById('steps-goal-input').value=10000">10 000</button>
+      <button class="btn btn-secondary" style="flex:1;min-width:80px" onclick="document.getElementById('steps-goal-input').value=12000">12 000</button>
+    </div>
+    <button class="btn btn-primary" onclick="saveStepsGoal()">💾 Сохранить цель</button>
   </div>
 </div>
 
@@ -1327,6 +1396,7 @@ function renderHome() {
   const p = data.profile;
   document.getElementById('home-name').textContent = p.name || 'Атлет';
   document.getElementById('home-goal').textContent = p.goal || 'Цель не задана — добавь в настройках ⚙️';
+  updateHomeStepsSub();
   document.getElementById('stat-workouts').textContent = data.workouts.length;
   document.getElementById('stat-weight').textContent = p.weight || '—';
 
@@ -1409,6 +1479,157 @@ window.openModal = function(id) {
   }
   origOpen(id);
 };
+
+// ═══════════════ STEPS ═══════════════
+if (!data.steps) data.steps = {};       // { 'YYYY-MM-DD': number }
+if (!data.stepsGoal) data.stepsGoal = 10000;
+
+function openStepsModal() {
+  const today = new Date().toISOString().split('T')[0];
+  const existing = data.steps[today] || '';
+  document.getElementById('steps-input-val').value = existing || '';
+  const goal = data.stepsGoal || 10000;
+  const d = new Date(); 
+  const label = `${d.getDate()} ${['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'][d.getMonth()]}`;
+  document.getElementById('steps-modal-date').textContent = `Сегодня, ${label}`;
+  document.getElementById('steps-goal-hint').textContent = `Цель: ${goal.toLocaleString('ru')} шагов`;
+  openModal('modal-steps');
+  setTimeout(() => document.getElementById('steps-input-val').select(), 100);
+}
+
+function saveStepsFromModal() {
+  const val = parseInt(document.getElementById('steps-input-val').value) || 0;
+  const today = new Date().toISOString().split('T')[0];
+  data.steps[today] = val;
+  save();
+  closeModal('modal-steps');
+  renderSteps();
+  updateHomeStepsSub();
+  const goal = data.stepsGoal || 10000;
+  const pct = Math.round(val / goal * 100);
+  toast(`👟 ${val.toLocaleString('ru')} шагов (${pct}% цели)`);
+}
+
+function openStepsGoalModal() {
+  document.getElementById('steps-goal-input').value = data.stepsGoal || 10000;
+  openModal('modal-steps-goal');
+}
+
+function saveStepsGoal() {
+  const val = parseInt(document.getElementById('steps-goal-input').value) || 10000;
+  data.stepsGoal = val;
+  save();
+  closeModal('modal-steps-goal');
+  renderSteps();
+  toast(`🎯 Цель: ${val.toLocaleString('ru')} шагов/день`);
+}
+
+function renderSteps() {
+  const el = document.getElementById('steps-section');
+  if (!el) return;
+
+  const goal = data.stepsGoal || 10000;
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayDay = now.getDate();
+  const monthNames = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+
+  // Gather this month's data
+  let totalSteps = 0, daysWithData = 0, daysGoalReached = 0;
+  const rows = [];
+  for (let d = 1; d <= todayDay; d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const steps = data.steps[dateStr] || 0;
+    if (steps > 0) { totalSteps += steps; daysWithData++; }
+    if (steps >= goal) daysGoalReached++;
+    const pct = steps ? Math.min(100, Math.round(steps / goal * 100)) : 0;
+    const reached = steps >= goal;
+    const stepsLabel = steps >= 1000 ? (steps/1000).toFixed(1)+'k' : (steps || '—');
+    rows.push(`
+      <div class="steps-day-row" onclick="openStepsDayModal('${dateStr}', ${d})">
+        <div class="steps-day-label">${d}</div>
+        <div class="steps-bar-wrap">
+          <div class="steps-bar-fill" style="width:${pct}%"></div>
+        </div>
+        <div class="steps-count ${reached?'goal-reached':''}">${stepsLabel}</div>
+      </div>`);
+  }
+
+  const avgSteps = daysWithData ? Math.round(totalSteps / daysWithData) : 0;
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-size:12px;color:var(--muted)">${monthNames[month]} ${year} · Цель: <b style="color:var(--accent3)">${goal.toLocaleString('ru')}</b> шагов</span>
+      <button class="btn btn-secondary" style="font-size:11px;padding:5px 10px" onclick="openStepsModal()">+ Сегодня</button>
+    </div>
+    <div class="steps-summary">
+      <div class="steps-stat">
+        <div class="steps-stat-val">${totalSteps>=1000?(totalSteps/1000).toFixed(1)+'k':totalSteps}</div>
+        <div class="steps-stat-lbl">Всего</div>
+      </div>
+      <div class="steps-stat">
+        <div class="steps-stat-val">${avgSteps>=1000?(avgSteps/1000).toFixed(1)+'k':avgSteps||'—'}</div>
+        <div class="steps-stat-lbl">В среднем</div>
+      </div>
+      <div class="steps-stat">
+        <div class="steps-stat-val" style="color:var(--success)">${daysGoalReached}</div>
+        <div class="steps-stat-lbl">Дней цели</div>
+      </div>
+    </div>
+    <div>${rows.join('')}</div>
+  `;
+  updateHomeStepsSub();
+}
+
+function openStepsDayModal(dateStr, day) {
+  const existing = data.steps[dateStr] || '';
+  document.getElementById('steps-input-val').value = existing || '';
+  const parts = dateStr.split('-');
+  const monthNames = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  document.getElementById('steps-modal-date').textContent = `${day} ${monthNames[parseInt(parts[1])-1]} ${parts[0]}`;
+  document.getElementById('steps-goal-hint').textContent = `Цель: ${(data.stepsGoal||10000).toLocaleString('ru')} шагов`;
+  // Override save to use this date
+  document.getElementById('modal-steps').dataset.dateOverride = dateStr;
+  openModal('modal-steps');
+  setTimeout(() => document.getElementById('steps-input-val').select(), 100);
+}
+
+// Patch saveStepsFromModal to support date override
+const _origSaveSteps = saveStepsFromModal;
+window.saveStepsFromModal = function() {
+  const modal = document.getElementById('modal-steps');
+  const dateOverride = modal.dataset.dateOverride;
+  if (dateOverride) {
+    const val = parseInt(document.getElementById('steps-input-val').value) || 0;
+    data.steps[dateOverride] = val;
+    save();
+    closeModal('modal-steps');
+    modal.dataset.dateOverride = '';
+    renderSteps();
+    updateHomeStepsSub();
+    toast(`👟 ${val.toLocaleString('ru')} шагов сохранено`);
+  } else {
+    _origSaveSteps();
+  }
+};
+
+function updateHomeStepsSub() {
+  const el = document.getElementById('home-steps-sub');
+  if (!el) return;
+  const today = new Date().toISOString().split('T')[0];
+  const steps = data.steps[today];
+  const goal = data.stepsGoal || 10000;
+  if (steps) {
+    const pct = Math.round(steps / goal * 100);
+    el.textContent = `${steps.toLocaleString('ru')} (${pct}%)`;
+    el.style.color = steps >= goal ? 'var(--success)' : 'var(--accent3)';
+  } else {
+    el.textContent = 'Добавить за день';
+    el.style.color = '';
+  }
+}
 
 // ═══════════════ TEMPLATES ═══════════════
 let tplExCount = 0;
@@ -2185,6 +2406,7 @@ function renderParams() {
   }
 
   // Steps
+  renderSteps();
 }
 
 function deleteParam(id) {
