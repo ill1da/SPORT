@@ -53,8 +53,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   background: var(--surface);
   border-top: 1px solid var(--border);
   display: flex;
-  padding-bottom: env(safe-area-inset-bottom, 8px);
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 4px);
   z-index: 100;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.4);
 }
 .nav-btn {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
@@ -172,6 +173,35 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .recent-score { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--gold); }
 
 /* ═══════════════ WORKOUT LOG ═══════════════ */
+/* WORKOUT MODE */
+.wm-screen { display:flex; flex-direction:column; height:100%; background:var(--bg); overflow:hidden; }
+.wm-topbar { display:flex; align-items:center; justify-content:space-between; padding:14px 16px 10px; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; }
+.wm-topbar-title { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:1px; }
+.wm-progress-bar { height:4px; background:var(--border); flex-shrink:0; }
+.wm-progress-fill { height:100%; background:linear-gradient(90deg,var(--accent2),var(--accent)); transition:width 0.4s ease; }
+.wm-body { flex:1; overflow-y:auto; padding:16px; -webkit-overflow-scrolling:touch; }
+.wm-ex-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:12px; }
+.wm-ex-name { font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:1px; color:var(--text); line-height:1.1; margin-bottom:4px; }
+.wm-ex-meta { font-size:12px; color:var(--muted); margin-bottom:14px; }
+.wm-set-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--surface); }
+.wm-set-row:last-child { border-bottom:none; }
+.wm-set-num { width:22px; font-size:11px; font-weight:800; color:var(--muted); text-align:right; flex-shrink:0; }
+.wm-set-done { width:28px; height:28px; border-radius:8px; border:2px solid var(--border); background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; transition:all 0.15s; flex-shrink:0; }
+.wm-set-done.done { background:var(--success); border-color:var(--success); }
+.wm-set-inp { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:7px 8px; color:var(--text); font-family:'Nunito',sans-serif; font-size:14px; font-weight:700; text-align:center; outline:none; }
+.wm-set-inp.weight { color:var(--accent3); }
+.wm-set-sep { font-size:12px; color:var(--muted); flex-shrink:0; }
+.wm-timer-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:300; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.wm-timer-ring { width:180px; height:180px; position:relative; margin-bottom:24px; }
+.wm-timer-ring svg { transform:rotate(-90deg); }
+.wm-timer-ring .ring-bg { fill:none; stroke:var(--border); stroke-width:8; }
+.wm-timer-ring .ring-fill { fill:none; stroke:var(--accent2); stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.wm-timer-num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:52px; letter-spacing:2px; color:var(--text); }
+.wm-timer-label { font-size:14px; color:var(--muted); font-weight:700; letter-spacing:1px; margin-bottom:8px; }
+.wm-timer-next { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--accent3); text-align:center; margin-bottom:32px; }
+.wm-footer { padding:12px 16px; background:var(--surface); border-top:1px solid var(--border); flex-shrink:0; display:flex; gap:8px; }
+.wm-summary-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--surface); font-size:13px; }
+
 /* TEMPLATES */
 .tpl-card {
   background: var(--card); border: 1px solid var(--border);
@@ -865,6 +895,42 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   </div>
 </div>
 
+<!-- ═══════════════ WORKOUT MODE SCREEN ═══════════════ -->
+<div class="screen" id="screen-workout-mode" style="display:none;background:var(--bg)">
+  <div id="wm-content" style="height:100%;display:flex;flex-direction:column"></div>
+</div>
+
+<!-- Modal: choose workout order mode -->
+<div class="modal-overlay" id="modal-wo-mode" onclick="closeModalOutside(event,'modal-wo-mode')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="wo-mode-tpl-name">РЕЖИМ ТРЕНИРОВКИ</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Выбери порядок выполнения упражнений</div>
+
+    <div id="wo-mode-A" class="tpl-card" style="margin-bottom:10px" onclick="selectWoMode('sequential')">
+      <div class="tpl-card-head">
+        <div class="tpl-letter" style="background:linear-gradient(135deg,#7c3aed,#ec4899);font-size:18px">A→B</div>
+        <div>
+          <div class="tpl-name">Упражнение за упражнением</div>
+          <div class="tpl-meta">Все подходы упражнения 1, затем все подходы упражнения 2…</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="wo-mode-B" class="tpl-card" onclick="selectWoMode('circuit')">
+      <div class="tpl-card-head">
+        <div class="tpl-letter" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:18px">↻</div>
+        <div>
+          <div class="tpl-name">Круговая тренировка</div>
+          <div class="tpl-meta">1 подход каждого упражнения по кругу, повторяем N раз</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-secondary" style="margin-top:14px" onclick="closeModal('modal-wo-mode')">Отмена</button>
+  </div>
+</div>
+
 <!-- Modal: template picker (from workout form) -->
 <div class="modal-overlay" id="modal-tpl-picker" onclick="closeModalOutside(event,'modal-tpl-picker')">
   <div class="modal" style="max-height:80vh;overflow-y:auto">
@@ -1480,6 +1546,397 @@ window.openModal = function(id) {
   origOpen(id);
 };
 
+// ═══════════════ WORKOUT MODE ═══════════════
+let wm = null; // active workout mode session
+
+function launchWorkoutMode(tplId) {
+  const t = data.templates.find(x => x.id === tplId);
+  if (!t || !t.exercises?.length) { toast('Шаблон пуст — добавь упражнения'); return; }
+  wm = { tplId, tpl: t, mode: null };
+  document.getElementById('wo-mode-tpl-name').textContent = t.name.toUpperCase();
+  openModal('modal-wo-mode');
+}
+
+function selectWoMode(mode) {
+  closeModal('modal-wo-mode');
+  wm.mode = mode; // 'sequential' | 'circuit'
+
+  // Build flat step list
+  const t = wm.tpl;
+  const steps = []; // { type:'exercise'|'rest', exIdx, setIdx, ... }
+
+  if (mode === 'sequential') {
+    // All sets of ex[0], then all sets of ex[1]…
+    t.exercises.forEach((ex, ei) => {
+      const setCount = Math.max(ex.sets?.length || 0, 1);
+      for (let si = 0; si < setCount; si++) {
+        steps.push({ type:'set', exIdx:ei, setIdx:si });
+        if (si < setCount - 1 || ei < t.exercises.length - 1) {
+          // rest after set (skip last set of last exercise)
+          if (ex.restMin > 0 || ex.restSec > 0) {
+            steps.push({ type:'rest', exIdx:ei, setIdx:si, restMin:ex.restMin, restSec:ex.restSec });
+          }
+        }
+      }
+    });
+  } else {
+    // Circuit: 1 set of each exercise, repeat
+    const maxSets = Math.max(...t.exercises.map(ex => ex.sets?.length || 1));
+    for (let si = 0; si < maxSets; si++) {
+      t.exercises.forEach((ex, ei) => {
+        if ((ex.sets?.length || 1) > si) {
+          steps.push({ type:'set', exIdx:ei, setIdx:si });
+          if (ex.restMin > 0 || ex.restSec > 0) {
+            steps.push({ type:'rest', exIdx:ei, setIdx:si, restMin:ex.restMin, restSec:ex.restSec });
+          }
+        }
+      });
+    }
+  }
+
+  // Remove trailing rest
+  while (steps.length && steps[steps.length-1].type === 'rest') steps.pop();
+
+  // Session state
+  wm.steps = steps;
+  wm.stepIdx = 0;
+  wm.startTime = Date.now();
+  wm.results = t.exercises.map(ex => ({
+    name: ex.name,
+    sets: (ex.sets?.length ? ex.sets : [{}]).map(s => ({ w: s?.w || '', r: s?.r || ex.targetReps || '' }))
+  }));
+  wm.timerInterval = null;
+
+  showWmScreen();
+  renderWmStep();
+}
+
+function showWmScreen() {
+  // Hide all screens, show wm screen
+  document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+  const sc = document.getElementById('screen-workout-mode');
+  sc.style.display = 'flex';
+  sc.style.flexDirection = 'column';
+  document.querySelector('.bottom-nav').style.display = 'none';
+}
+
+function hideWmScreen() {
+  document.getElementById('screen-workout-mode').style.display = 'none';
+  document.querySelector('.bottom-nav').style.display = 'flex';
+  goTo('workouts');
+}
+
+function renderWmStep() {
+  const step = wm.steps[wm.stepIdx];
+  const total = wm.steps.filter(s => s.type === 'set').length;
+  const doneSets = wm.steps.slice(0, wm.stepIdx).filter(s => s.type === 'set').length;
+  const pct = Math.round(doneSets / total * 100);
+
+  if (step.type === 'rest') {
+    startRestTimer(step);
+    return;
+  }
+
+  // Build exercise UI
+  const ex = wm.tpl.exercises[step.exIdx];
+  const res = wm.results[step.exIdx];
+  const setCount = res.sets.length;
+  const isLast = wm.stepIdx === wm.steps.length - 1;
+  const nextStep = wm.steps[wm.stepIdx + 1];
+  const nextLabel = nextStep
+    ? nextStep.type === 'rest'
+      ? `Следующее: ОТДЫХ ${nextStep.restMin}:${String(nextStep.restSec).padStart(2,'0')}`
+      : `Следующее: ${wm.tpl.exercises[nextStep.exIdx].name} · подход ${nextStep.setIdx + 1}`
+    : 'Финальный шаг!';
+
+  const setsHTML = res.sets.map((s, si) => {
+    const isCurrentSet = si === step.setIdx;
+    const isDoneSet = si < step.setIdx;
+    return `<div class="wm-set-row" style="${isCurrentSet ? 'background:rgba(124,58,237,0.08);border-radius:8px;padding:8px;margin:0 -4px' : ''}">
+      <div class="wm-set-num">П${si+1}</div>
+      <div class="wm-set-done ${isDoneSet?'done':''}" onclick="toggleWmSetDone(${si})">${isDoneSet?'✓':''}</div>
+      <input class="wm-set-inp weight" type="number" placeholder="кг" value="${s.w}" step="0.5" min="0"
+        onchange="wm.results[${step.exIdx}].sets[${si}].w=this.value" style="${!isCurrentSet?'opacity:0.5':''}">
+      <span class="wm-set-sep">×</span>
+      <input class="wm-set-inp" type="number" placeholder="повт" value="${s.r}" min="0"
+        onchange="wm.results[${step.exIdx}].sets[${si}].r=this.value" style="${!isCurrentSet?'opacity:0.5':''}">
+    </div>`;
+  }).join('');
+
+  const restTotal = (ex.restMin||0)*60 + (ex.restSec||0);
+
+  document.getElementById('wm-content').innerHTML = `
+    <div class="wm-screen">
+      <div class="wm-topbar">
+        <div>
+          <div class="wm-topbar-title">${wm.tpl.name}</div>
+          <div style="font-size:11px;color:var(--muted)">${doneSets}/${total} подходов · ${formatElapsed()}</div>
+        </div>
+        <button class="btn btn-secondary" style="font-size:11px;padding:6px 10px;color:var(--accent)" onclick="confirmAbortWm()">Завершить</button>
+      </div>
+      <div class="wm-progress-bar"><div class="wm-progress-fill" style="width:${pct}%"></div></div>
+      <div class="wm-body">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Упражнение ${step.exIdx+1} из ${wm.tpl.exercises.length}</div>
+        <div class="wm-ex-card">
+          <div class="wm-ex-name">${ex.name}</div>
+          <div class="wm-ex-meta">
+            ${ex.targetReps ? `Цель: ${ex.targetReps} повт · ` : ''}
+            ${restTotal ? `Отдых: ${ex.restMin||0}м ${ex.restSec||0}с` : 'Без отдыха'}
+          </div>
+          <div style="font-size:12px;font-weight:800;color:var(--accent2);margin-bottom:10px">▶ Подход ${step.setIdx + 1}</div>
+          ${setsHTML}
+        </div>
+        <div style="background:var(--surface);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--muted)">
+          ${nextLabel}
+        </div>
+      </div>
+      <div class="wm-footer">
+        <button class="btn btn-secondary" style="flex:0 0 48px" onclick="wmStepBack()" ${wm.stepIdx===0?'disabled':''}>‹</button>
+        <button class="btn btn-primary" style="flex:1;font-size:15px" onclick="wmStepNext()">
+          ${isLast ? '🏁 Завершить' : restTotal ? `Далее · ${ex.restMin||0}:${String(ex.restSec||0).padStart(2,'0')} отдых ›` : 'Далее ›'}
+        </button>
+      </div>
+    </div>
+  `;
+  // Start elapsed timer update
+  if (!wm._elapsedTimer) wm._elapsedTimer = setInterval(() => {
+    const el = document.querySelector('.wm-topbar .wm-topbar-title + div');
+    if (el) el.textContent = `${doneSets}/${total} подходов · ${formatElapsed()}`;
+  }, 10000);
+}
+
+function toggleWmSetDone(si) {
+  const step = wm.steps[wm.stepIdx];
+  // just visual feedback via re-render
+  renderWmStep();
+}
+
+function wmStepNext() {
+  if (wm.stepIdx >= wm.steps.length - 1) {
+    finishWm(); return;
+  }
+  wm.stepIdx++;
+  renderWmStep();
+}
+
+function wmStepBack() {
+  if (wm.stepIdx > 0) { wm.stepIdx--; renderWmStep(); }
+}
+
+function formatElapsed() {
+  const sec = Math.floor((Date.now() - wm.startTime) / 1000);
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function confirmAbortWm() {
+  if (confirm('Завершить тренировку досрочно и перейти к отчёту?')) finishWm();
+}
+
+// ── REST TIMER ───────────────────────────────────────────────────
+function startRestTimer(step) {
+  const total = (step.restMin||0)*60 + (step.restSec||0);
+  let remaining = total;
+  const nextStep = wm.steps[wm.stepIdx + 1];
+  const nextExName = nextStep && nextStep.type==='set' ? wm.tpl.exercises[nextStep.exIdx].name : '';
+  const circumference = 2 * Math.PI * 80; // r=80
+
+  function renderTimer() {
+    const pct = remaining / total;
+    const offset = circumference * (1 - pct);
+    const mins = Math.floor(remaining / 60), secs = remaining % 60;
+    document.getElementById('wm-content').innerHTML = `
+      <div class="wm-screen">
+        <div class="wm-topbar">
+          <div class="wm-topbar-title">ОТДЫХ</div>
+          <div style="font-size:11px;color:var(--muted)">${formatElapsed()} прошло</div>
+        </div>
+        <div class="wm-timer-overlay" style="position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0">
+          <div style="font-size:13px;color:var(--muted);font-weight:700;letter-spacing:1px;margin-bottom:16px">ОТДЫХ</div>
+          <div class="wm-timer-ring">
+            <svg width="180" height="180" viewBox="0 0 180 180">
+              <circle class="ring-bg" cx="90" cy="90" r="80" fill="none" stroke="var(--border)" stroke-width="8"/>
+              <circle class="ring-fill" cx="90" cy="90" r="80" fill="none"
+                stroke="${remaining > total*0.33 ? 'var(--accent2)' : 'var(--accent)'}"
+                stroke-width="8" stroke-linecap="round"
+                stroke-dasharray="${circumference}"
+                stroke-dashoffset="${offset}"
+                transform="rotate(-90 90 90)"/>
+            </svg>
+            <div class="wm-timer-num">${mins}:${String(secs).padStart(2,'0')}</div>
+          </div>
+          ${nextExName ? `<div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent3);margin-top:8px">Далее: ${nextExName}</div>` : ''}
+          <div style="margin-top:24px;display:flex;gap:10px">
+            <button class="btn btn-secondary" style="padding:12px 20px" onclick="skipRestTimer()">Пропустить ›</button>
+            <button class="btn btn-secondary" style="padding:12px 20px" onclick="addRestTime(30)">+30с</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  renderTimer();
+  wm.timerInterval = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      clearInterval(wm.timerInterval); wm.timerInterval = null;
+      // Vibrate if supported
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      wm.stepIdx++;
+      renderWmStep();
+    } else {
+      renderTimer();
+    }
+  }, 1000);
+
+  window._wmRestRemaining = () => remaining;
+  window._wmRestTotal = total;
+}
+
+function skipRestTimer() {
+  if (wm.timerInterval) { clearInterval(wm.timerInterval); wm.timerInterval = null; }
+  wm.stepIdx++;
+  renderWmStep();
+}
+
+function addRestTime(sec) {
+  // handled via closure in startRestTimer — need a global ref
+  if (window._wmRestRemaining) {
+    // patch: dispatch to interval — simplest approach is re-start with new time
+    // We'll use a flag on wm
+    wm._extraRest = (wm._extraRest || 0) + sec;
+  }
+}
+
+// ── FINISH / REPORT ──────────────────────────────────────────────
+function finishWm() {
+  if (wm.timerInterval) { clearInterval(wm.timerInterval); wm.timerInterval = null; }
+  if (wm._elapsedTimer) { clearInterval(wm._elapsedTimer); wm._elapsedTimer = null; }
+  const elapsed = Math.floor((Date.now() - wm.startTime) / 1000);
+  const mins = Math.floor(elapsed / 60);
+  const t = wm.tpl;
+
+  // Render report screen
+  const exRows = wm.results.map((res, ei) => {
+    const setsStr = res.sets.filter(s => s.w||s.r).map(s => {
+      if (s.w && s.r) return `${s.w}кг×${s.r}`;
+      if (s.w) return `${s.w}кг`;
+      if (s.r) return `×${s.r}`;
+      return '—';
+    }).join(' · ');
+    return `<div class="wm-summary-row">
+      <span style="font-weight:800">${res.name}</span>
+      <span style="color:var(--accent3);font-size:12px">${setsStr || '—'}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('wm-content').innerHTML = `
+    <div class="wm-screen">
+      <div class="wm-topbar">
+        <div class="wm-topbar-title">🏁 ОТЧЁТ О ТРЕНИРОВКЕ</div>
+      </div>
+      <div class="wm-body">
+        <div style="text-align:center;padding:16px 0 20px">
+          <div style="font-size:48px;margin-bottom:4px">🔥</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent)">ТРЕНИРОВКА ЗАВЕРШЕНА!</div>
+          <div style="font-size:13px;color:var(--muted)">${t.name} · ${mins} мин</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+          <div class="steps-stat"><div class="steps-stat-val" style="color:var(--accent)">${mins}</div><div class="steps-stat-lbl">минут</div></div>
+          <div class="steps-stat"><div class="steps-stat-val" style="color:var(--accent2)">${wm.results.length}</div><div class="steps-stat-lbl">упражнений</div></div>
+        </div>
+
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-title"><span></span> РЕЗУЛЬТАТЫ</div>
+          ${exRows}
+        </div>
+
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-title"><span></span> ДОПОЛНИТЬ ЗАПИСЬ</div>
+          <div class="row2" style="margin-bottom:8px">
+            <div class="field"><label>Настроение</label>
+              <div class="mood-bar" id="wm-mood-bar">
+                <div class="mood-btn" data-mood="😴" onclick="selectWmMood(this)">😴</div>
+                <div class="mood-btn" data-mood="😐" onclick="selectWmMood(this)">😐</div>
+                <div class="mood-btn" data-mood="😊" onclick="selectWmMood(this)">😊</div>
+                <div class="mood-btn" data-mood="🔥" onclick="selectWmMood(this)">🔥</div>
+              </div>
+            </div>
+            <div class="field"><label>Сон (ч)</label>
+              <input type="number" id="wm-sleep" placeholder="8" min="0" max="24">
+            </div>
+          </div>
+          <div class="field"><label>Оценка</label>
+            <div class="stars" id="wm-stars">
+              ${[1,2,3,4,5].map(i=>`<span class="star" onclick="setWmRating(${i})">★</span>`).join('')}
+            </div>
+          </div>
+          <div class="field"><label>Заметки</label>
+            <textarea id="wm-notes" placeholder="Как прошла тренировка?" rows="3"></textarea>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="font-size:15px;padding:14px" onclick="saveWmWorkout()">💾 Сохранить тренировку</button>
+        <button class="btn btn-secondary" style="margin-top:8px" onclick="confirmAbortSave()">Не сохранять</button>
+      </div>
+    </div>`;
+  wm._wmRating = 0;
+  wm._wmMood = '';
+}
+
+function selectWmMood(el) {
+  document.querySelectorAll('#wm-mood-bar .mood-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  wm._wmMood = el.dataset.mood;
+}
+
+function setWmRating(n) {
+  wm._wmRating = n;
+  document.querySelectorAll('#wm-stars .star').forEach((s,i) => s.classList.toggle('filled', i < n));
+}
+
+function saveWmWorkout() {
+  const today = new Date().toISOString().split('T')[0];
+  const elapsed = Math.floor((Date.now() - wm.startTime) / 1000);
+  const t = wm.tpl;
+
+  const workout = {
+    id: Date.now(),
+    date: today,
+    type: t.type || 'Силовая',
+    sleep: document.getElementById('wm-sleep')?.value || '',
+    energy: '⭐⭐⭐⭐',
+    mood: wm._wmMood || '',
+    muscles: t.muscles || [],
+    exercises: wm.results,
+    cardio: { type: '', time: Math.round(elapsed/60), dist:'', pulse:'', cals:'' },
+    rating: wm._wmRating || 0,
+    notes: (document.getElementById('wm-notes')?.value || '') + (t.name ? `\n[Шаблон: ${t.name}]` : ''),
+    fromTemplate: t.id,
+    duration: elapsed,
+  };
+
+  data.workouts.push(workout);
+  if (!data.tracker[today]) data.tracker[today] = 'done';
+  save();
+
+  // Offer to update template
+  offerTplUpdate(workout);
+  currentTplId = null;
+
+  hideWmScreen();
+  toast('🔥 Тренировка сохранена!');
+}
+
+function confirmAbortSave() {
+  if (confirm('Отменить сохранение и выйти?')) {
+    if (wm.timerInterval) clearInterval(wm.timerInterval);
+    if (wm._elapsedTimer) clearInterval(wm._elapsedTimer);
+    wm = null;
+    hideWmScreen();
+  }
+}
+
 // ═══════════════ STEPS ═══════════════
 if (!data.steps) data.steps = {};       // { 'YYYY-MM-DD': number }
 if (!data.stepsGoal) data.stepsGoal = 10000;
@@ -1690,7 +2147,8 @@ function renderTplCard(t, picker = false) {
     ${exList ? `<div class="tpl-ex-list">${exList}</div>` : ''}
     ${t.notes ? `<div style="margin-top:8px;font-size:11px;color:var(--muted);font-style:italic">${t.notes}</div>` : ''}
     <div style="margin-top:10px;display:flex;gap:8px">
-      <button class="btn btn-primary" style="flex:1;padding:10px;font-size:12px" onclick="startWorkoutFromTpl(${t.id})">▶ Тренироваться по шаблону</button>
+      <button class="btn btn-primary" style="flex:1;padding:10px;font-size:12px" onclick="launchWorkoutMode(${t.id})">▶ Тренироваться</button>
+      <button class="btn btn-secondary" style="padding:10px 12px;font-size:12px" onclick="startWorkoutFromTpl(${t.id})">✏️ Вручную</button>
     </div>
   </div>`;
 }
@@ -1733,11 +2191,28 @@ function addTplExercise(ex) {
   const div = document.createElement('div');
   div.className = 'exercise-row';
   div.id = 'tpl-ex-' + n;
+  const restM = ex?.restMin ?? '';
+  const restS = ex?.restSec ?? '';
+  const targetReps = ex?.targetReps ?? '';
   div.innerHTML = `
     <div class="ex-head">
       <div class="ex-num">${n}</div>
       <input class="ex-name-input" placeholder="Название упражнения" id="tpl-ex-name-${n}" value="${ex?.name||''}">
       <button class="btn-icon" onclick="document.getElementById('tpl-ex-${n}').remove()" style="color:var(--accent)">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:6px 0">
+      <div class="field" style="margin:0">
+        <label style="font-size:9px">Цел. повторы</label>
+        <input type="number" class="set-input" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px;width:100%;color:var(--accent3)" placeholder="12" id="tpl-ex${n}-treps" value="${targetReps}" min="1">
+      </div>
+      <div class="field" style="margin:0">
+        <label style="font-size:9px">Пауза мин</label>
+        <input type="number" class="set-input" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px;width:100%" placeholder="1" id="tpl-ex${n}-restm" value="${restM}" min="0" max="10">
+      </div>
+      <div class="field" style="margin:0">
+        <label style="font-size:9px">Пауза сек</label>
+        <input type="number" class="set-input" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px;width:100%" placeholder="30" id="tpl-ex${n}-rests" value="${restS}" min="0" max="59">
+      </div>
     </div>
     <div class="sets-grid">
       ${[1,2,3,4,5].map(s => {
@@ -1773,7 +2248,10 @@ function saveTpl() {
       const r = document.getElementById(`tpl-ex${i}-r${s}`)?.value.trim() || '';
       return (w||r) ? {w,r} : null;
     }).filter(Boolean);
-    exercises.push({ name: exName, sets });
+    const restMin   = parseInt(document.getElementById(`tpl-ex${i}-restm`)?.value) || 0;
+    const restSec   = parseInt(document.getElementById(`tpl-ex${i}-rests`)?.value) || 0;
+    const targetReps= parseInt(document.getElementById(`tpl-ex${i}-treps`)?.value) || 0;
+    exercises.push({ name: exName, sets, restMin, restSec, targetReps });
   }
   const muscles = [...document.querySelectorAll('#tpl-muscles-row .muscle-chip.selected')].map(c => c.textContent);
   const editId = document.getElementById('tpl-edit-id').value;
