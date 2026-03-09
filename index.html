@@ -175,31 +175,32 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 /* ═══════════════ WORKOUT LOG ═══════════════ */
 /* WORKOUT MODE */
 .wm-screen { display:flex; flex-direction:column; height:100%; background:var(--bg); overflow:hidden; }
-.wm-topbar { display:flex; align-items:center; justify-content:space-between; padding:14px 16px 10px; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; }
-.wm-topbar-title { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:1px; }
+.wm-topbar { display:grid; grid-template-columns:1fr auto; align-items:start; gap:8px; padding:12px 14px 10px; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; }
+.wm-topbar-left { min-width:0; }
+.wm-topbar-title { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.wm-topbar-sub { font-size:11px; color:var(--muted); margin-top:1px; display:flex; align-items:center; gap:8px; }
+.wm-elapsed { font-family:'Bebas Neue',sans-serif; font-size:16px; color:var(--accent3); letter-spacing:1px; }
 .wm-progress-bar { height:4px; background:var(--border); flex-shrink:0; }
 .wm-progress-fill { height:100%; background:linear-gradient(90deg,var(--accent2),var(--accent)); transition:width 0.4s ease; }
-.wm-body { flex:1; overflow-y:auto; padding:16px; -webkit-overflow-scrolling:touch; }
-.wm-ex-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:12px; }
-.wm-ex-name { font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:1px; color:var(--text); line-height:1.1; margin-bottom:4px; }
-.wm-ex-meta { font-size:12px; color:var(--muted); margin-bottom:14px; }
-.wm-set-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--surface); }
-.wm-set-row:last-child { border-bottom:none; }
-.wm-set-num { width:22px; font-size:11px; font-weight:800; color:var(--muted); text-align:right; flex-shrink:0; }
-.wm-set-done { width:28px; height:28px; border-radius:8px; border:2px solid var(--border); background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; transition:all 0.15s; flex-shrink:0; }
+.wm-body { flex:1; overflow-y:auto; padding:14px; -webkit-overflow-scrolling:touch; overflow-x:hidden; }
+.wm-ex-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:10px; overflow:hidden; }
+.wm-ex-name { font-size:20px; font-weight:800; color:var(--text); line-height:1.2; margin-bottom:4px; word-break:break-word; }
+.wm-ex-meta { font-size:12px; color:var(--muted); margin-bottom:12px; }
+.wm-set-table { width:100%; border-collapse:collapse; }
+.wm-set-table th { font-size:10px; font-weight:800; color:var(--muted); padding:0 4px 6px; text-align:center; }
+.wm-set-table td { padding:4px; text-align:center; }
+.wm-set-row-active { background:rgba(124,58,237,0.1); border-radius:8px; }
+.wm-set-num-cell { font-size:11px; font-weight:800; color:var(--muted); width:26px; }
+.wm-set-done { width:28px; height:28px; border-radius:8px; border:2px solid var(--border); background:transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:14px; transition:all 0.15s; }
 .wm-set-done.done { background:var(--success); border-color:var(--success); }
-.wm-set-inp { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:7px 8px; color:var(--text); font-family:'Nunito',sans-serif; font-size:14px; font-weight:700; text-align:center; outline:none; }
+.wm-set-inp { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:7px 4px; color:var(--text); font-family:'Nunito',sans-serif; font-size:15px; font-weight:800; text-align:center; outline:none; box-sizing:border-box; }
 .wm-set-inp.weight { color:var(--accent3); }
-.wm-set-sep { font-size:12px; color:var(--muted); flex-shrink:0; }
-.wm-timer-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:300; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-.wm-timer-ring { width:180px; height:180px; position:relative; margin-bottom:24px; }
-.wm-timer-ring svg { transform:rotate(-90deg); }
-.wm-timer-ring .ring-bg { fill:none; stroke:var(--border); stroke-width:8; }
-.wm-timer-ring .ring-fill { fill:none; stroke:var(--accent2); stroke-width:8; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+.wm-set-inp.dim { opacity:0.45; }
+.wm-set-sep { font-size:11px; color:var(--muted); width:12px; }
+.wm-timer-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:300; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.wm-timer-ring { width:180px; height:180px; position:relative; margin-bottom:20px; }
 .wm-timer-num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:52px; letter-spacing:2px; color:var(--text); }
-.wm-timer-label { font-size:14px; color:var(--muted); font-weight:700; letter-spacing:1px; margin-bottom:8px; }
-.wm-timer-next { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--accent3); text-align:center; margin-bottom:32px; }
-.wm-footer { padding:12px 16px; background:var(--surface); border-top:1px solid var(--border); flex-shrink:0; display:flex; gap:8px; }
+.wm-footer { padding:10px 14px; background:var(--surface); border-top:1px solid var(--border); flex-shrink:0; display:flex; gap:8px; padding-bottom:max(env(safe-area-inset-bottom,0px),10px); }
 .wm-summary-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--surface); font-size:13px; }
 
 /* TEMPLATES */
@@ -622,10 +623,16 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 
     <!-- Quick actions -->
     <div class="quick-btns">
+      <div class="quick-btn" onclick="openQuickTrainModal()" style="border-color:var(--accent2);background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(255,62,98,0.08))">
+        <div class="ico">▶️</div>
+        <div class="lbl" style="color:var(--accent2)">Тренироваться</div>
+        <div class="sub">По шаблону</div>
+      </div>
+
       <div class="quick-btn" onclick="goTo('workouts'); showNewWorkout()">
         <div class="ico">💪</div>
         <div class="lbl">Тренировка</div>
-        <div class="sub">Записать</div>
+        <div class="sub">Записать вручную</div>
       </div>
 
       <div class="quick-btn" onclick="goTo('food')">
@@ -1557,6 +1564,46 @@ function launchWorkoutMode(tplId) {
   openModal('modal-wo-mode');
 }
 
+function openQuickTrainModal() {
+  if (!data.templates.length) {
+    toast('Нет шаблонов — создай шаблон в разделе Шаблоны');
+    setTimeout(() => goTo('templates'), 800);
+    return;
+  }
+  // Build a picker similar to tpl-picker-list
+  const existing = document.getElementById('modal-quick-train');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'modal-quick-train';
+  overlay.innerHTML = `
+    <div class="modal" style="max-height:80vh;overflow-y:auto">
+      <div class="modal-handle"></div>
+      <div class="modal-title">▶ ВЫБЕРИ ШАБЛОН</div>
+      <div style="margin-bottom:12px">
+        ${data.templates.map(t => `
+          <div class="tpl-card" style="margin-bottom:8px" onclick="closeQuickTrainModal();launchWorkoutMode(${t.id})">
+            <div class="tpl-card-head">
+              <div class="tpl-letter">${(t.name||'A')[0].toUpperCase()}</div>
+              <div>
+                <div class="tpl-name">${t.name}</div>
+                <div class="tpl-meta">${t.type||'Силовая'} · ${(t.exercises||[]).length} упр.</div>
+              </div>
+              <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent2);margin-left:auto">▶</div>
+            </div>
+          </div>`).join('')}
+      </div>
+      <button class="btn btn-secondary" onclick="closeQuickTrainModal()">Отмена</button>
+    </div>`;
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeQuickTrainModal(); });
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('open'));
+}
+function closeQuickTrainModal() {
+  const el = document.getElementById('modal-quick-train');
+  if (el) el.remove();
+}
+
 function selectWoMode(mode) {
   closeModal('modal-wo-mode');
   wm.mode = mode; // 'sequential' | 'circuit'
@@ -1640,76 +1687,88 @@ function renderWmStep() {
   // Build exercise UI
   const ex = wm.tpl.exercises[step.exIdx];
   const res = wm.results[step.exIdx];
-  const setCount = res.sets.length;
   const isLast = wm.stepIdx === wm.steps.length - 1;
   const nextStep = wm.steps[wm.stepIdx + 1];
   const nextLabel = nextStep
     ? nextStep.type === 'rest'
-      ? `Следующее: ОТДЫХ ${nextStep.restMin}:${String(nextStep.restSec).padStart(2,'0')}`
-      : `Следующее: ${wm.tpl.exercises[nextStep.exIdx].name} · подход ${nextStep.setIdx + 1}`
-    : 'Финальный шаг!';
+      ? `⏸ Отдых ${nextStep.restMin||0}м ${String(nextStep.restSec||0).padStart(2,'0')}с после этого подхода`
+      : `Далее: ${wm.tpl.exercises[nextStep.exIdx].name} · подход ${nextStep.setIdx + 1}`
+    : '🏁 Последний подход!';
 
-  const setsHTML = res.sets.map((s, si) => {
-    const isCurrentSet = si === step.setIdx;
-    const isDoneSet = si < step.setIdx;
-    return `<div class="wm-set-row" style="${isCurrentSet ? 'background:rgba(124,58,237,0.08);border-radius:8px;padding:8px;margin:0 -4px' : ''}">
-      <div class="wm-set-num">П${si+1}</div>
-      <div class="wm-set-done ${isDoneSet?'done':''}" onclick="toggleWmSetDone(${si})">${isDoneSet?'✓':''}</div>
-      <input class="wm-set-inp weight" type="number" placeholder="кг" value="${s.w}" step="0.5" min="0"
-        onchange="wm.results[${step.exIdx}].sets[${si}].w=this.value" style="${!isCurrentSet?'opacity:0.5':''}">
-      <span class="wm-set-sep">×</span>
-      <input class="wm-set-inp" type="number" placeholder="повт" value="${s.r}" min="0"
-        onchange="wm.results[${step.exIdx}].sets[${si}].r=this.value" style="${!isCurrentSet?'opacity:0.5':''}">
-    </div>`;
+  // Table-based sets — no horizontal overflow
+  const setsRows = res.sets.map((s, si) => {
+    const isCur  = si === step.setIdx;
+    const isDone = si < step.setIdx;
+    return `<tr class="${isCur ? 'wm-set-row-active' : ''}">
+      <td class="wm-set-num-cell">П${si+1}</td>
+      <td style="width:28px"><div class="wm-set-done ${isDone?'done':''}" onclick="wmToggleDone(${si})">${isDone?'✓':''}</div></td>
+      <td><input class="wm-set-inp weight ${!isCur?'dim':''}" type="number" inputmode="decimal"
+        placeholder="кг" value="${s.w}" step="0.5" min="0"
+        onchange="wm.results[${step.exIdx}].sets[${si}].w=this.value"></td>
+      <td class="wm-set-sep">×</td>
+      <td><input class="wm-set-inp ${!isCur?'dim':''}" type="number" inputmode="numeric"
+        placeholder="${ex.targetReps||'повт'}" value="${s.r}" min="0"
+        onchange="wm.results[${step.exIdx}].sets[${si}].r=this.value"></td>
+    </tr>`;
   }).join('');
 
   const restTotal = (ex.restMin||0)*60 + (ex.restSec||0);
+  const restLabel = restTotal ? `${ex.restMin||0}:${String(ex.restSec||0).padStart(2,'0')} отдых ›` : 'Далее ›';
 
   document.getElementById('wm-content').innerHTML = `
     <div class="wm-screen">
       <div class="wm-topbar">
-        <div>
+        <div class="wm-topbar-left">
           <div class="wm-topbar-title">${wm.tpl.name}</div>
-          <div style="font-size:11px;color:var(--muted)">${doneSets}/${total} подходов · ${formatElapsed()}</div>
+          <div class="wm-topbar-sub">
+            <span>${doneSets}/${total} подходов</span>
+            <span class="wm-elapsed" id="wm-elapsed-display">${formatElapsed()}</span>
+          </div>
         </div>
-        <button class="btn btn-secondary" style="font-size:11px;padding:6px 10px;color:var(--accent)" onclick="confirmAbortWm()">Завершить</button>
+        <button class="btn btn-secondary" style="font-size:11px;padding:7px 12px;color:var(--accent);flex-shrink:0" onclick="confirmAbortWm()">Завершить</button>
       </div>
       <div class="wm-progress-bar"><div class="wm-progress-fill" style="width:${pct}%"></div></div>
       <div class="wm-body">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Упражнение ${step.exIdx+1} из ${wm.tpl.exercises.length}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">
+          Упражнение <b style="color:var(--text)">${step.exIdx+1}</b> из ${wm.tpl.exercises.length}
+          · Подход <b style="color:var(--accent2)">${step.setIdx+1}</b> из ${res.sets.length}
+        </div>
         <div class="wm-ex-card">
           <div class="wm-ex-name">${ex.name}</div>
           <div class="wm-ex-meta">
-            ${ex.targetReps ? `Цель: ${ex.targetReps} повт · ` : ''}
-            ${restTotal ? `Отдых: ${ex.restMin||0}м ${ex.restSec||0}с` : 'Без отдыха'}
+            ${ex.targetReps ? `🎯 ${ex.targetReps} повт` : ''}${ex.targetReps && restTotal ? ' · ' : ''}${restTotal ? `⏱ ${ex.restMin||0}м ${ex.restSec||0}с отдых` : ''}
           </div>
-          <div style="font-size:12px;font-weight:800;color:var(--accent2);margin-bottom:10px">▶ Подход ${step.setIdx + 1}</div>
-          ${setsHTML}
+          <table class="wm-set-table">
+            <thead><tr>
+              <th></th><th></th>
+              <th>КГ</th><th></th><th>ПОВТ</th>
+            </tr></thead>
+            <tbody>${setsRows}</tbody>
+          </table>
         </div>
         <div style="background:var(--surface);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--muted)">
           ${nextLabel}
         </div>
       </div>
       <div class="wm-footer">
-        <button class="btn btn-secondary" style="flex:0 0 48px" onclick="wmStepBack()" ${wm.stepIdx===0?'disabled':''}>‹</button>
-        <button class="btn btn-primary" style="flex:1;font-size:15px" onclick="wmStepNext()">
-          ${isLast ? '🏁 Завершить' : restTotal ? `Далее · ${ex.restMin||0}:${String(ex.restSec||0).padStart(2,'0')} отдых ›` : 'Далее ›'}
+        <button class="btn btn-secondary" style="flex:0 0 50px;font-size:18px" onclick="wmStepBack()" ${wm.stepIdx===0?'disabled':''}>‹</button>
+        <button class="btn btn-primary" style="flex:1;font-size:15px;font-weight:800" onclick="wmStepNext()">
+          ${isLast ? '🏁 Завершить' : restTotal ? `Далее · ${restLabel}` : 'Далее ›'}
         </button>
       </div>
     </div>
   `;
-  // Start elapsed timer update
-  if (!wm._elapsedTimer) wm._elapsedTimer = setInterval(() => {
-    const el = document.querySelector('.wm-topbar .wm-topbar-title + div');
-    if (el) el.textContent = `${doneSets}/${total} подходов · ${formatElapsed()}`;
-  }, 10000);
+
+  // Live elapsed timer — tick every second
+  if (wm._elapsedTimer) clearInterval(wm._elapsedTimer);
+  wm._elapsedTimer = setInterval(() => {
+    const el = document.getElementById('wm-elapsed-display');
+    if (el) el.textContent = formatElapsed();
+  }, 1000);
 }
 
-function toggleWmSetDone(si) {
-  const step = wm.steps[wm.stepIdx];
-  // just visual feedback via re-render
-  renderWmStep();
-}
+function toggleWmSetDone(si) { renderWmStep(); }
+function wmToggleDone(si) { renderWmStep(); }
 
 function wmStepNext() {
   if (wm.stepIdx >= wm.steps.length - 1) {
@@ -1748,8 +1807,11 @@ function startRestTimer(step) {
     document.getElementById('wm-content').innerHTML = `
       <div class="wm-screen">
         <div class="wm-topbar">
-          <div class="wm-topbar-title">ОТДЫХ</div>
-          <div style="font-size:11px;color:var(--muted)">${formatElapsed()} прошло</div>
+          <div class="wm-topbar-left">
+            <div class="wm-topbar-title">ОТДЫХ</div>
+            <div class="wm-topbar-sub"><span class="wm-elapsed">${formatElapsed()}</span> прошло</div>
+          </div>
+          <button class="btn btn-secondary" style="font-size:11px;padding:7px 12px;color:var(--accent);flex-shrink:0" onclick="skipRestTimer()">Пропустить</button>
         </div>
         <div class="wm-timer-overlay" style="position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0">
           <div style="font-size:13px;color:var(--muted);font-weight:700;letter-spacing:1px;margin-bottom:16px">ОТДЫХ</div>
