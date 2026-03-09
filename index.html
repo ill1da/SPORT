@@ -283,16 +283,19 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .habit-icon { font-size: 22px; }
 .habit-title { font-size: 14px; font-weight: 800; flex: 1; }
 .habit-counter { font-family: 'Bebas Neue', sans-serif; font-size: 20px; }
-.habit-dots { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+.habit-dots { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .habit-dot {
-  aspect-ratio: 1; border-radius: 4px;
-  background: var(--surface); border: 1px solid var(--border);
-  cursor: pointer; transition: all 0.15s;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 9px; color: transparent;
+  border-radius: 7px; border: 1px solid var(--border);
+  background: var(--surface); cursor: pointer; transition: all 0.15s;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 4px 2px; min-height: 36px; gap: 1px;
 }
-.habit-dot.done { background: var(--success); border-color: var(--success); color: white; font-size: 10px; }
-.habit-dot:active { transform: scale(0.85); }
+.habit-dot .dot-num { font-size: 9px; font-weight: 800; color: var(--muted); line-height: 1; }
+.habit-dot .dot-check { font-size: 11px; line-height: 1; color: white; }
+.habit-dot.done { background: var(--success); border-color: var(--success); }
+.habit-dot.done .dot-num { color: rgba(255,255,255,0.65); }
+.habit-dot.future { opacity: 0.28; cursor: default; }
+.habit-dot:not(.future):active { transform: scale(0.88); }
 
 /* ═══════════════ CHALLENGE ═══════════════ */
 .challenge-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; margin-bottom: 10px; }
@@ -1847,7 +1850,9 @@ function renderHabits() {
 function renderHabitsMonth(year, month) {
   document.querySelectorAll('#habit-month-select .chip').forEach((c, i) => c.classList.toggle('active', i === month));
   const daysInMonth = new Date(year, month+1, 0).getDate();
-  const today = new Date().toISOString().split('T')[0];
+  const todayDate = new Date();
+  const isCurrentMonth = (year === todayDate.getFullYear() && month === todayDate.getMonth());
+  const todayDay = todayDate.getDate();
 
   const list = document.getElementById('habits-list');
   if (data.habits.length === 0) {
@@ -1857,21 +1862,25 @@ function renderHabitsMonth(year, month) {
       const key = `${year}-${month}`;
       if (!h.days[key]) h.days[key] = {};
       const doneCount = Object.values(h.days[key]).filter(Boolean).length;
-      const dots = Array.from({length:30}, (_, i) => {
+      const dots = Array.from({length: daysInMonth}, (_, i) => {
         const d = i + 1;
-        const done = h.days[key][d];
-        return `<div class="habit-dot ${done ? 'done' : ''}" onclick="toggleHabit(${h.id}, ${d}, '${key}', this)">✓</div>`;
+        const done = !!h.days[key][d];
+        const isFuture = isCurrentMonth && d > todayDay;
+        let cls = done ? 'done' : (isFuture ? 'future' : '');
+        return `<div class="habit-dot ${cls}" onclick="toggleHabit(${h.id}, ${d}, '${key}', this)" data-day="${d}">
+          <span class="dot-num">${d}</span>${done ? '<span class="dot-check">✓</span>' : ''}
+        </div>`;
       }).join('');
       return `
         <div class="habit-row">
           <div class="habit-header">
             <div class="habit-icon">${h.icon}</div>
             <div class="habit-title">${h.name}</div>
-            <div class="habit-counter" style="color:${doneCount>=21?'var(--success)':'var(--accent)'}">${doneCount}/30</div>
+            <div class="habit-counter" id="hc-${h.id}-${year}-${month}" style="color:${doneCount>=21?'var(--success)':'var(--accent)'}">${doneCount}/${daysInMonth}</div>
             <button onclick="deleteHabit(${h.id})" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer">🗑</button>
           </div>
-          <div class="habit-dots">${dots}</div>
-          <div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:${doneCount/30*100}%"></div></div>
+          <div class="habit-dots" id="hd-${h.id}-${year}-${month}">${dots}</div>
+          <div class="progress-bar" style="margin-top:8px"><div class="progress-fill" id="hp-${h.id}-${year}-${month}" style="width:${doneCount/daysInMonth*100}%"></div></div>
           ${doneCount >= 21 ? '<div style="text-align:center;font-size:12px;color:var(--success);margin-top:4px;font-weight:700">🎉 Привычка сформирована!</div>' : ''}
         </div>
       `;
@@ -1885,13 +1894,25 @@ function toggleHabit(id, day, key, el) {
   const habit = data.habits.find(h => h.id === id);
   if (!habit) return;
   if (!habit.days[key]) habit.days[key] = {};
-  habit.days[key][day] = !habit.days[key][day];
-  el.classList.toggle('done', habit.days[key][day]);
+  const nowDone = !habit.days[key][day];
+  habit.days[key][day] = nowDone;
   save();
-  // Update counter
+
+  // Update cell appearance
+  el.classList.toggle('done', nowDone);
+  el.innerHTML = `<span class="dot-num">${day}</span>${nowDone ? '<span class="dot-check">✓</span>' : ''}`;
+
+  // Update counter + progress bar using stable IDs
+  const [, yearStr, monthStr] = key.match(/^(\d+)-(\d+)$/) || [];
+  const daysInMonth = new Date(+yearStr, +monthStr+1, 0).getDate();
   const doneCount = Object.values(habit.days[key]).filter(Boolean).length;
-  el.closest('.habit-row').querySelector('.habit-counter').textContent = doneCount + '/30';
-  el.closest('.habit-row').querySelector('.progress-fill').style.width = (doneCount/30*100) + '%';
+  const counterEl = document.getElementById(`hc-${id}-${key}`);
+  const progressEl = document.getElementById(`hp-${id}-${key}`);
+  if (counterEl) {
+    counterEl.textContent = `${doneCount}/${daysInMonth}`;
+    counterEl.style.color = doneCount >= 21 ? 'var(--success)' : 'var(--accent)';
+  }
+  if (progressEl) progressEl.style.width = (doneCount / daysInMonth * 100) + '%';
 }
 
 function deleteHabit(id) {
@@ -1942,12 +1963,12 @@ function renderChallenges() {
             ${c.start ? `<div style="font-size:11px;color:var(--muted)">${formatDate(c.start)} → ${formatDate(c.end)||'...'}</div>` : ''}
           </div>
           <div style="text-align:right">
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent)">${doneCount}<span style="font-size:16px;color:var(--muted)">/30</span></div>
+            <div id="ch-counter-${c.id}" style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent)">${doneCount}<span style="font-size:16px;color:var(--muted)">/30</span></div>
             <button onclick="deleteChallenge(${c.id})" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer">🗑 Удалить</button>
           </div>
         </div>
         <div class="challenge-days">${days}</div>
-        <div class="progress-bar" style="margin-top:8px"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="progress-bar" style="margin-top:8px"><div class="progress-fill" id="ch-progress-${c.id}" style="width:${pct}%"></div></div>
         ${c.firstResult ? `<div style="font-size:12px;color:var(--muted);margin-top:4px">Старт: <b style="color:var(--text)">${c.firstResult}</b></div>` : ''}
       </div>
     `;
@@ -1960,8 +1981,12 @@ function toggleChallenge(id, day, el) {
   ch.days[day] = !ch.days[day];
   el.classList.toggle('done', ch.days[day]);
   save();
-  const done = Object.values(ch.days).filter(Boolean).length;
-  el.closest('[style]').querySelector('.progress-fill').style.width = (done/30*100) + '%';
+  // Update counter and progress bar using stable IDs
+  const doneCount = Object.values(ch.days).filter(Boolean).length;
+  const counterEl = document.getElementById(`ch-counter-${id}`);
+  const progressEl = document.getElementById(`ch-progress-${id}`);
+  if (counterEl) counterEl.innerHTML = `${doneCount}<span style="font-size:16px;color:var(--muted)">/30</span>`;
+  if (progressEl) progressEl.style.width = (doneCount / 30 * 100) + '%';
 }
 
 function deleteChallenge(id) {
