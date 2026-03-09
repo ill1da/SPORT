@@ -190,15 +190,17 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .sets-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 .set-cell {
   background: var(--card); border-radius: 8px; border: 1px solid var(--border);
-  padding: 6px 4px; text-align: center;
+  padding: 5px 3px; text-align: center;
 }
-.set-label { font-size: 9px; color: var(--muted); font-weight: 700; margin-bottom: 3px; }
+.set-label { font-size: 9px; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
 .set-input {
   width: 100%; background: transparent; border: none;
   color: var(--text); font-family: 'Nunito', sans-serif;
   font-size: 12px; font-weight: 700; outline: none; text-align: center;
 }
 .set-input::placeholder { color: var(--border); }
+.set-divider { height: 1px; background: var(--border); margin: 2px 4px; }
+.set-sublabel { font-size: 8px; color: var(--border); font-weight: 600; }
 
 .muscles-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .muscle-chip {
@@ -983,26 +985,27 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
     <!-- Daily log entry (one record per day) -->
     <div class="card">
       <div class="card-title"><span></span> ЗАПИСАТЬ ДЕНЬ</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Подсказки = твои цели. Оставь пустым если не менялось.</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="field">
           <label style="color:#f59e0b">🔥 Калории</label>
-          <input type="number" id="food-cals" placeholder="2000" min="0">
+          <input type="number" id="food-cals" min="0">
         </div>
         <div class="field">
           <label style="color:#06b6d4">💧 Вода (л)</label>
-          <input type="number" id="food-water" placeholder="2.0" min="0" step="0.1">
+          <input type="number" id="food-water" min="0" step="0.1">
         </div>
         <div class="field">
           <label style="color:#60a5fa">💪 Белки (г)</label>
-          <input type="number" id="food-prot" placeholder="120" min="0">
+          <input type="number" id="food-prot" min="0">
         </div>
         <div class="field">
           <label style="color:#f87171">🍞 Углеводы (г)</label>
-          <input type="number" id="food-carbs" placeholder="200" min="0">
+          <input type="number" id="food-carbs" min="0">
         </div>
         <div class="field" style="grid-column:1/-1">
           <label style="color:#34d399">🥑 Жиры (г)</label>
-          <input type="number" id="food-fat" placeholder="60" min="0">
+          <input type="number" id="food-fat" min="0">
         </div>
       </div>
       <div class="field">
@@ -1019,7 +1022,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <span id="goals-toggle-icon" style="margin-left:auto;color:var(--muted);font-size:13px">▼</span>
       </div>
       <div id="goals-section" style="display:none">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Введи свои дневные нормы — приложение будет показывать % выполнения</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Введи свои нормы — они появятся как подсказки в форме записи дня, чтобы не запутаться в цифрах</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
           <div class="field">
             <label style="color:#f59e0b">🔥 Ккал/день</label>
@@ -1274,20 +1277,25 @@ function hideNewWorkout() {
 
 function addExercise() {
   exerciseCount++;
+  const n = exerciseCount;
   const div = document.createElement('div');
   div.className = 'exercise-row';
-  div.id = 'ex-' + exerciseCount;
+  div.id = 'ex-' + n;
   div.innerHTML = `
     <div class="ex-head">
-      <div class="ex-num">${exerciseCount}</div>
-      <input class="ex-name-input" placeholder="Название упражнения" id="ex-name-${exerciseCount}">
-      <button class="btn-icon" onclick="removeExercise(${exerciseCount})" style="color:var(--accent)">✕</button>
+      <div class="ex-num">${n}</div>
+      <input class="ex-name-input" placeholder="Название упражнения" id="ex-name-${n}">
+      <button class="btn-icon" onclick="removeExercise(${n})" style="color:var(--accent)">✕</button>
     </div>
     <div class="sets-grid">
       ${[1,2,3,4,5].map(s => `
         <div class="set-cell">
           <div class="set-label">П${s}</div>
-          <input class="set-input" placeholder="—" id="ex${exerciseCount}-s${s}">
+          <div class="set-sublabel">кг</div>
+          <input class="set-input" placeholder="—" id="ex${n}-w${s}" type="number" min="0" step="0.5" style="color:var(--accent3)">
+          <div class="set-divider"></div>
+          <div class="set-sublabel">повт</div>
+          <input class="set-input" placeholder="—" id="ex${n}-r${s}" type="number" min="0" step="1">
         </div>
       `).join('')}
     </div>
@@ -1327,9 +1335,17 @@ function saveWorkout() {
     const name = nameEl.value.trim();
     if (!name) continue;
     const sets = [1,2,3,4,5].map(s => {
-      const el = document.getElementById(`ex${i}-s${s}`);
-      return el ? el.value.trim() : '';
-    });
+      const wEl = document.getElementById(`ex${i}-w${s}`);
+      const rEl = document.getElementById(`ex${i}-r${s}`);
+      // fallback to old single-field format
+      const legEl = document.getElementById(`ex${i}-s${s}`);
+      if (wEl || rEl) {
+        const w = wEl ? wEl.value.trim() : '';
+        const r = rEl ? rEl.value.trim() : '';
+        return (w || r) ? { w, r } : null;
+      }
+      return legEl ? legEl.value.trim() : null;
+    }).filter(x => x !== null && x !== '');
     exercises.push({ name, sets });
   }
 
@@ -1384,7 +1400,15 @@ function renderWorkoutsHistory() {
   const sorted = [...data.workouts].sort((a,b) => b.date.localeCompare(a.date));
   list.innerHTML = sorted.map(w => {
     const exRows = (w.exercises||[]).map(e => {
-      const setsStr = e.sets.filter(s=>s).join(' | ');
+      const setsStr = e.sets.filter(s=>s).map(s => {
+        if (typeof s === 'object') {
+          if (s.w && s.r) return `${s.w}кг×${s.r}`;
+          if (s.w) return `${s.w}кг`;
+          if (s.r) return `×${s.r}`;
+          return '—';
+        }
+        return s;
+      }).join(' · ');
       return `<div class="ex-detail-row"><span class="ex-detail-name">${e.name}</span><span class="ex-detail-sets">${setsStr||'—'}</span></div>`;
     }).join('');
     const cardioStr = w.cardio && (w.cardio.time||w.cardio.dist) ?
@@ -1490,11 +1514,19 @@ function addEditExercise(ex) {
       <button class="btn-icon" onclick="document.getElementById('edit-ex-${n}').remove()" style="color:var(--accent)">✕</button>
     </div>
     <div class="sets-grid">
-      ${[1,2,3,4,5].map(s => `
-        <div class="set-cell">
+      ${[1,2,3,4,5].map(s => {
+        const setVal = ex?.sets?.[s-1];
+        const wVal = (setVal && typeof setVal === 'object') ? (setVal.w||'') : '';
+        const rVal = (setVal && typeof setVal === 'object') ? (setVal.r||'') : (setVal||'');
+        return `<div class="set-cell">
           <div class="set-label">П${s}</div>
-          <input class="set-input" placeholder="—" id="edit-ex${n}-s${s}" value="${ex?.sets?.[s-1]||''}">
-        </div>`).join('')}
+          <div class="set-sublabel">кг</div>
+          <input class="set-input" placeholder="—" id="edit-ex${n}-w${s}" type="number" min="0" step="0.5" value="${wVal}" style="color:var(--accent3)">
+          <div class="set-divider"></div>
+          <div class="set-sublabel">повт</div>
+          <input class="set-input" placeholder="—" id="edit-ex${n}-r${s}" type="number" min="0" step="1" value="${rVal}">
+        </div>`;
+      }).join('')}
     </div>
   `;
   document.getElementById('edit-exercises-list').appendChild(div);
@@ -1516,7 +1548,17 @@ function saveEditedWorkout() {
     if (!nameEl) continue;
     const name = nameEl.value.trim();
     if (!name) continue;
-    const sets = [1,2,3,4,5].map(s => { const el = document.getElementById(`edit-ex${i}-s${s}`); return el ? el.value.trim() : ''; });
+    const sets = [1,2,3,4,5].map(s => {
+      const wEl = document.getElementById(`edit-ex${i}-w${s}`);
+      const rEl = document.getElementById(`edit-ex${i}-r${s}`);
+      const legEl = document.getElementById(`edit-ex${i}-s${s}`);
+      if (wEl || rEl) {
+        const w = wEl ? wEl.value.trim() : '';
+        const r = rEl ? rEl.value.trim() : '';
+        return (w || r) ? { w, r } : null;
+      }
+      return legEl ? legEl.value.trim() : null;
+    }).filter(x => x !== null && x !== '');
     exercises.push({ name, sets });
   }
 
@@ -2254,10 +2296,26 @@ function saveGoals() {
   };
   save();
   renderFood();
+  updateFoodPlaceholders();
   // close section
   document.getElementById('goals-section').style.display='none';
   document.getElementById('goals-toggle-icon').textContent='▼';
   toast('🎯 Цели сохранены!');
+}
+
+function updateFoodPlaceholders() {
+  const g = data.foodGoals || {};
+  const map = {
+    'food-cals':  g.cals  ? `цель: ${g.cals} ккал`  : 'введи ккал',
+    'food-water': g.water ? `цель: ${g.water} л`     : 'введи воду',
+    'food-prot':  g.prot  ? `цель: ${g.prot} г`      : 'введи белки',
+    'food-carbs': g.carbs ? `цель: ${g.carbs} г`     : 'введи углеводы',
+    'food-fat':   g.fat   ? `цель: ${g.fat} г`       : 'введи жиры',
+  };
+  Object.entries(map).forEach(([id, ph]) => {
+    const el = document.getElementById(id);
+    if (el) el.placeholder = ph;
+  });
 }
 
 function saveDayFood() {
@@ -2276,6 +2334,7 @@ function saveDayFood() {
 }
 
 function renderFood() {
+  updateFoodPlaceholders();
   const today = new Date().toISOString().split('T')[0];
   const d = foodCurrentDate;
   const lbl = document.getElementById('food-date-lbl');
