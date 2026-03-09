@@ -295,6 +295,26 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .habit-dot.done { background: var(--success); border-color: var(--success); }
 .habit-dot.done .dot-num { color: rgba(255,255,255,0.65); }
 .habit-dot.future { opacity: 0.28; cursor: default; }
+.habit-dot.miss { background: rgba(255,62,98,0.18); border-color: var(--accent); cursor: default; }
+.habit-dot.miss .dot-num { color: var(--accent); }
+.dot-miss { font-size: 11px; line-height: 1; color: var(--accent); }
+.habit-dot.today-dot { border-color: var(--accent3); border-width: 2px; cursor: pointer; }
+.habit-dot.today-dot .dot-num { color: var(--accent3); }
+
+/* Toggle switch */
+.toggle-switch { position: relative; display: inline-block; width: 46px; height: 26px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute; inset: 0; border-radius: 26px;
+  background: var(--border); cursor: pointer; transition: .25s;
+}
+.toggle-slider:before {
+  content: ''; position: absolute;
+  width: 20px; height: 20px; left: 3px; bottom: 3px;
+  background: white; border-radius: 50%; transition: .25s;
+}
+.toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+.toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
 .habit-dot:not(.future):active { transform: scale(0.88); }
 
 /* ═══════════════ CHALLENGE ═══════════════ */
@@ -887,8 +907,39 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <div class="chip" onclick="selectHabitIcon(this)" data-icon="🎯">🎯</div>
       </div>
     </div>
-    <div class="field"><label>Дата начала</label><input type="date" id="hab-start"></div>
-    <button class="btn btn-primary" onclick="saveHabit()">💾 Добавить привычку</button>
+
+    <!-- Mode toggle -->
+    <div class="field" style="margin-top:4px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-weight:800;font-size:13px">📅 Отслеживать по дням</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Авто-считает пропуски, отсчёт с сегодня</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="hab-track-days" onchange="onHabitModeChange()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Mode A: simple (no tracking) -->
+    <div id="hab-mode-simple">
+      <div class="field">
+        <label>Количество дней цели</label>
+        <input type="number" id="hab-goal-days" value="30" min="1" max="365" placeholder="30">
+      </div>
+    </div>
+
+    <!-- Mode B: day tracking — no extra settings needed -->
+    <div id="hab-mode-tracked" style="display:none">
+      <div style="background:var(--surface);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--muted);line-height:1.5">
+        ✅ Отсчёт начнётся с <b style="color:var(--text)">сегодня</b> (день 1)<br>
+        ❌ Пропущенные дни будут помечены красным автоматически<br>
+        📊 Прогресс = 30 дней подряд
+      </div>
+    </div>
+
+    <button class="btn btn-primary" style="margin-top:12px" onclick="saveHabit()">💾 Добавить привычку</button>
   </div>
 </div>
 
@@ -1818,21 +1869,35 @@ function selectHabitIcon(el) {
   selectedHabitIcon = el.dataset.icon;
 }
 
+function onHabitModeChange() {
+  const tracked = document.getElementById('hab-track-days').checked;
+  document.getElementById('hab-mode-simple').style.display  = tracked ? 'none'  : 'block';
+  document.getElementById('hab-mode-tracked').style.display = tracked ? 'block' : 'none';
+}
+
 function saveHabit() {
   const name = document.getElementById('hab-name').value.trim();
-  if (!name) return;
+  if (!name) { toast('Введи название привычки'); return; }
+  const tracked = document.getElementById('hab-track-days').checked;
+  const goalDays = tracked ? 30 : (parseInt(document.getElementById('hab-goal-days').value) || 30);
+  const today = new Date().toISOString().split('T')[0];
   data.habits.push({
     id: Date.now(),
     name,
     icon: selectedHabitIcon,
-    start: document.getElementById('hab-start').value,
-    days: {},
+    tracked,          // true = day-by-day mode with auto-fail
+    goalDays,         // target number of days
+    startDate: today, // always starts today
+    days: {},         // for simple: { 'YYYY-M': { 1: true, ... } }  for tracked: { 'YYYY-MM-DD': 'done'|'miss' }
   });
   save();
   closeModal('modal-add-habit');
   renderHabits();
   toast('✅ Привычка добавлена!');
   document.getElementById('hab-name').value = '';
+  document.getElementById('hab-track-days').checked = false;
+  document.getElementById('hab-goal-days').value = '30';
+  onHabitModeChange();
 }
 
 function renderHabits() {
@@ -1849,70 +1914,177 @@ function renderHabits() {
 
 function renderHabitsMonth(year, month) {
   document.querySelectorAll('#habit-month-select .chip').forEach((c, i) => c.classList.toggle('active', i === month));
-  const daysInMonth = new Date(year, month+1, 0).getDate();
-  const todayDate = new Date();
-  const isCurrentMonth = (year === todayDate.getFullYear() && month === todayDate.getMonth());
-  const todayDay = todayDate.getDate();
 
   const list = document.getElementById('habits-list');
   if (data.habits.length === 0) {
     list.innerHTML = '<div class="card" style="text-align:center;color:var(--muted);font-size:13px;padding:20px;">Нажми ➕ чтобы добавить привычку</div>';
-  } else {
-    list.innerHTML = data.habits.map(h => {
-      const key = `${year}-${month}`;
-      if (!h.days[key]) h.days[key] = {};
-      const doneCount = Object.values(h.days[key]).filter(Boolean).length;
-      const dots = Array.from({length: daysInMonth}, (_, i) => {
-        const d = i + 1;
-        const done = !!h.days[key][d];
-        const isFuture = isCurrentMonth && d > todayDay;
-        let cls = done ? 'done' : (isFuture ? 'future' : '');
-        return `<div class="habit-dot ${cls}" onclick="toggleHabit(${h.id}, ${d}, '${key}', this)" data-day="${d}">
-          <span class="dot-num">${d}</span>${done ? '<span class="dot-check">✓</span>' : ''}
-        </div>`;
-      }).join('');
-      return `
-        <div class="habit-row">
-          <div class="habit-header">
-            <div class="habit-icon">${h.icon}</div>
-            <div class="habit-title">${h.name}</div>
-            <div class="habit-counter" id="hc-${h.id}-${year}-${month}" style="color:${doneCount>=21?'var(--success)':'var(--accent)'}">${doneCount}/${daysInMonth}</div>
-            <button onclick="deleteHabit(${h.id})" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer">🗑</button>
-          </div>
-          <div class="habit-dots" id="hd-${h.id}-${year}-${month}">${dots}</div>
-          <div class="progress-bar" style="margin-top:8px"><div class="progress-fill" id="hp-${h.id}-${year}-${month}" style="width:${doneCount/daysInMonth*100}%"></div></div>
-          ${doneCount >= 21 ? '<div style="text-align:center;font-size:12px;color:var(--success);margin-top:4px;font-weight:700">🎉 Привычка сформирована!</div>' : ''}
-        </div>
-      `;
-    }).join('');
+    renderChallenges(); return;
   }
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  list.innerHTML = data.habits.map(h => {
+    // ─── MODE B: tracked (day-by-day with auto-fail) ───────────────
+    if (h.tracked) {
+      return renderTrackedHabit(h, todayStr);
+    }
+    // ─── MODE A: simple (user-controlled grid) ─────────────────────
+    return renderSimpleHabit(h, year, month);
+  }).join('');
 
   renderChallenges();
 }
 
-function toggleHabit(id, day, key, el) {
+// ── MODE A: simple ─────────────────────────────────────────────────
+function renderSimpleHabit(h, year, month) {
+  const goal = h.goalDays || 30;
+  const key  = `${year}-${month}`;
+  if (!h.days) h.days = {};
+  if (!h.days[key]) h.days[key] = {};
+  const doneCount = Object.values(h.days[key]).filter(v => v === true || v === 'done').length;
+  const pct = Math.round(doneCount / goal * 100);
+
+  const dots = Array.from({length: goal}, (_, i) => {
+    const d = i + 1;
+    const done = !!(h.days[key][d]);
+    return `<div class="habit-dot ${done ? 'done' : ''}" onclick="toggleHabitSimple(${h.id}, ${d}, '${key}', this)">
+      <span class="dot-num">${d}</span>${done ? '<span class="dot-check">✓</span>' : ''}
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="habit-row">
+      <div class="habit-header">
+        <div class="habit-icon">${h.icon}</div>
+        <div style="flex:1">
+          <div class="habit-title">${h.name}</div>
+          <div style="font-size:10px;color:var(--muted)">Свободный режим · ${goal} дней</div>
+        </div>
+        <div class="habit-counter" id="hc-${h.id}-${key}" style="color:${doneCount>=goal?'var(--success)':'var(--accent)'}">${doneCount}/${goal}</div>
+        <button onclick="deleteHabit(${h.id})" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer">🗑</button>
+      </div>
+      <div class="habit-dots" id="hd-${h.id}-${key}">${dots}</div>
+      <div class="progress-bar" style="margin-top:8px"><div class="progress-fill" id="hp-${h.id}-${key}" style="width:${pct}%"></div></div>
+      ${doneCount >= goal ? '<div style="text-align:center;font-size:12px;color:var(--success);margin-top:4px;font-weight:700">🎉 Цель достигнута!</div>' : ''}
+    </div>`;
+}
+
+// ── MODE B: tracked ────────────────────────────────────────────────
+function renderTrackedHabit(h, todayStr) {
+  const start  = h.startDate || todayStr;
+  const goal   = h.goalDays || 30;
+  const days   = h.trackedDays || {};  // { 'YYYY-MM-DD': 'done'|'miss' }
+
+  // Build list of days from start up to today
+  const startMs = new Date(start).getTime();
+  const todayMs = new Date(todayStr).getTime();
+  const dayMs   = 86400000;
+  const totalElapsed = Math.floor((todayMs - startMs) / dayMs) + 1;
+  const totalDays    = Math.min(Math.max(totalElapsed, 1), goal);
+
+  // Auto-fill missed days (days before today with no record → miss)
+  for (let i = 0; i < totalDays; i++) {
+    const d = new Date(startMs + i * dayMs).toISOString().split('T')[0];
+    if (d < todayStr && !days[d]) {
+      days[d] = 'miss';
+    }
+  }
+  h.trackedDays = days;
+
+  const doneCount = Object.values(days).filter(v => v === 'done').length;
+  const pct = Math.round(doneCount / goal * 100);
+
+  const todayRecord = days[todayStr];
+  const todayDayNum = totalDays; // which day number is today
+
+  // Grid cells: one per elapsed day
+  const dots = Array.from({length: totalDays}, (_, i) => {
+    const dateStr = new Date(startMs + i * dayMs).toISOString().split('T')[0];
+    const rec     = days[dateStr];
+    const dayNum  = i + 1;
+    const isToday = dateStr === todayStr;
+    let cls = '', content = '';
+    if (rec === 'done') {
+      cls = 'done';
+      content = `<span class="dot-num">${dayNum}</span><span class="dot-check">✓</span>`;
+    } else if (rec === 'miss') {
+      cls = 'miss';
+      content = `<span class="dot-num">${dayNum}</span><span class="dot-miss">✕</span>`;
+    } else {
+      cls = isToday ? 'today-dot' : 'future';
+      content = `<span class="dot-num">${dayNum}</span>`;
+    }
+    const clickable = (isToday && rec !== 'done') || false;
+    return `<div class="habit-dot ${cls}" ${isToday && rec !== 'done' ? `onclick="toggleHabitTracked(${h.id}, '${dateStr}', this)"` : ''} title="${dateStr}">
+      ${content}
+    </div>`;
+  }).join('');
+
+  // Remaining days (future, unshown)
+  const remaining = goal - totalDays;
+  const futureDots = remaining > 0
+    ? `<div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center">+ ещё ${remaining} ${remaining===1?'день':remaining<5?'дня':'дней'}</div>`
+    : '';
+
+  const streakDays = (() => {
+    let s = 0;
+    for (let i = totalDays - 1; i >= 0; i--) {
+      const d = new Date(startMs + i * dayMs).toISOString().split('T')[0];
+      if (days[d] === 'done') s++;
+      else break;
+    }
+    return s;
+  })();
+
+  return `
+    <div class="habit-row">
+      <div class="habit-header">
+        <div class="habit-icon">${h.icon}</div>
+        <div style="flex:1">
+          <div class="habit-title">${h.name}</div>
+          <div style="font-size:10px;color:var(--muted)">📅 По дням · день ${todayDayNum}/${goal}${streakDays>1?' · 🔥 '+streakDays+' подряд':''}</div>
+        </div>
+        <div class="habit-counter" id="hct-${h.id}" style="color:${doneCount>=goal?'var(--success)':doneCount>0?'var(--accent)':'var(--muted)'}">${doneCount}/${goal}</div>
+        <button onclick="deleteHabit(${h.id})" style="background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer">🗑</button>
+      </div>
+      <div class="habit-dots" id="hdt-${h.id}">${dots}${futureDots}</div>
+      <div class="progress-bar" style="margin-top:8px"><div class="progress-fill" id="hpt-${h.id}" style="width:${pct}%"></div></div>
+      ${!todayRecord ? `<button class="btn btn-primary" style="margin-top:8px;padding:10px" onclick="toggleHabitTracked(${h.id}, '${todayStr}', null)">✅ Отметить сегодня (день ${todayDayNum})</button>` : ''}
+      ${doneCount >= goal ? '<div style="text-align:center;font-size:12px;color:var(--success);margin-top:4px;font-weight:700">🎉 30 дней выполнено! Привычка сформирована!</div>' : ''}
+    </div>`;
+}
+
+function toggleHabitSimple(id, day, key, el) {
   const habit = data.habits.find(h => h.id === id);
   if (!habit) return;
   if (!habit.days[key]) habit.days[key] = {};
   const nowDone = !habit.days[key][day];
   habit.days[key][day] = nowDone;
   save();
-
-  // Update cell appearance
   el.classList.toggle('done', nowDone);
   el.innerHTML = `<span class="dot-num">${day}</span>${nowDone ? '<span class="dot-check">✓</span>' : ''}`;
-
-  // Update counter + progress bar using stable IDs
-  const [, yearStr, monthStr] = key.match(/^(\d+)-(\d+)$/) || [];
-  const daysInMonth = new Date(+yearStr, +monthStr+1, 0).getDate();
+  const goal = habit.goalDays || 30;
   const doneCount = Object.values(habit.days[key]).filter(Boolean).length;
-  const counterEl = document.getElementById(`hc-${id}-${key}`);
+  const counterEl  = document.getElementById(`hc-${id}-${key}`);
   const progressEl = document.getElementById(`hp-${id}-${key}`);
-  if (counterEl) {
-    counterEl.textContent = `${doneCount}/${daysInMonth}`;
-    counterEl.style.color = doneCount >= 21 ? 'var(--success)' : 'var(--accent)';
-  }
-  if (progressEl) progressEl.style.width = (doneCount / daysInMonth * 100) + '%';
+  if (counterEl)  { counterEl.textContent = `${doneCount}/${goal}`; counterEl.style.color = doneCount>=goal?'var(--success)':'var(--accent)'; }
+  if (progressEl) progressEl.style.width = (doneCount/goal*100) + '%';
+}
+
+function toggleHabitTracked(id, dateStr, el) {
+  const habit = data.habits.find(h => h.id === id);
+  if (!habit) return;
+  if (!habit.trackedDays) habit.trackedDays = {};
+  habit.trackedDays[dateStr] = 'done';
+  save();
+  // Full re-render for tracked habits (simpler, avoids edge cases)
+  renderHabits();
+  toast('✅ День засчитан!');
+}
+
+function toggleHabit(id, day, key, el) {
+  // Legacy wrapper for old data
+  toggleHabitSimple(id, day, key, el);
 }
 
 function deleteHabit(id) {
@@ -1920,6 +2092,8 @@ function deleteHabit(id) {
   data.habits = data.habits.filter(h => h.id !== id);
   save(); renderHabits(); toast('🗑 Удалено');
 }
+
+// ═══════════════ CHALLENGES
 
 // ═══════════════ CHALLENGES ═══════════════
 function saveChallenge() {
