@@ -232,6 +232,33 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 }
 .tpl-selected-info { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
+/* drag-reorder */
+.ex-drag-handle {
+  display:flex; align-items:center; justify-content:center;
+  width:28px; height:28px; color:var(--muted); font-size:18px;
+  cursor:grab; flex-shrink:0; touch-action:none; user-select:none;
+}
+.ex-drag-handle:active { cursor:grabbing; }
+.exercise-row.dragging { opacity:0.4; border:2px dashed var(--accent2); }
+.exercise-row.drag-over { border-top:3px solid var(--accent2); }
+
+/* exercise done state */
+.ex-done-check {
+  width:26px; height:26px; border-radius:7px; border:2px solid var(--border);
+  background:transparent; cursor:pointer; display:flex; align-items:center;
+  justify-content:center; font-size:14px; transition:all 0.2s; flex-shrink:0;
+}
+.ex-done-check.done { background:var(--success); border-color:var(--success); }
+.exercise-row.completed { opacity:0.6; }
+.exercise-row.completed .ex-name-input,
+.exercise-row.completed .wm-ex-name { text-decoration:line-through; color:var(--muted); }
+.exercise-row.completed .sets-grid { pointer-events:none; }
+.ex-completed-badge {
+  display:none; font-size:11px; font-weight:800; color:var(--success);
+  margin-left:4px; letter-spacing:0.5px;
+}
+.exercise-row.completed .ex-completed-badge { display:inline; }
+
 .exercise-row {
   background: var(--surface);
   border-radius: 12px;
@@ -2256,8 +2283,10 @@ function addTplExercise(ex) {
   const restM = ex?.restMin ?? '';
   const restS = ex?.restSec ?? '';
   const targetReps = ex?.targetReps ?? '';
+  div.draggable = true;
   div.innerHTML = `
     <div class="ex-head">
+      <div class="ex-drag-handle" title="Перетащить">⠿</div>
       <div class="ex-num">${n}</div>
       <input class="ex-name-input" placeholder="Название упражнения" id="tpl-ex-name-${n}" value="${ex?.name||''}">
       <button class="btn-icon" onclick="document.getElementById('tpl-ex-${n}').remove()" style="color:var(--accent)">✕</button>
@@ -2293,6 +2322,7 @@ function addTplExercise(ex) {
     </div>
   `;
   document.getElementById('tpl-exercises-list').appendChild(div);
+  initDragRow(div, 'tpl-exercises-list');
   if (!ex) div.querySelector('.ex-name-input').focus();
 }
 
@@ -2395,12 +2425,12 @@ function selectTemplate(id) {
         </div>
       `;
       document.getElementById('exercises-list').appendChild(div);
+      initDragRow(div, 'exercises-list');
     });
   } else {
     addExercise();
   }
   // Update banner
-  document.getElementById('tpl-none-banner').style.display = 'none';
   document.getElementById('tpl-selected-banner').style.display = 'flex';
   document.getElementById('tpl-banner-name').textContent = t.name;
   document.getElementById('tpl-banner-info').textContent = `${t.type||'Силовая'} · ${t.exercises?.length||0} упр. · редактируй веса и жми «Сохранить»`;
@@ -2462,16 +2492,103 @@ function hideNewWorkout() {
   document.getElementById('workouts-history').style.display = 'block';
 }
 
+// ═══════════════ DRAG REORDER ═══════════════
+let _dragSrc = null;
+
+function initDragRow(el, listId) {
+  el.addEventListener('dragstart', e => {
+    _dragSrc = el;
+    el.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  el.addEventListener('dragend', () => {
+    el.classList.remove('dragging');
+    document.querySelectorAll(`#${listId} .exercise-row`).forEach(r => r.classList.remove('drag-over'));
+    _dragSrc = null;
+    renumberExercises(listId);
+  });
+  el.addEventListener('dragover', e => {
+    e.preventDefault();
+    if (!_dragSrc || _dragSrc === el) return;
+    const list = document.getElementById(listId);
+    const rows = [...list.querySelectorAll('.exercise-row:not(.dragging)')];
+    const after = rows.find(r => {
+      const rect = r.getBoundingClientRect();
+      return e.clientY < rect.top + rect.height / 2;
+    });
+    rows.forEach(r => r.classList.remove('drag-over'));
+    el.classList.add('drag-over');
+    if (after) list.insertBefore(_dragSrc, after);
+    else list.appendChild(_dragSrc);
+  });
+  el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+  el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('drag-over'); });
+
+  // Touch drag (mobile) — long-press to activate
+  let touchTimer, touchStartY, touchEl;
+  el.addEventListener('touchstart', e => {
+    touchEl = el;
+    touchStartY = e.touches[0].clientY;
+    touchTimer = setTimeout(() => {
+      el.classList.add('dragging');
+      _dragSrc = el;
+    }, 400);
+  }, { passive: true });
+  el.addEventListener('touchmove', e => {
+    if (!_dragSrc) { clearTimeout(touchTimer); return; }
+    e.preventDefault();
+    const touch = e.touches[0];
+    const list = document.getElementById(listId);
+    const rows = [...list.querySelectorAll('.exercise-row:not(.dragging)')];
+    const after = rows.find(r => {
+      const rect = r.getBoundingClientRect();
+      return touch.clientY < rect.top + rect.height / 2;
+    });
+    rows.forEach(r => r.classList.remove('drag-over'));
+    if (after) list.insertBefore(_dragSrc, after);
+    else list.appendChild(_dragSrc);
+  }, { passive: false });
+  el.addEventListener('touchend', () => {
+    clearTimeout(touchTimer);
+    if (_dragSrc) {
+      _dragSrc.classList.remove('dragging');
+      document.querySelectorAll(`#${listId} .exercise-row`).forEach(r => r.classList.remove('drag-over'));
+      renumberExercises(listId);
+      _dragSrc = null;
+    }
+  });
+}
+
+function renumberExercises(listId) {
+  const rows = document.querySelectorAll(`#${listId} .exercise-row`);
+  rows.forEach((row, i) => {
+    const numEl = row.querySelector('.ex-num');
+    if (numEl) numEl.textContent = i + 1;
+  });
+}
+
+// ═══════════════ EXERCISE DONE CHECKBOX ═══════════════
+function toggleExDone(btn) {
+  const row = btn.closest('.exercise-row');
+  const isDone = row.classList.toggle('completed');
+  btn.classList.toggle('done', isDone);
+  btn.textContent = isDone ? '✓' : '';
+}
+
 function addExercise() {
   exerciseCount++;
   const n = exerciseCount;
   const div = document.createElement('div');
   div.className = 'exercise-row';
   div.id = 'ex-' + n;
+  div.draggable = true;
   div.innerHTML = `
     <div class="ex-head">
+      <div class="ex-drag-handle" title="Перетащить">⠿</div>
       <div class="ex-num">${n}</div>
       <input class="ex-name-input" placeholder="Название упражнения" id="ex-name-${n}">
+      <span class="ex-completed-badge">✓ Готово</span>
+      <div class="ex-done-check" title="Отметить выполненным" onclick="toggleExDone(this)"></div>
       <button class="btn-icon" onclick="removeExercise(${n})" style="color:var(--accent)">✕</button>
     </div>
     <div class="sets-grid">
@@ -2488,6 +2605,7 @@ function addExercise() {
     </div>
   `;
   document.getElementById('exercises-list').appendChild(div);
+  initDragRow(div, 'exercises-list');
   div.querySelector('.ex-name-input').focus();
 }
 
@@ -2699,8 +2817,10 @@ function addEditExercise(ex) {
   const div = document.createElement('div');
   div.className = 'exercise-row';
   div.id = 'edit-ex-' + n;
+  div.draggable = true;
   div.innerHTML = `
     <div class="ex-head">
+      <div class="ex-drag-handle" title="Перетащить">⠿</div>
       <div class="ex-num">${n}</div>
       <input class="ex-name-input" placeholder="Упражнение" id="edit-ex-name-${n}" value="${ex?.name||''}">
       <button class="btn-icon" onclick="document.getElementById('edit-ex-${n}').remove()" style="color:var(--accent)">✕</button>
@@ -2722,6 +2842,7 @@ function addEditExercise(ex) {
     </div>
   `;
   document.getElementById('edit-exercises-list').appendChild(div);
+  initDragRow(div, 'edit-exercises-list');
 }
 
 function setEditRating(n) { editRating = n; updateEditStars(); }
