@@ -233,7 +233,15 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .tpl-selected-info { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
 /* drag-reorder */
-.ex-drag-handle {
+.prog-hint {
+  display:flex; align-items:center; gap:6px;
+  background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3);
+  border-radius:8px; padding:7px 10px; margin-bottom:8px;
+  font-size:12px; font-weight:700; color:var(--success);
+}
+.prog-hint-ico { font-size:14px; }
+
+/* drag-reorder */
   display:flex; align-items:center; justify-content:center;
   width:28px; height:28px; color:var(--muted); font-size:18px;
   cursor:grab; flex-shrink:0; touch-action:none; user-select:none;
@@ -2283,6 +2291,8 @@ function addTplExercise(ex) {
   const restM = ex?.restMin ?? '';
   const restS = ex?.restSec ?? '';
   const targetReps = ex?.targetReps ?? '';
+  const progType = ex?.progType ?? 'none';
+  const progStep = ex?.progStep ?? '';
   div.draggable = true;
   div.innerHTML = `
     <div class="ex-head">
@@ -2303,6 +2313,21 @@ function addTplExercise(ex) {
       <div class="field" style="margin:0">
         <label style="font-size:9px">Пауза сек</label>
         <input type="number" class="set-input" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px;width:100%" placeholder="30" id="tpl-ex${n}-rests" value="${restS}" min="0" max="59">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+      <div class="field" style="margin:0">
+        <label style="font-size:9px">📈 Прогрессия</label>
+        <select id="tpl-ex${n}-prog" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px;width:100%;color:var(--text);font-size:12px" onchange="toggleProgStep(${n})">
+          <option value="none" ${progType==='none'?'selected':''}>Без прогрессии</option>
+          <option value="weight" ${progType==='weight'?'selected':''}>+вес каждую трен.</option>
+          <option value="reps" ${progType==='reps'?'selected':''}>+повторы каждую трен.</option>
+          <option value="double" ${progType==='double'?'selected':''}>Двойная прогрессия</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0" id="tpl-ex${n}-step-wrap">
+        <label style="font-size:9px" id="tpl-ex${n}-step-lbl">${progType==='reps'?'Шаг (повт)':'Шаг (кг)'}</label>
+        <input type="number" class="set-input" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px;width:100%;color:var(--accent3)" placeholder="${progType==='reps'?'1':'2.5'}" id="tpl-ex${n}-step" value="${progStep}" min="0.5" step="0.5">
       </div>
     </div>
     <div class="sets-grid">
@@ -2343,7 +2368,9 @@ function saveTpl() {
     const restMin   = parseInt(document.getElementById(`tpl-ex${i}-restm`)?.value) || 0;
     const restSec   = parseInt(document.getElementById(`tpl-ex${i}-rests`)?.value) || 0;
     const targetReps= parseInt(document.getElementById(`tpl-ex${i}-treps`)?.value) || 0;
-    exercises.push({ name: exName, sets, restMin, restSec, targetReps });
+    const progType  = document.getElementById(`tpl-ex${i}-prog`)?.value || 'none';
+    const progStep  = parseFloat(document.getElementById(`tpl-ex${i}-step`)?.value) || 0;
+    exercises.push({ name: exName, sets, restMin, restSec, targetReps, progType, progStep });
   }
   const muscles = [...document.querySelectorAll('#tpl-muscles-row .muscle-chip.selected')].map(c => c.textContent);
   const editId = document.getElementById('tpl-edit-id').value;
@@ -2387,50 +2414,21 @@ function selectTemplate(id) {
   const t = data.templates.find(x => x.id === id);
   if (!t) return;
   currentTplId = id;
-  // Fill workout form with template data
   document.getElementById('wo-type').value = t.type || 'Силовая';
   document.querySelectorAll('#new-workout-form .muscle-chip').forEach(c => {
     c.classList.toggle('selected', (t.muscles||[]).includes(c.textContent));
   });
-  // Replace exercises
   exerciseCount = 0;
   document.getElementById('exercises-list').innerHTML = '';
   if (t.exercises && t.exercises.length) {
-    t.exercises.forEach(ex => {
-      exerciseCount++;
-      const n = exerciseCount;
-      const div = document.createElement('div');
-      div.className = 'exercise-row';
-      div.id = 'ex-' + n;
-      div.innerHTML = `
-        <div class="ex-head">
-          <div class="ex-num">${n}</div>
-          <input class="ex-name-input" placeholder="Название упражнения" id="ex-name-${n}" value="${ex.name||''}">
-          <button class="btn-icon" onclick="removeExercise(${n})" style="color:var(--accent)">✕</button>
-        </div>
-        <div class="sets-grid">
-          ${[1,2,3,4,5].map(s => {
-            const sv = ex.sets?.[s-1];
-            const wv = sv ? (sv.w||'') : '';
-            const rv = sv ? (sv.r||'') : '';
-            return `<div class="set-cell">
-              <div class="set-label">П${s}</div>
-              <div class="set-sublabel">кг</div>
-              <input class="set-input" placeholder="—" id="ex${n}-w${s}" type="number" min="0" step="0.5" value="${wv}" style="color:var(--accent3)">
-              <div class="set-divider"></div>
-              <div class="set-sublabel">повт</div>
-              <input class="set-input" placeholder="—" id="ex${n}-r${s}" type="number" min="0" step="1" value="${rv}">
-            </div>`;
-          }).join('')}
-        </div>
-      `;
-      document.getElementById('exercises-list').appendChild(div);
-      initDragRow(div, 'exercises-list');
-    });
+    t.exercises.forEach(ex => addExercise(ex));
   } else {
     addExercise();
   }
+  // Show progression hints
+  renderProgressionHints(t);
   // Update banner
+  document.getElementById('tpl-none-banner').style.display = 'none';
   document.getElementById('tpl-selected-banner').style.display = 'flex';
   document.getElementById('tpl-banner-name').textContent = t.name;
   document.getElementById('tpl-banner-info').textContent = `${t.type||'Силовая'} · ${t.exercises?.length||0} упр. · редактируй веса и жми «Сохранить»`;
@@ -2490,6 +2488,77 @@ function showNewWorkout() {
 function hideNewWorkout() {
   document.getElementById('new-workout-form').style.display = 'none';
   document.getElementById('workouts-history').style.display = 'block';
+}
+
+// ═══════════════ PROGRESSION ═══════════════
+function toggleProgStep(n) {
+  const sel = document.getElementById(`tpl-ex${n}-prog`);
+  const wrap = document.getElementById(`tpl-ex${n}-step-wrap`);
+  const lbl  = document.getElementById(`tpl-ex${n}-step-lbl`);
+  const inp  = document.getElementById(`tpl-ex${n}-step`);
+  if (!sel) return;
+  const v = sel.value;
+  if (v === 'none') {
+    wrap.style.opacity = '0.4';
+  } else {
+    wrap.style.opacity = '1';
+    if (v === 'reps') { lbl.textContent = 'Шаг (повт)'; inp.placeholder = '1'; inp.step = '1'; }
+    else { lbl.textContent = 'Шаг (кг)'; inp.placeholder = '2.5'; inp.step = '0.5'; }
+  }
+}
+
+function calcNextStep(ex, lastSets) {
+  // Returns { w, r, hint } for next session
+  if (!ex.progType || ex.progType === 'none') return null;
+  const validSets = (lastSets || []).filter(s => s && (s.w || s.r));
+  if (!validSets.length) return null;
+  const lastW = parseFloat(validSets[0]?.w) || 0;
+  const lastR  = parseInt(validSets[0]?.r)  || 0;
+  const step   = parseFloat(ex.progStep) || (ex.progType === 'reps' ? 1 : 2.5);
+  const target = parseInt(ex.targetReps) || 12;
+
+  if (ex.progType === 'weight') {
+    return { w: (lastW + step).toFixed(1).replace(/\.0$/,''), r: lastR, hint: `+${step} кг → ${(lastW+step).toFixed(1).replace(/\.0$/,'')} кг` };
+  }
+  if (ex.progType === 'reps') {
+    return { w: lastW, r: lastR + step, hint: `+${step} повт → ${lastR+step} повт` };
+  }
+  if (ex.progType === 'double') {
+    // Double progression: add reps until target reached, then +weight and reset reps
+    if (lastR < target) {
+      return { w: lastW, r: lastR + 1, hint: `+1 повт → ${lastR+1} (цель ${target}), затем +${step} кг` };
+    } else {
+      return { w: (lastW + step).toFixed(1).replace(/\.0$/,''), r: lastR - Math.floor(target * 0.15), hint: `Цель достигнута! +${step} кг → ${(lastW+step).toFixed(1).replace(/\.0$/,'')} кг` };
+    }
+  }
+  return null;
+}
+
+function renderProgressionHints(tpl) {
+  if (!tpl) return;
+  // Find last workout using this template
+  const pastWorkouts = data.workouts
+    .filter(w => w.fromTemplate === tpl.id)
+    .sort((a, b) => b.date.localeCompare(a.date));
+  const last = pastWorkouts[0];
+
+  tpl.exercises.forEach((ex, ei) => {
+    if (!ex.progType || ex.progType === 'none') return;
+    const exEl = document.getElementById('ex-' + (ei + 1));
+    if (!exEl) return;
+    const lastSets = last?.exercises?.[ei]?.sets || ex.sets;
+    const next = calcNextStep(ex, lastSets);
+    if (!next) return;
+
+    // Remove old hint if any
+    const oldHint = exEl.querySelector('.prog-hint');
+    if (oldHint) oldHint.remove();
+
+    const hint = document.createElement('div');
+    hint.className = 'prog-hint';
+    hint.innerHTML = `<span class="prog-hint-ico">📈</span> ${next.hint}${last ? '' : ' (первая тренировка)'}`;
+    exEl.querySelector('.sets-grid').before(hint);
+  });
 }
 
 // ═══════════════ DRAG REORDER ═══════════════
@@ -2575,7 +2644,7 @@ function toggleExDone(btn) {
   btn.textContent = isDone ? '✓' : '';
 }
 
-function addExercise() {
+function addExercise(ex) {
   exerciseCount++;
   const n = exerciseCount;
   const div = document.createElement('div');
@@ -2586,27 +2655,30 @@ function addExercise() {
     <div class="ex-head">
       <div class="ex-drag-handle" title="Перетащить">⠿</div>
       <div class="ex-num">${n}</div>
-      <input class="ex-name-input" placeholder="Название упражнения" id="ex-name-${n}">
+      <input class="ex-name-input" placeholder="Название упражнения" id="ex-name-${n}" value="${ex?.name||''}">
       <span class="ex-completed-badge">✓ Готово</span>
       <div class="ex-done-check" title="Отметить выполненным" onclick="toggleExDone(this)"></div>
       <button class="btn-icon" onclick="removeExercise(${n})" style="color:var(--accent)">✕</button>
     </div>
     <div class="sets-grid">
-      ${[1,2,3,4,5].map(s => `
-        <div class="set-cell">
+      ${[1,2,3,4,5].map(s => {
+        const sv = ex?.sets?.[s-1];
+        const wv = sv && typeof sv === 'object' ? (sv.w||'') : (sv||'');
+        const rv = sv && typeof sv === 'object' ? (sv.r||'') : '';
+        return `<div class="set-cell">
           <div class="set-label">П${s}</div>
           <div class="set-sublabel">кг</div>
-          <input class="set-input" placeholder="—" id="ex${n}-w${s}" type="number" min="0" step="0.5" style="color:var(--accent3)">
+          <input class="set-input" placeholder="—" id="ex${n}-w${s}" type="number" min="0" step="0.5" value="${wv}" style="color:var(--accent3)">
           <div class="set-divider"></div>
           <div class="set-sublabel">повт</div>
-          <input class="set-input" placeholder="—" id="ex${n}-r${s}" type="number" min="0" step="1">
-        </div>
-      `).join('')}
+          <input class="set-input" placeholder="—" id="ex${n}-r${s}" type="number" min="0" step="1" value="${rv}">
+        </div>`;
+      }).join('')}
     </div>
   `;
   document.getElementById('exercises-list').appendChild(div);
   initDragRow(div, 'exercises-list');
-  div.querySelector('.ex-name-input').focus();
+  if (!ex) div.querySelector('.ex-name-input').focus();
 }
 
 function removeExercise(n) {
