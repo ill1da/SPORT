@@ -547,6 +547,21 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .ex-detail-row:last-child { border-bottom: none; }
 .ex-detail-name { font-weight: 700; flex: 1; }
 .ex-detail-sets { font-size: 12px; color: var(--muted); }
+.ex-detail-chart-btn {
+  border: 1px solid var(--border); background: var(--card); color: var(--accent3);
+  border-radius: 8px; padding: 5px 8px; font-size: 12px; cursor: pointer;
+  font-family: 'Nunito', sans-serif; font-weight: 800; flex-shrink: 0;
+}
+.ex-detail-chart-btn:active { border-color: var(--accent3); transform: scale(0.98); }
+.exercise-chart-toolbar { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 10px; }
+.exercise-chart-select {
+  width: 100%; background: var(--card); border: 1px solid var(--border); color: var(--text);
+  border-radius: 10px; padding: 10px 12px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 800;
+}
+.exercise-chart-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 8px 0 10px; }
+.exercise-chart-stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 9px 6px; text-align: center; }
+.exercise-chart-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--accent3); line-height: 1; }
+.exercise-chart-stat-lbl { font-size: 9px; color: var(--muted); font-weight: 800; margin-top: 4px; line-height: 1.2; }
 
 /* FOOD CALENDAR PICKER */
 .food-cal-overlay {
@@ -897,6 +912,19 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <canvas id="chart-monthly"></canvas>
     </div>
 
+    <!-- Exercise progression -->
+    <div class="chart-wrap">
+      <div class="chart-title">ПРОГРЕССИЯ ПО УПРАЖНЕНИЮ</div>
+      <div class="exercise-chart-toolbar">
+        <select class="exercise-chart-select" id="exercise-chart-select" onchange="renderExerciseProgressChart()"></select>
+      </div>
+      <canvas id="chart-exercise-progress"></canvas>
+      <div class="chart-empty" id="chart-exercise-empty" style="display:none">
+        Нужны минимум 2 записи одного упражнения с весами/повторами 📈
+      </div>
+      <div id="exercise-chart-summary"></div>
+    </div>
+
     <!-- Tracker streak -->
     <div class="card">
       <div class="card-title"><span></span> РЕКОРДЫ</div>
@@ -1113,6 +1141,22 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 </div>
 
 <!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- Exercise progress chart -->
+<div class="modal-overlay" id="modal-ex-chart" onclick="closeModalOutside(event, 'modal-ex-chart')">
+  <div class="modal" style="max-height:86vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="ex-chart-title">ПРОГРЕССИЯ</div>
+    <div id="ex-chart-modal-stats"></div>
+    <div class="chart-wrap" style="margin-top:10px">
+      <canvas id="chart-exercise-modal"></canvas>
+      <div class="chart-empty" id="chart-exercise-modal-empty" style="display:none">
+        Нужны минимум 2 записи этого упражнения
+      </div>
+    </div>
+    <button class="btn btn-secondary" onclick="closeModal('modal-ex-chart')">Закрыть</button>
+  </div>
+</div>
 
 <!-- Profile edit -->
 <div class="modal-overlay" id="modal-profile-edit" onclick="closeModalOutside(event, 'modal-profile-edit')">
@@ -2861,7 +2905,8 @@ function renderWorkoutsHistory() {
         }
         return s;
       }).join(' · ');
-      return `<div class="ex-detail-row"><span class="ex-detail-name">${e.name}</span><span class="ex-detail-sets">${setsStr||'—'}</span></div>`;
+      const exEncoded = encodeURIComponent(e.name || '');
+      return `<div class="ex-detail-row"><span class="ex-detail-name">${e.name}</span><span class="ex-detail-sets">${setsStr||'—'}</span><button class="ex-detail-chart-btn" onclick="openExerciseChartByName(decodeURIComponent('${exEncoded}'))">📈</button></div>`;
     }).join('');
     const cardioStr = w.cardio && (w.cardio.time||w.cardio.dist) ?
       `<div style="margin-top:6px;font-size:12px;color:var(--accent3)">🏃 ${w.cardio.type||'Кардио'}: ${w.cardio.time||'—'} мин · ${w.cardio.dist||'—'} км · ${w.cardio.cals||'—'} ккал</div>` : '';
@@ -3530,6 +3575,8 @@ function deleteChallenge(id) {
 let activeChart = null;
 let musclesChart = null;
 let monthlyChart = null;
+let exerciseProgressChart = null;
+let exerciseModalChart = null;
 let currentChartMetric = 'weight';
 
 const CHART_DEFAULTS = {
@@ -3586,6 +3633,7 @@ function renderCharts() {
   renderDelta(currentChartMetric);
   renderMusclesChart();
   renderMonthlyChart();
+  renderExerciseProgressChart();
   renderRecords();
 }
 
@@ -3756,6 +3804,171 @@ function renderMonthlyChart() {
       }}
     }
   });
+}
+
+
+function normalizeExerciseName(name) {
+  return String(name || '').trim().toLowerCase().replace(/ё/g, 'е').replace(/\s+/g, ' ');
+}
+
+function getExerciseNames() {
+  const map = new Map();
+  (data.workouts || []).forEach(w => (w.exercises || []).forEach(ex => {
+    const key = normalizeExerciseName(ex.name);
+    if (!key) return;
+    if (!map.has(key)) map.set(key, ex.name.trim());
+  }));
+  return [...map.values()].sort((a,b) => a.localeCompare(b, 'ru'));
+}
+
+function parseWorkoutSet(s) {
+  if (!s) return null;
+  if (typeof s === 'object') {
+    const w = parseSetNum(s.w);
+    const r = parseSetNum(s.r);
+    return (w !== null || r !== null) ? { w, r } : null;
+  }
+  const raw = String(s).replace(',', '.');
+  let m = raw.match(/([0-9]+(?:\.[0-9]+)?)\s*(?:кг|kg)?\s*[xх×*]\s*([0-9]+)/i);
+  if (m) return { w: Number(m[1]), r: Number(m[2]) };
+  const n = parseSetNum(raw);
+  return n !== null ? { w: null, r: n } : null;
+}
+
+function getExerciseHistory(name) {
+  const key = normalizeExerciseName(name);
+  if (!key) return [];
+  return [...(data.workouts || [])]
+    .filter(w => w.date)
+    .sort((a,b) => String(a.date).localeCompare(String(b.date)) || (a.id || 0) - (b.id || 0))
+    .flatMap(w => (w.exercises || [])
+      .filter(ex => normalizeExerciseName(ex.name) === key)
+      .map(ex => {
+        const sets = (ex.sets || []).map(parseWorkoutSet).filter(Boolean);
+        const weighted = sets.filter(s => s.w !== null && s.w > 0);
+        const withReps = sets.filter(s => s.r !== null && s.r > 0);
+        const maxWeight = weighted.length ? Math.max(...weighted.map(s => s.w)) : null;
+        const totalReps = withReps.reduce((sum, s) => sum + (s.r || 0), 0);
+        const volume = weighted.reduce((sum, s) => sum + (s.w || 0) * (s.r || 0), 0);
+        const best1rm = weighted.length ? Math.max(...weighted.map(s => s.r ? s.w * (1 + s.r / 30) : s.w)) : null;
+        return { date: w.date, workoutId: w.id, sets, maxWeight, totalReps, volume, best1rm };
+      }))
+    .filter(x => x.maxWeight !== null || x.totalReps > 0);
+}
+
+function getExerciseSummary(history) {
+  const weights = history.filter(x => x.maxWeight !== null);
+  const volumes = history.filter(x => x.volume > 0);
+  const firstW = weights[0]?.maxWeight ?? null;
+  const lastW = weights[weights.length - 1]?.maxWeight ?? null;
+  const bestVol = volumes.length ? Math.max(...volumes.map(x => x.volume)) : null;
+  return { firstW, lastW, bestVol };
+}
+
+function renderExerciseChartStats(containerId, history) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (history.length < 1) { el.innerHTML = ''; return; }
+  const s = getExerciseSummary(history);
+  const diff = (s.firstW !== null && s.lastW !== null) ? (s.lastW - s.firstW) : null;
+  el.innerHTML = `
+    <div class="exercise-chart-stats">
+      <div class="exercise-chart-stat"><div class="exercise-chart-stat-val">${s.lastW !== null ? fmtNum(s.lastW) : '—'}</div><div class="exercise-chart-stat-lbl">ТЕКУЩИЙ МАКС. ВЕС</div></div>
+      <div class="exercise-chart-stat"><div class="exercise-chart-stat-val">${diff !== null ? (diff > 0 ? '+' : '') + fmtNum(diff) : '—'}</div><div class="exercise-chart-stat-lbl">ИЗМЕНЕНИЕ КГ</div></div>
+      <div class="exercise-chart-stat"><div class="exercise-chart-stat-val">${s.bestVol ? Math.round(s.bestVol) : '—'}</div><div class="exercise-chart-stat-lbl">ЛУЧШИЙ ОБЪЁМ</div></div>
+    </div>`;
+}
+
+function makeExerciseDatasets(history) {
+  return {
+    labels: history.map(x => formatDate(x.date).split(' ').slice(0,2).join(' ')),
+    maxWeights: history.map(x => x.maxWeight),
+    volumes: history.map(x => x.volume || null),
+    oneRm: history.map(x => x.best1rm ? Number(x.best1rm.toFixed(1)) : null)
+  };
+}
+
+function buildExerciseChart(canvas, history, compact=false) {
+  const ds = makeExerciseDatasets(history);
+  return new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: ds.labels,
+      datasets: [
+        {
+          label: 'Макс. вес, кг', data: ds.maxWeights, borderColor: '#06b6d4', backgroundColor: '#06b6d433',
+          borderWidth: 2.5, pointRadius: 4, pointHoverRadius: 6, tension: 0.35, fill: false, yAxisID: 'y'
+        },
+        {
+          label: 'Объём, кг×повт', data: ds.volumes, borderColor: '#7c3aed', backgroundColor: '#7c3aed22',
+          borderWidth: 2, pointRadius: 3, pointHoverRadius: 5, tension: 0.35, fill: false, yAxisID: 'y1'
+        },
+        {
+          label: 'Расч. 1ПМ', data: ds.oneRm, borderColor: '#ff4d6d', backgroundColor: '#ff4d6d22',
+          borderWidth: 2, pointRadius: compact ? 0 : 3, pointHoverRadius: 5, tension: 0.35, fill: false, yAxisID: 'y', hidden: true
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { color: '#6b6b88', font: { family: 'Nunito', size: 10 }, padding: 10, boxWidth: 10 } },
+        tooltip: { ...CHART_DEFAULTS.plugins.tooltip, callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y ?? '—'}` } }
+      },
+      scales: {
+        x: { grid: { color: '#2a2a38' }, ticks: { color: '#6b6b88', font: { family: 'Nunito', size: 10 } } },
+        y: { position: 'left', grid: { color: '#2a2a38' }, ticks: { color: '#6b6b88', font: { family: 'Nunito', size: 10 } } },
+        y1: { position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#6b6b88', font: { family: 'Nunito', size: 10 } } }
+      }
+    }
+  });
+}
+
+function renderExerciseProgressChart() {
+  const select = document.getElementById('exercise-chart-select');
+  const canvas = document.getElementById('chart-exercise-progress');
+  const empty = document.getElementById('chart-exercise-empty');
+  if (!select || !canvas || !empty) return;
+
+  if (exerciseProgressChart) { exerciseProgressChart.destroy(); exerciseProgressChart = null; }
+  const names = getExerciseNames();
+  const prev = select.value;
+  select.innerHTML = names.length
+    ? names.map(n => `<option value="${encodeURIComponent(n)}">${n}</option>`).join('')
+    : '<option value="">Нет упражнений</option>';
+  if (prev && names.some(n => encodeURIComponent(n) === prev)) select.value = prev;
+
+  const name = select.value ? decodeURIComponent(select.value) : names[0];
+  const history = getExerciseHistory(name);
+  renderExerciseChartStats('exercise-chart-summary', history);
+
+  if (history.length < 2) {
+    canvas.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+  canvas.style.display = 'block';
+  empty.style.display = 'none';
+  exerciseProgressChart = buildExerciseChart(canvas, history, true);
+}
+
+function openExerciseChartByName(name) {
+  const history = getExerciseHistory(name);
+  document.getElementById('ex-chart-title').textContent = 'ПРОГРЕССИЯ: ' + (name || 'Упражнение').toUpperCase();
+  renderExerciseChartStats('ex-chart-modal-stats', history);
+  const canvas = document.getElementById('chart-exercise-modal');
+  const empty = document.getElementById('chart-exercise-modal-empty');
+  if (exerciseModalChart) { exerciseModalChart.destroy(); exerciseModalChart = null; }
+  if (history.length < 2) {
+    canvas.style.display = 'none';
+    empty.style.display = 'block';
+  } else {
+    canvas.style.display = 'block';
+    empty.style.display = 'none';
+    exerciseModalChart = buildExerciseChart(canvas, history);
+  }
+  openModal('modal-ex-chart');
 }
 
 function renderRecords() {
