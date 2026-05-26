@@ -255,6 +255,22 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 }
 .active-technique-row input { flex:0 0 auto; }
 .active-technique-row span { line-height:1.25; }
+.ex-technique-pill {
+  display:flex; align-items:center; gap:5px;
+  padding:6px 8px; border-radius:8px;
+  background:rgba(52,211,153,0.08);
+  border:1px solid rgba(52,211,153,0.30);
+  color:var(--success); font-size:11px; font-weight:800;
+  flex-shrink:0; cursor:pointer; user-select:none;
+}
+.ex-technique-pill input { width:17px; height:17px; accent-color:var(--success); margin:0; }
+.ex-technique-pill span { white-space:nowrap; }
+.ex-technique-pill:not(:has(input:checked)) {
+  background:rgba(255,255,255,0.025); border-color:var(--border); color:var(--muted);
+}
+.technique-note {
+  font-size:11px; color:var(--muted); margin:-2px 0 8px 40px; line-height:1.25;
+}
 
 .prog-hint.warn { background:rgba(251,191,36,0.10); border-color:rgba(251,191,36,0.35); color:var(--gold); }
 
@@ -291,12 +307,12 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   padding: 12px;
   margin-bottom: 8px;
 }
-.ex-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.ex-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap:nowrap; }
 .ex-num { width: 24px; height: 24px; background: var(--accent); border-radius: 6px; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .ex-name-input {
   flex: 1; background: transparent; border: none;
   color: var(--text); font-family: 'Nunito', sans-serif;
-  font-size: 14px; font-weight: 700; outline: none;
+  font-size: 14px; font-weight: 700; outline: none; min-width:0;
 }
 .ex-name-input::placeholder { color: var(--muted); }
 .sets-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
@@ -2809,14 +2825,15 @@ function addExercise(ex) {
       <div class="ex-drag-handle" title="Перетащить">⠿</div>
       <div class="ex-num">${n}</div>
       <input class="ex-name-input" placeholder="Название упражнения" id="ex-name-${n}" value="${ex?.name||''}">
+      <label class="ex-technique-pill" title="Отметь только если техника была чистой">
+        <input type="checkbox" id="ex${n}-technique" ${ex?.techniqueOk ? 'checked' : ''} onclick="event.stopPropagation()">
+        <span>Техника</span>
+      </label>
       <span class="ex-completed-badge">✓ Готово</span>
       <div class="ex-done-check" title="Отметить выполненным" onclick="toggleExDone(this)"></div>
       <button class="btn-icon" onclick="removeExercise(${n})" style="color:var(--accent)">✕</button>
     </div>
-    <label class="technique-row active-technique-row">
-      <input type="checkbox" id="ex${n}-technique" ${ex?.techniqueOk ? 'checked' : ''}>
-      <span><strong>Техника чистая</strong> — разрешить прогрессию для следующей тренировки</span>
-    </label>
+    <div class="technique-note">Прогрессия сработает только если отмечена чистая техника и добраны нужные повторы.</div>
     <div class="sets-grid">
       ${[1,2,3,4,5].map(s => {
         const sv = ex?.sets?.[s-1];
@@ -3056,9 +3073,12 @@ function addEditExercise(ex) {
       <div class="ex-drag-handle" title="Перетащить">⠿</div>
       <div class="ex-num">${n}</div>
       <input class="ex-name-input" placeholder="Упражнение" id="edit-ex-name-${n}" value="${ex?.name||''}">
+      <label class="ex-technique-pill" title="Отметь только если техника была чистой">
+        <input type="checkbox" id="edit-ex${n}-technique" ${ex?.techniqueOk ? 'checked' : ''} onclick="event.stopPropagation()">
+        <span>Техника</span>
+      </label>
       <button class="btn-icon" onclick="document.getElementById('edit-ex-${n}').remove()" style="color:var(--accent)">✕</button>
     </div>
-    <label class="technique-row"><input type="checkbox" id="edit-ex${n}-technique" ${ex?.techniqueOk ? 'checked' : ''}> <span><strong>Техника чистая</strong></span></label>
     <div class="sets-grid">
       ${[1,2,3,4,5].map(s => {
         const setVal = ex?.sets?.[s-1];
