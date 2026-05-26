@@ -240,6 +240,15 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   font-size:12px; font-weight:700; color:var(--success);
 }
 .prog-hint-ico { font-size:14px; }
+.technique-row {
+  display:flex; align-items:center; gap:8px;
+  background:rgba(255,255,255,0.03); border:1px solid var(--border);
+  border-radius:8px; padding:8px 10px; margin:8px 0;
+  font-size:12px; color:var(--muted); font-weight:700;
+}
+.technique-row input { width:18px; height:18px; accent-color: var(--success); }
+.technique-row strong { color:var(--text); }
+.prog-hint.warn { background:rgba(251,191,36,0.10); border-color:rgba(251,191,36,0.35); color:var(--gold); }
 
 /* drag-reorder */
   display:flex; align-items:center; justify-content:center;
@@ -2335,6 +2344,7 @@ function addTplExercise(ex) {
   const restM = ex?.restMin ?? '';
   const restS = ex?.restSec ?? '';
   const targetReps = ex?.targetReps ?? '';
+  const targetMinReps = ex?.targetMinReps ?? '';
   const progType = ex?.progType ?? 'none';
   const progStep = ex?.progStep ?? '';
   div.draggable = true;
@@ -2345,9 +2355,13 @@ function addTplExercise(ex) {
       <input class="ex-name-input" placeholder="Название упражнения" id="tpl-ex-name-${n}" value="${ex?.name||''}">
       <button class="btn-icon" onclick="document.getElementById('tpl-ex-${n}').remove()" style="color:var(--accent)">✕</button>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:6px 0">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin:6px 0">
       <div class="field" style="margin:0">
-        <label style="font-size:9px">Цел. повторы</label>
+        <label style="font-size:9px">Мин. повт</label>
+        <input type="number" class="set-input" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px;width:100%;color:var(--accent3)" placeholder="8" id="tpl-ex${n}-rmin" value="${targetMinReps}" min="1">
+      </div>
+      <div class="field" style="margin:0">
+        <label style="font-size:9px">Макс. повт</label>
         <input type="number" class="set-input" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px;width:100%;color:var(--accent3)" placeholder="12" id="tpl-ex${n}-treps" value="${targetReps}" min="1">
       </div>
       <div class="field" style="margin:0">
@@ -2364,9 +2378,9 @@ function addTplExercise(ex) {
         <label style="font-size:9px">📈 Прогрессия</label>
         <select id="tpl-ex${n}-prog" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px;width:100%;color:var(--text);font-size:12px" onchange="toggleProgStep(${n})">
           <option value="none" ${progType==='none'?'selected':''}>Без прогрессии</option>
-          <option value="weight" ${progType==='weight'?'selected':''}>+вес каждую трен.</option>
-          <option value="reps" ${progType==='reps'?'selected':''}>+повторы каждую трен.</option>
-          <option value="double" ${progType==='double'?'selected':''}>Двойная прогрессия</option>
+          <option value="weight" ${progType==='weight'?'selected':''}>Вес после цели</option>
+          <option value="reps" ${progType==='reps'?'selected':''}>Мягко +повтор</option>
+          <option value="double" ${progType==='double'?'selected':''}>Двойная 8–12</option>
         </select>
       </div>
       <div class="field" style="margin:0" id="tpl-ex${n}-step-wrap">
@@ -2374,6 +2388,7 @@ function addTplExercise(ex) {
         <input type="number" class="set-input" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px;width:100%;color:var(--accent3)" placeholder="${progType==='reps'?'1':'2.5'}" id="tpl-ex${n}-step" value="${progStep}" min="0.5" step="0.5">
       </div>
     </div>
+    <label class="technique-row"><input type="checkbox" id="ex${n}-technique" ${ex?.techniqueOk ? 'checked' : ''}> <span><strong>Техника чистая</strong> — только тогда программа разрешит прогрессию дальше</span></label>
     <div class="sets-grid">
       ${[1,2,3,4,5].map(s => {
         const sv = ex?.sets?.[s-1];
@@ -2412,9 +2427,10 @@ function saveTpl() {
     const restMin   = parseInt(document.getElementById(`tpl-ex${i}-restm`)?.value) || 0;
     const restSec   = parseInt(document.getElementById(`tpl-ex${i}-rests`)?.value) || 0;
     const targetReps= parseInt(document.getElementById(`tpl-ex${i}-treps`)?.value) || 0;
+    const targetMinReps= parseInt(document.getElementById(`tpl-ex${i}-rmin`)?.value) || 0;
     const progType  = document.getElementById(`tpl-ex${i}-prog`)?.value || 'none';
     const progStep  = parseFloat(document.getElementById(`tpl-ex${i}-step`)?.value) || 0;
-    exercises.push({ name: exName, sets, restMin, restSec, targetReps, progType, progStep });
+    exercises.push({ name: exName, sets, restMin, restSec, targetReps, targetMinReps, progType, progStep });
   }
   const muscles = [...document.querySelectorAll('#tpl-muscles-row .muscle-chip.selected')].map(c => c.textContent);
   const editId = document.getElementById('tpl-edit-id').value;
@@ -2585,61 +2601,77 @@ function getLastTemplateWorkout(tpl) {
     .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || (b.id || 0) - (a.id || 0))[0];
 }
 
-function calcNextStep(ex, lastSets, hasHistory = true) {
-  // Returns { sets, hint } for next session
+function addOneRepSoft(baseSets, maxReps) {
+  const sets = cloneSets(baseSets);
+  const candidates = sets
+    .map((s, idx) => ({ s, idx, r: parseSetNum(s.r) }))
+    .filter(x => x.r !== null && x.r < maxReps);
+  if (!candidates.length) return sets;
+  const minR = Math.min(...candidates.map(x => x.r));
+  const chosen = candidates.find(x => x.r === minR) || candidates[0];
+  sets[chosen.idx] = { ...sets[chosen.idx], r: fmtNum(Math.min(maxReps, chosen.r + 1)) };
+  return sets;
+}
+
+function calcNextStep(ex, lastExercise, hasHistory = true) {
+  // Мягкая прогрессия: техника → повторы → вес.
+  // Вес повышается только после верхней границы повторов во всех рабочих подходах.
   if (!ex.progType || ex.progType === 'none') return null;
 
-  const baseSets = cloneSets(lastSets && lastSets.length ? lastSets : ex.sets);
+  const lastEx = Array.isArray(lastExercise) ? { sets: lastExercise, techniqueOk: true } : (lastExercise || {});
+  const baseSets = cloneSets((lastEx.sets && lastEx.sets.length) ? lastEx.sets : ex.sets);
   const validSets = baseSets.filter(s => s && (s.w !== '' || s.r !== ''));
   if (!validSets.length) return null;
 
   const step = parseSetNum(ex.progStep) || (ex.progType === 'reps' ? 1 : 2.5);
-  const target = parseInt(ex.targetReps) || 12;
+  const maxReps = parseInt(ex.targetReps) || 12;
+  const minReps = parseInt(ex.targetMinReps) || Math.max(1, maxReps - 4);
+  const rangeText = minReps === maxReps ? `${maxReps}` : `${minReps}–${maxReps}`;
 
   if (!hasHistory) {
-    return { sets: baseSets, hint: `Старт: веса из шаблона, цель — ${target} повт.` };
+    return { sets: baseSets, hint: `Старт: работаем в диапазоне ${rangeText} повт. Вес повышаем только после чистой техники.` };
   }
 
-  const completedAll = validSets.every(s => (parseSetNum(s.r) || 0) >= target);
+  if (lastEx.techniqueOk !== true) {
+    return { sets: baseSets, warn: true, hint: `Прогрессию не включаю: в прошлой тренировке не отмечена чистая техника. Сначала повтори этот вес качественно.` };
+  }
+
+  const completedAll = validSets.every(s => (parseSetNum(s.r) || 0) >= maxReps);
   const hasWeights = validSets.some(s => parseSetNum(s.w) !== null);
 
   if (ex.progType === 'weight') {
     if (!completedAll) {
-      return { sets: baseSets, hint: `Вес пока не повышаем: сначала добей ${target} повт. во всех рабочих подходах.` };
+      return { sets: baseSets, hint: `Вес пока держим: сначала добей ${maxReps} повт. во всех рабочих подходах с чистой техникой.` };
     }
-    if (!hasWeights) return { sets: baseSets, hint: `Нет веса в прошлой тренировке — прогрессию по кг применить нельзя.` };
+    if (!hasWeights) return { sets: baseSets, warn: true, hint: `Нет веса в прошлой тренировке — прогрессию по кг применить нельзя.` };
     const sets = baseSets.map(s => {
       const w = parseSetNum(s.w);
       if (w === null) return s;
-      return { w: fmtNum(w + step), r: s.r || target };
+      return { w: fmtNum(w + step), r: fmtNum(minReps) };
     });
-    return { sets, hint: `Все подходы ≥ ${target} повт. Следующая тренировка: +${fmtNum(step)} кг на рабочие подходы.` };
+    return { sets, hint: `Цель выполнена чисто. Мягко повышаем вес на ${fmtNum(step)} кг и возвращаемся к ${minReps} повт.` };
   }
 
   if (ex.progType === 'reps') {
-    const sets = baseSets.map(s => {
-      const r = parseSetNum(s.r);
-      return { ...s, r: r === null ? s.r : fmtNum(r + step) };
-    });
-    return { sets, hint: `Добавь +${fmtNum(step)} повт. в каждом рабочем подходе.` };
+    if (completedAll) {
+      return { sets: baseSets, hint: `Верхняя граница ${maxReps} уже достигнута. Для роста дальше лучше перейти на двойную прогрессию и добавить вес.` };
+    }
+    const sets = addOneRepSoft(baseSets, maxReps);
+    return { sets, hint: `Мягкая прогрессия: вес оставляем, добавляем только +1 повтор в одном самом слабом подходе до ${maxReps}.` };
   }
 
   if (ex.progType === 'double') {
     if (completedAll) {
-      const resetReps = Math.max(1, target - 2);
+      if (!hasWeights) return { sets: baseSets, warn: true, hint: `Повторы добиты, но вес не указан — не могу повысить кг.` };
       const sets = baseSets.map(s => {
         const w = parseSetNum(s.w);
-        if (w === null) return { ...s, r: resetReps };
-        return { w: fmtNum(w + step), r: resetReps };
+        if (w === null) return { ...s, r: fmtNum(minReps) };
+        return { w: fmtNum(w + step), r: fmtNum(minReps) };
       });
-      return { sets, hint: `Двойная прогрессия: цель ${target} достигнута, +${fmtNum(step)} кг и откат до ${resetReps} повт.` };
+      return { sets, hint: `Двойная прогрессия: ${maxReps} повт. во всех подходах выполнены чисто → +${fmtNum(step)} кг и откат к ${minReps} повт.` };
     }
-    const sets = baseSets.map(s => {
-      const r = parseSetNum(s.r);
-      if (r === null) return s;
-      return { ...s, r: Math.min(target, r + 1) };
-    });
-    return { sets, hint: `Двойная прогрессия: вес оставляем, добавь повторы до цели ${target}.` };
+    const sets = addOneRepSoft(baseSets, maxReps);
+    return { sets, hint: `Двойная прогрессия: вес не трогаем, добавляем +1 повтор в одном подходе. Цель — довести все подходы до ${maxReps}.` };
   }
 
   return null;
@@ -2647,8 +2679,8 @@ function calcNextStep(ex, lastSets, hasHistory = true) {
 
 function buildProgressedExercise(tpl, ex, idx) {
   const last = getLastTemplateWorkout(tpl);
-  const lastSets = last?.exercises?.[idx]?.sets || ex.sets;
-  const next = calcNextStep(ex, lastSets, Boolean(last));
+  const lastEx = last?.exercises?.[idx] || { sets: ex.sets };
+  const next = calcNextStep(ex, lastEx, Boolean(last));
   return { ...ex, sets: next?.sets || cloneSets(ex.sets) };
 }
 
@@ -2660,15 +2692,15 @@ function renderProgressionHints(tpl) {
     if (!ex.progType || ex.progType === 'none') return;
     const exEl = document.getElementById('ex-' + (ei + 1));
     if (!exEl) return;
-    const lastSets = last?.exercises?.[ei]?.sets || ex.sets;
-    const next = calcNextStep(ex, lastSets, Boolean(last));
+    const lastEx = last?.exercises?.[ei] || { sets: ex.sets };
+    const next = calcNextStep(ex, lastEx, Boolean(last));
     if (!next) return;
 
     const oldHint = exEl.querySelector('.prog-hint');
     if (oldHint) oldHint.remove();
 
     const hint = document.createElement('div');
-    hint.className = 'prog-hint';
+    hint.className = 'prog-hint' + (next.warn ? ' warn' : '');
     hint.innerHTML = `<span class="prog-hint-ico">📈</span> ${next.hint}`;
     exEl.querySelector('.sets-grid').before(hint);
   });
@@ -2836,7 +2868,8 @@ function saveWorkout() {
       }
       return legEl ? legEl.value.trim() : null;
     }).filter(x => x !== null && x !== '');
-    exercises.push({ name, sets });
+    const techniqueOk = document.getElementById(`ex${i}-technique`)?.checked === true;
+    exercises.push({ name, sets, techniqueOk });
   }
 
   const muscles = [...document.querySelectorAll('.muscle-chip.selected')].map(c => c.textContent);
@@ -2906,7 +2939,8 @@ function renderWorkoutsHistory() {
         return s;
       }).join(' · ');
       const exEncoded = encodeURIComponent(e.name || '');
-      return `<div class="ex-detail-row"><span class="ex-detail-name">${e.name}</span><span class="ex-detail-sets">${setsStr||'—'}</span><button class="ex-detail-chart-btn" onclick="openExerciseChartByName(decodeURIComponent('${exEncoded}'))">📈</button></div>`;
+      const techBadge = e.techniqueOk ? '<span title="Техника отмечена чистой" style="color:var(--success);font-size:11px;margin-left:4px">чисто</span>' : '<span title="Техника не отмечена" style="color:var(--muted);font-size:11px;margin-left:4px">без отметки</span>';
+      return `<div class="ex-detail-row"><span class="ex-detail-name">${e.name} ${techBadge}</span><span class="ex-detail-sets">${setsStr||'—'}</span><button class="ex-detail-chart-btn" onclick="openExerciseChartByName(decodeURIComponent('${exEncoded}'))">📈</button></div>`;
     }).join('');
     const cardioStr = w.cardio && (w.cardio.time||w.cardio.dist) ?
       `<div style="margin-top:6px;font-size:12px;color:var(--accent3)">🏃 ${w.cardio.type||'Кардио'}: ${w.cardio.time||'—'} мин · ${w.cardio.dist||'—'} км · ${w.cardio.cals||'—'} ккал</div>` : '';
@@ -3012,6 +3046,7 @@ function addEditExercise(ex) {
       <input class="ex-name-input" placeholder="Упражнение" id="edit-ex-name-${n}" value="${ex?.name||''}">
       <button class="btn-icon" onclick="document.getElementById('edit-ex-${n}').remove()" style="color:var(--accent)">✕</button>
     </div>
+    <label class="technique-row"><input type="checkbox" id="edit-ex${n}-technique" ${ex?.techniqueOk ? 'checked' : ''}> <span><strong>Техника чистая</strong></span></label>
     <div class="sets-grid">
       ${[1,2,3,4,5].map(s => {
         const setVal = ex?.sets?.[s-1];
@@ -3059,7 +3094,8 @@ function saveEditedWorkout() {
       }
       return legEl ? legEl.value.trim() : null;
     }).filter(x => x !== null && x !== '');
-    exercises.push({ name, sets });
+    const techniqueOk = document.getElementById(`edit-ex${i}-technique`)?.checked === true;
+    exercises.push({ name, sets, techniqueOk });
   }
 
   const muscles = [...document.querySelectorAll('#edit-muscles-row .muscle-chip.selected')].map(c => c.textContent);
