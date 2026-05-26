@@ -248,6 +248,14 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 }
 .technique-row input { width:18px; height:18px; accent-color: var(--success); }
 .technique-row strong { color:var(--text); }
+.active-technique-row {
+  margin-top:10px; margin-bottom:10px;
+  background:rgba(52,211,153,0.08);
+  border-color:rgba(52,211,153,0.28);
+}
+.active-technique-row input { flex:0 0 auto; }
+.active-technique-row span { line-height:1.25; }
+
 .prog-hint.warn { background:rgba(251,191,36,0.10); border-color:rgba(251,191,36,0.35); color:var(--gold); }
 
 /* drag-reorder */
@@ -2805,6 +2813,10 @@ function addExercise(ex) {
       <div class="ex-done-check" title="Отметить выполненным" onclick="toggleExDone(this)"></div>
       <button class="btn-icon" onclick="removeExercise(${n})" style="color:var(--accent)">✕</button>
     </div>
+    <label class="technique-row active-technique-row">
+      <input type="checkbox" id="ex${n}-technique" ${ex?.techniqueOk ? 'checked' : ''}>
+      <span><strong>Техника чистая</strong> — разрешить прогрессию для следующей тренировки</span>
+    </label>
     <div class="sets-grid">
       ${[1,2,3,4,5].map(s => {
         const sv = ex?.sets?.[s-1];
