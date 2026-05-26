@@ -236,10 +236,32 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .prog-hint {
   display:flex; align-items:center; gap:6px;
   background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3);
-  border-radius:8px; padding:7px 10px; margin-bottom:8px;
+  border-radius:8px; padding:7px 10px; margin:0;
   font-size:12px; font-weight:700; color:var(--success);
+  flex:1 1 auto; min-width:0;
 }
 .prog-hint-ico { font-size:14px; }
+.prog-line {
+  display:flex; align-items:stretch; gap:8px; margin-bottom:8px;
+}
+.prog-technique-pill {
+  display:none; align-items:center; justify-content:center; gap:6px;
+  flex:0 0 96px; padding:7px 8px; border-radius:8px;
+  background:rgba(255,255,255,0.025); border:1px solid var(--border);
+  color:var(--muted); font-size:11px; font-weight:800;
+  cursor:pointer; user-select:none; text-align:center;
+}
+.prog-technique-pill input { width:18px; height:18px; accent-color:var(--success); margin:0; flex-shrink:0; }
+.prog-technique-pill:has(input:checked) {
+  background:rgba(52,211,153,0.10); border-color:rgba(52,211,153,0.40); color:var(--success);
+}
+.exercise-row.completed .prog-technique-pill { display:flex; }
+@media (max-width: 390px) {
+  .prog-line { gap:6px; }
+  .prog-technique-pill { flex-basis:82px; padding-left:6px; padding-right:6px; }
+  .prog-technique-pill span { display:none; }
+}
+
 .technique-row {
   display:flex; align-items:center; gap:8px;
   background:rgba(255,255,255,0.03); border:1px solid var(--border);
@@ -2720,13 +2742,19 @@ function renderProgressionHints(tpl) {
     const next = calcNextStep(ex, lastEx, Boolean(last));
     if (!next) return;
 
-    const oldHint = exEl.querySelector('.prog-hint');
-    if (oldHint) oldHint.remove();
+    const oldLine = exEl.querySelector('.prog-line');
+    if (oldLine) oldLine.remove();
 
-    const hint = document.createElement('div');
-    hint.className = 'prog-hint' + (next.warn ? ' warn' : '');
-    hint.innerHTML = `<span class="prog-hint-ico">📈</span> ${next.hint}`;
-    exEl.querySelector('.sets-grid').before(hint);
+    const line = document.createElement('div');
+    line.className = 'prog-line';
+    line.innerHTML = `
+      <div class="prog-hint${next.warn ? ' warn' : ''}"><span class="prog-hint-ico">📈</span> ${next.hint}</div>
+      <label class="prog-technique-pill" title="Отметь после выполнения, если техника была чистой">
+        <input type="checkbox" id="ex${ei + 1}-technique" ${ex?.techniqueOk ? 'checked' : ''} onclick="event.stopPropagation()">
+        <span>Техника</span>
+      </label>
+    `;
+    exEl.querySelector('.sets-grid').before(line);
   });
 }
 
@@ -2825,15 +2853,10 @@ function addExercise(ex) {
       <div class="ex-drag-handle" title="Перетащить">⠿</div>
       <div class="ex-num">${n}</div>
       <input class="ex-name-input" placeholder="Название упражнения" id="ex-name-${n}" value="${ex?.name||''}">
-      <label class="ex-technique-pill" title="Отметь только если техника была чистой">
-        <input type="checkbox" id="ex${n}-technique" ${ex?.techniqueOk ? 'checked' : ''} onclick="event.stopPropagation()">
-        <span>Техника</span>
-      </label>
       <span class="ex-completed-badge">✓ Готово</span>
       <div class="ex-done-check" title="Отметить выполненным" onclick="toggleExDone(this)"></div>
       <button class="btn-icon" onclick="removeExercise(${n})" style="color:var(--accent)">✕</button>
     </div>
-    <div class="technique-note">Прогрессия сработает только если отмечена чистая техника и добраны нужные повторы.</div>
     <div class="sets-grid">
       ${[1,2,3,4,5].map(s => {
         const sv = ex?.sets?.[s-1];
