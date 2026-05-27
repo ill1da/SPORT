@@ -693,6 +693,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .stat-label { font-size: 14px; color: var(--muted); }
 .stat-val { font-size: 14px; font-weight: 800; }
 
+
+.formula-select { background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px;width:100%;color:var(--text);font-size:12px; }
+.formula-note { font-size:10px;color:var(--muted);line-height:1.25;margin-top:4px; }
+
 </style>
 </head>
 <body>
@@ -2389,10 +2393,11 @@ function addTplExercise(ex) {
   div.id = 'tpl-ex-' + n;
   const restM = ex?.restMin ?? '';
   const restS = ex?.restSec ?? '';
-  const targetReps = ex?.targetReps ?? '';
-  const targetMinReps = ex?.targetMinReps ?? '';
-  const progType = ex?.progType ?? 'none';
-  const progStep = ex?.progStep ?? '';
+  const targetReps = ex?.targetReps ?? 12;
+  const targetMinReps = ex?.targetMinReps ?? 8;
+  const progType = ex?.progType ?? 'double';
+  const progStep = ex?.progStep ?? 2.5;
+  const formulaPreset = ex?.formulaPreset ?? 'double_8_12';
   div.draggable = true;
   div.innerHTML = `
     <div class="ex-head">
@@ -2400,6 +2405,22 @@ function addTplExercise(ex) {
       <div class="ex-num">${n}</div>
       <input class="ex-name-input" placeholder="Название упражнения" id="tpl-ex-name-${n}" value="${ex?.name||''}">
       <button class="btn-icon" onclick="document.getElementById('tpl-ex-${n}').remove()" style="color:var(--accent)">✕</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:6px;margin:6px 0">
+      <div class="field" style="margin:0">
+        <label style="font-size:9px">Главная формула</label>
+        <select id="tpl-ex${n}-formula" class="formula-select" onchange="applyFormulaPreset(${n})">
+          <option value="custom" ${formulaPreset==='custom'?'selected':''}>Своя настройка</option>
+          <option value="double_8_12" ${formulaPreset==='double_8_12'?'selected':''}>Двойная 8–12 + техника чистая</option>
+          <option value="double_6_10" ${formulaPreset==='double_6_10'?'selected':''}>Тяжёлые жимы/тяги: двойная 6–10</option>
+          <option value="double_8_10" ${formulaPreset==='double_8_10'?'selected':''}>Тяжёлая база: двойная 8–10</option>
+          <option value="double_12_15" ${formulaPreset==='double_12_15'?'selected':''}>Плечи/задняя дельта/бабочка: 12–15</option>
+          <option value="double_10_12" ${formulaPreset==='double_10_12'?'selected':''}>Бицепс/трицепс: 10–12</option>
+          <option value="double_10_15" ${formulaPreset==='double_10_15'?'selected':''}>Бицепс/трицепс: 10–15</option>
+          <option value="double_15_20" ${formulaPreset==='double_15_20'?'selected':''}>Икры/пресс: 15–20</option>
+        </select>
+        <div class="formula-note">Вес повышается только после верхней границы во всех рабочих подходах и отметки чистой техники.</div>
+      </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin:6px 0">
       <div class="field" style="margin:0">
@@ -2426,7 +2447,7 @@ function addTplExercise(ex) {
           <option value="none" ${progType==='none'?'selected':''}>Без прогрессии</option>
           <option value="weight" ${progType==='weight'?'selected':''}>Вес после цели</option>
           <option value="reps" ${progType==='reps'?'selected':''}>Мягко +повтор</option>
-          <option value="double" ${progType==='double'?'selected':''}>Двойная 8–12</option>
+          <option value="double" ${progType==='double'?'selected':''}>Двойная по диапазону</option>
         </select>
       </div>
       <div class="field" style="margin:0" id="tpl-ex${n}-step-wrap">
@@ -2476,7 +2497,8 @@ function saveTpl() {
     const targetMinReps= parseInt(document.getElementById(`tpl-ex${i}-rmin`)?.value) || 0;
     const progType  = document.getElementById(`tpl-ex${i}-prog`)?.value || 'none';
     const progStep  = parseFloat(document.getElementById(`tpl-ex${i}-step`)?.value) || 0;
-    exercises.push({ name: exName, sets, restMin, restSec, targetReps, targetMinReps, progType, progStep });
+    const formulaPreset = document.getElementById(`tpl-ex${i}-formula`)?.value || 'custom';
+    exercises.push({ name: exName, sets, restMin, restSec, targetReps, targetMinReps, progType, progStep, formulaPreset });
   }
   const muscles = [...document.querySelectorAll('#tpl-muscles-row .muscle-chip.selected')].map(c => c.textContent);
   const editId = document.getElementById('tpl-edit-id').value;
@@ -2606,6 +2628,35 @@ function hideNewWorkout() {
 }
 
 // ═══════════════ PROGRESSION ═══════════════
+
+function getFormulaPresetConfig(value) {
+  const map = {
+    double_8_12: { min: 8,  max: 12, step: 2.5, label: 'Двойная 8–12 + техника чистая' },
+    double_6_10: { min: 6,  max: 10, step: 2.5, label: 'Тяжёлые жимы/тяги: двойная 6–10' },
+    double_8_10: { min: 8,  max: 10, step: 2.5, label: 'Тяжёлая база: двойная 8–10' },
+    double_12_15:{ min: 12, max: 15, step: 1,   label: 'Плечи/задняя дельта/бабочка: 12–15' },
+    double_10_12:{ min: 10, max: 12, step: 1,   label: 'Бицепс/трицепс: 10–12' },
+    double_10_15:{ min: 10, max: 15, step: 1,   label: 'Бицепс/трицепс: 10–15' },
+    double_15_20:{ min: 15, max: 20, step: 1,   label: 'Икры/пресс: 15–20' },
+  };
+  return map[value] || null;
+}
+
+function applyFormulaPreset(n) {
+  const formula = document.getElementById(`tpl-ex${n}-formula`)?.value || 'custom';
+  const cfg = getFormulaPresetConfig(formula);
+  if (!cfg) return;
+  const prog = document.getElementById(`tpl-ex${n}-prog`);
+  const rmin = document.getElementById(`tpl-ex${n}-rmin`);
+  const rmax = document.getElementById(`tpl-ex${n}-treps`);
+  const step = document.getElementById(`tpl-ex${n}-step`);
+  if (prog) prog.value = 'double';
+  if (rmin) rmin.value = cfg.min;
+  if (rmax) rmax.value = cfg.max;
+  if (step && (!step.value || Number(String(step.value).replace(',', '.')) === 0)) step.value = cfg.step;
+  toggleProgStep(n);
+}
+
 function toggleProgStep(n) {
   const sel = document.getElementById(`tpl-ex${n}-prog`);
   const wrap = document.getElementById(`tpl-ex${n}-step-wrap`);
