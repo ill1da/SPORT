@@ -2404,7 +2404,7 @@ function addTplExercise(ex) {
       <div class="ex-drag-handle" title="Перетащить">⠿</div>
       <div class="ex-num">${n}</div>
       <input class="ex-name-input" placeholder="Название упражнения" id="tpl-ex-name-${n}" value="${ex?.name||''}">
-      <button class="btn-icon" onclick="document.getElementById('tpl-ex-${n}').remove()" style="color:var(--accent)">✕</button>
+      <button class="btn-icon" onclick="confirmRemoveTplExercise(${n})" style="color:var(--accent)">✕</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr;gap:6px;margin:6px 0">
       <div class="field" style="margin:0">
@@ -2522,6 +2522,24 @@ function deleteTpl(id) {
   if (!confirm('Удалить шаблон?')) return;
   data.templates = data.templates.filter(t => t.id !== id);
   save(); renderTemplates(); toast('🗑 Удалено');
+}
+
+function confirmRemoveTplExercise(n) {
+  if (!confirm('Удалить упражнение из шаблона?')) return;
+  const el = document.getElementById('tpl-ex-' + n);
+  if (el) {
+    el.remove();
+    toast('🗑 Упражнение удалено');
+  }
+}
+
+function confirmRemoveEditExercise(n) {
+  if (!confirm('Удалить упражнение из тренировки?')) return;
+  const el = document.getElementById('edit-ex-' + n);
+  if (el) {
+    el.remove();
+    toast('🗑 Упражнение удалено');
+  }
 }
 
 // Open picker from workout form
@@ -3151,7 +3169,7 @@ function addEditExercise(ex) {
         <input type="checkbox" id="edit-ex${n}-technique" ${ex?.techniqueOk ? 'checked' : ''} onclick="event.stopPropagation()">
         <span>Техника</span>
       </label>
-      <button class="btn-icon" onclick="document.getElementById('edit-ex-${n}').remove()" style="color:var(--accent)">✕</button>
+      <button class="btn-icon" onclick="confirmRemoveEditExercise(${n})" style="color:var(--accent)">✕</button>
     </div>
     <div class="sets-grid">
       ${[1,2,3,4,5].map(s => {
