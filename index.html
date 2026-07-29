@@ -66,6 +66,27 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 }
 .nav-btn .ico { font-size: 16px; }
 .nav-btn.active { color: var(--accent); }
+.nav-settings-btn {
+  flex: 0 0 42px; border-left: 1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  background:none; border-top:none; border-right:none; border-bottom:none;
+  color:var(--muted); font-size:18px; cursor:pointer;
+}
+.nav-settings-btn:active { color:var(--accent2); }
+.nav-config-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+.nav-config-row:last-child { border-bottom:none; }
+.nav-config-icon { width:34px; height:34px; border-radius:10px; background:var(--card); display:flex; align-items:center; justify-content:center; font-size:18px; }
+.nav-config-name { flex:1; font-size:13px; font-weight:800; }
+.nav-config-actions { display:flex; gap:5px; }
+.nav-mini-btn { width:30px; height:30px; border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text); cursor:pointer; }
+.nav-mini-btn:disabled { opacity:.25; cursor:default; }
+.exercise-comment { margin:8px 0 10px; padding:9px 10px; border-radius:9px; background:rgba(96,165,250,.08); border-left:3px solid var(--accent3); color:var(--muted); font-size:12px; line-height:1.45; white-space:pre-wrap; }
+.exercise-comment strong { color:var(--accent3); }
+.exercise-comment-input { width:100%; min-height:64px; resize:vertical; margin:7px 0; font-size:12px; }
+.assist-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 6px; border-radius:10px; background:rgba(6,182,212,.12); color:#22d3ee; font-size:10px; font-weight:800; }
+.program-banner { background:linear-gradient(135deg,rgba(124,58,237,.16),rgba(236,72,153,.10)); border:1px solid rgba(167,139,250,.35); border-radius:14px; padding:13px; margin-bottom:12px; }
+.program-banner-title { font-family:'Bebas Neue',sans-serif; font-size:19px; letter-spacing:.6px; margin-bottom:4px; }
+.program-banner-text { font-size:12px; color:var(--muted); line-height:1.45; margin-bottom:10px; }
 
 /* CARDS */
 .card {
@@ -1013,11 +1034,17 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 <div class="screen" id="screen-templates">
   <div class="topbar">
     <div class="topbar-title">📋 ШАБЛОНЫ</div>
+    <button class="btn-icon" title="Загрузить текущую программу" onclick="installProgram2()">🎯</button>
     <button class="btn-icon" onclick="openNewTplModal()">➕</button>
   </div>
   <div class="scroll">
+    <div class="program-banner">
+      <div class="program-banner-title">V-СИЛУЭТ · ПРОГРАММА 2.0</div>
+      <div class="program-banner-text">Четыре актуальных шаблона с диапазонами повторов, отдыхом, комментариями по технике и прогрессией гравитрона через уменьшение помощи.</div>
+      <button class="btn btn-secondary" style="padding:9px 12px;font-size:12px" onclick="installProgram2()">🎯 Добавить / обновить программу</button>
+    </div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">
-      Создай шаблоны (День A, День B…) — при добавлении тренировки выбери нужный, упражнения заполнятся автоматически. Прогрессия сохраняется в шаблоне.
+      Создай шаблоны (День A, День B…) — при добавлении тренировки выбери нужный, упражнения заполнятся автоматически. Прогрессия и комментарии сохраняются в шаблоне.
     </div>
     <div id="templates-list"></div>
     <button class="btn btn-secondary" style="margin-top:4px" onclick="openNewTplModal()">➕ Новый шаблон</button>
@@ -1523,30 +1550,21 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 <div class="toast" id="toast"></div>
 <div class="toast" id="toast"></div>
 
-<!-- Bottom nav -->
-<div class="bottom-nav">
-  <button class="nav-btn active" id="nav-home" onclick="goTo('home')">
-    <span class="ico">🏠</span>Главная
-  </button>
-  <button class="nav-btn" id="nav-workouts" onclick="goTo('workouts')">
-    <span class="ico">💪</span>Трен.
-  </button>
-  <button class="nav-btn" id="nav-templates" onclick="goTo('templates')">
-    <span class="ico">📋</span>Шаблоны
-  </button>
-  <button class="nav-btn" id="nav-food" onclick="goTo('food')">
-    <span class="ico">🥗</span>Еда
-  </button>
-  <button class="nav-btn" id="nav-params" onclick="goTo('params')">
-    <span class="ico">📊</span>Парам.
-  </button>
-  <button class="nav-btn" id="nav-charts" onclick="goTo('charts')">
-    <span class="ico">📈</span>Графики
-  </button>
-  <button class="nav-btn" id="nav-habits" onclick="goTo('habits')">
-    <span class="ico">✅</span>Привычки
-  </button>
+<!-- Modal: bottom navigation settings -->
+<div class="modal-overlay" id="modal-nav-settings" onclick="closeModalOutside(event,'modal-nav-settings')">
+  <div class="modal" style="max-height:85vh;overflow-y:auto">
+    <div class="modal-handle"></div>
+    <div class="modal-title">НИЖНЯЯ ПАНЕЛЬ</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.45;margin-bottom:12px">Добавляй и убирай разделы переключателем, меняй порядок стрелками. Кнопка ⚙️ остаётся всегда, чтобы настройки не потерялись.</div>
+    <div class="card" id="nav-settings-list"></div>
+    <button class="btn btn-primary" style="margin-top:12px" onclick="saveNavSettings()">💾 Сохранить панель</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="resetNavSettings()">Вернуть стандартный порядок</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="closeModal('modal-nav-settings')">Закрыть</button>
+  </div>
 </div>
+
+<!-- Bottom nav -->
+<div class="bottom-nav" id="bottom-nav"></div>
 
 <script>
 // ═══════════════ DATA ═══════════════
@@ -1560,15 +1578,94 @@ if (!data.challenges) data.challenges = [];
 if (!data.tracker) data.tracker = {};
 if (!data.food) data.food = {};
 
+const NAV_SECTIONS = [
+  { id:'home',      label:'Главная',   short:'Главная', icon:'🏠' },
+  { id:'workouts',  label:'Тренировки',short:'Трен.',   icon:'💪' },
+  { id:'templates', label:'Шаблоны',   short:'Шаблоны', icon:'📋' },
+  { id:'food',      label:'Питание',   short:'Еда',     icon:'🥗' },
+  { id:'params',    label:'Параметры', short:'Парам.',  icon:'📊' },
+  { id:'charts',    label:'Графики',   short:'Графики', icon:'📈' },
+  { id:'habits',    label:'Привычки',  short:'Привычки',icon:'✅' },
+  { id:'tracker',   label:'Трекер',    short:'Трекер',  icon:'🗓️' },
+];
+const DEFAULT_NAV = ['home','workouts','templates','food','params','charts','habits'];
+if (!Array.isArray(data.navConfig) || !data.navConfig.length) data.navConfig = [...DEFAULT_NAV];
+
 function save() { localStorage.setItem('workout_diary_v2', JSON.stringify(data)); }
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+}
+function escapeAttr(value) { return escapeHtml(value).replace(/`/g, '&#096;'); }
 
 // ═══════════════ NAVIGATION ═══════════════
+let navDraft = [];
+function getValidNavConfig(config = data.navConfig) {
+  const valid = new Set(NAV_SECTIONS.map(x => x.id));
+  const result = [...new Set((config || []).filter(id => valid.has(id)))];
+  return result.length ? result : ['home'];
+}
+function renderBottomNav(activePage = document.querySelector('.screen.active')?.id?.replace('screen-','') || 'home') {
+  const nav = document.getElementById('bottom-nav');
+  if (!nav) return;
+  const ids = getValidNavConfig();
+  nav.innerHTML = ids.map(id => {
+    const item = NAV_SECTIONS.find(x => x.id === id);
+    if (!item) return '';
+    return `<button class="nav-btn ${activePage===id?'active':''}" id="nav-${id}" onclick="goTo('${id}')"><span class="ico">${item.icon}</span>${item.short}</button>`;
+  }).join('') + `<button class="nav-settings-btn" title="Настроить нижнюю панель" onclick="openNavSettings()">⚙️</button>`;
+}
+function openNavSettings() {
+  navDraft = getValidNavConfig();
+  renderNavSettings();
+  openModal('modal-nav-settings');
+}
+function renderNavSettings() {
+  const list = document.getElementById('nav-settings-list');
+  if (!list) return;
+  const ordered = [...navDraft, ...NAV_SECTIONS.map(x=>x.id).filter(id=>!navDraft.includes(id))];
+  list.innerHTML = ordered.map(id => {
+    const item = NAV_SECTIONS.find(x=>x.id===id);
+    const enabled = navDraft.includes(id);
+    const pos = navDraft.indexOf(id);
+    return `<div class="nav-config-row">
+      <div class="nav-config-icon">${item.icon}</div>
+      <div class="nav-config-name">${item.label}</div>
+      <label class="switch"><input type="checkbox" ${enabled?'checked':''} onchange="toggleNavDraft('${id}',this.checked)"><span class="slider"></span></label>
+      <div class="nav-config-actions">
+        <button class="nav-mini-btn" ${!enabled||pos<=0?'disabled':''} onclick="moveNavDraft('${id}',-1)">↑</button>
+        <button class="nav-mini-btn" ${!enabled||pos===navDraft.length-1?'disabled':''} onclick="moveNavDraft('${id}',1)">↓</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleNavDraft(id, enabled) {
+  if (enabled && !navDraft.includes(id)) navDraft.push(id);
+  if (!enabled) navDraft = navDraft.filter(x => x !== id);
+  renderNavSettings();
+}
+function moveNavDraft(id, delta) {
+  const idx = navDraft.indexOf(id);
+  const target = idx + delta;
+  if (idx < 0 || target < 0 || target >= navDraft.length) return;
+  [navDraft[idx], navDraft[target]] = [navDraft[target], navDraft[idx]];
+  renderNavSettings();
+}
+function saveNavSettings() {
+  if (!navDraft.length) { toast('Оставь хотя бы один раздел'); return; }
+  data.navConfig = getValidNavConfig(navDraft);
+  save();
+  renderBottomNav();
+  closeModal('modal-nav-settings');
+  toast('✅ Нижняя панель обновлена');
+}
+function resetNavSettings() { navDraft = [...DEFAULT_NAV]; renderNavSettings(); }
+
 function goTo(page) {
+  const target = document.getElementById('screen-' + page);
+  if (!target) return;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('screen-' + page).classList.add('active');
-  const navBtn = document.getElementById('nav-' + page);
-  if (navBtn) navBtn.classList.add('active');
+  target.classList.add('active');
+  renderBottomNav(page);
   renderPage(page);
 }
 
@@ -1697,7 +1794,8 @@ let wm = null; // active workout mode session
 function launchWorkoutMode(tplId) {
   const t = data.templates.find(x => x.id === tplId);
   if (!t || !t.exercises?.length) { toast('Шаблон пуст — добавь упражнения'); return; }
-  wm = { tplId, tpl: t, mode: null };
+  const sessionExercises = t.exercises.map((ex, idx) => buildProgressedExercise(t, ex, idx));
+  wm = { tplId, sourceTpl: t, tpl: { ...t, exercises: sessionExercises }, mode: null };
   document.getElementById('wo-mode-tpl-name').textContent = t.name.toUpperCase();
   openModal('modal-wo-mode');
 }
@@ -1788,7 +1886,10 @@ function selectWoMode(mode) {
   wm.startTime = Date.now();
   wm.results = t.exercises.map(ex => ({
     name: ex.name,
-    sets: (ex.sets?.length ? ex.sets : [{}]).map(s => ({ w: s?.w || '', r: s?.r || ex.targetReps || '' }))
+    comment: ex.comment || '',
+    progType: ex.progType || 'none',
+    techniqueOk: false,
+    sets: (ex.sets?.length ? ex.sets : [{}]).map(s => ({ w: s?.w || '', r: s?.r || '' }))
   }));
   wm.timerInterval = null;
 
@@ -1834,6 +1935,7 @@ function renderWmStep() {
     : '🏁 Последний подход!';
 
   // Table-based sets — no horizontal overflow
+  const assisted = ex.progType === 'assistance';
   const setsRows = res.sets.map((s, si) => {
     const isCur  = si === step.setIdx;
     const isDone = si < step.setIdx;
@@ -1841,7 +1943,7 @@ function renderWmStep() {
       <td class="wm-set-num-cell">П${si+1}</td>
       <td style="width:28px"><div class="wm-set-done ${isDone?'done':''}" onclick="wmToggleDone(${si})">${isDone?'✓':''}</div></td>
       <td><input class="wm-set-inp weight ${!isCur?'dim':''}" type="number" inputmode="decimal"
-        placeholder="кг" value="${s.w}" step="0.5" min="0"
+        placeholder="${assisted?'помощь':'кг'}" value="${s.w}" step="0.5" min="0"
         onchange="wm.results[${step.exIdx}].sets[${si}].w=this.value"></td>
       <td class="wm-set-sep">×</td>
       <td><input class="wm-set-inp ${!isCur?'dim':''}" type="number" inputmode="numeric"
@@ -1874,12 +1976,16 @@ function renderWmStep() {
         <div class="wm-ex-card">
           <div class="wm-ex-name">${ex.name}</div>
           <div class="wm-ex-meta">
-            ${ex.targetReps ? `🎯 ${ex.targetReps} повт` : ''}${ex.targetReps && restTotal ? ' · ' : ''}${restTotal ? `⏱ ${ex.restMin||0}м ${ex.restSec||0}с отдых` : ''}
+            ${ex.targetMinReps && ex.targetReps ? `🎯 ${ex.targetMinReps}–${ex.targetReps} повт` : ex.targetReps ? `🎯 ${ex.targetReps} повт` : ''}${ex.targetReps && restTotal ? ' · ' : ''}${restTotal ? `⏱ ${ex.restMin||0}м ${ex.restSec||0}с отдых` : ''}
+            ${assisted ? ' · <span class="assist-badge">помощь ↓</span>' : ''}
           </div>
+          ${ex.comment ? `<div class="exercise-comment"><strong>Комментарий:</strong> ${escapeHtml(ex.comment)}</div>` : ''}
+          ${ex._progressHint ? `<div class="prog-hint${ex._progressWarn?' warn':''}" style="margin-bottom:10px"><span class="prog-hint-ico">📈</span> ${escapeHtml(ex._progressHint)}</div>` : ''}
+          <label class="technique-row" style="margin-bottom:10px"><input type="checkbox" ${res.techniqueOk?'checked':''} onchange="wm.results[${step.exIdx}].techniqueOk=this.checked"> <span><strong>Техника чистая</strong> — отметь после рабочих подходов</span></label>
           <table class="wm-set-table">
             <thead><tr>
               <th></th><th></th>
-              <th>КГ</th><th></th><th>ПОВТ</th>
+              <th>${assisted?'ПОМОЩЬ':'КГ'}</th><th></th><th>ПОВТ</th>
             </tr></thead>
             <tbody>${setsRows}</tbody>
           </table>
@@ -2017,16 +2123,17 @@ function finishWm() {
 
   // Render report screen
   const exRows = wm.results.map((res, ei) => {
+    const assisted = res.progType === 'assistance';
     const setsStr = res.sets.filter(s => s.w||s.r).map(s => {
-      if (s.w && s.r) return `${s.w}кг×${s.r}`;
-      if (s.w) return `${s.w}кг`;
+      if (s.w && s.r) return assisted ? `${s.w}кг помощи×${s.r}` : `${s.w}кг×${s.r}`;
+      if (s.w) return assisted ? `${s.w}кг помощи` : `${s.w}кг`;
       if (s.r) return `×${s.r}`;
       return '—';
     }).join(' · ');
     return `<div class="wm-summary-row">
-      <span style="font-weight:800">${res.name}</span>
+      <span style="font-weight:800">${escapeHtml(res.name)} ${res.techniqueOk?'✓':''}</span>
       <span style="color:var(--accent3);font-size:12px">${setsStr || '—'}</span>
-    </div>`;
+    </div>${res.comment?`<div style="font-size:11px;color:var(--muted);padding:0 0 7px">💬 ${escapeHtml(res.comment)}</div>`:''}`;
   }).join('');
 
   document.getElementById('wm-content').innerHTML = `
@@ -2288,6 +2395,133 @@ function updateHomeStepsSub() {
   }
 }
 
+
+// ═══════════════ CURRENT PROGRAM: V-SILHOUETTE 2.0 ═══════════════
+function blankProgramSets(count) {
+  return Array.from({length: count}, () => ({ w:'', r:'' }));
+}
+
+function programExercise(key, name, setCount, min, max, restMin, restSec, progType, progStep, formulaPreset, comment) {
+  return {
+    programExerciseKey:key,
+    name,
+    sets:blankProgramSets(setCount),
+    targetMinReps:min,
+    targetReps:max,
+    restMin,
+    restSec,
+    progType,
+    progStep,
+    formulaPreset,
+    comment,
+    techniqueOk:false,
+  };
+}
+
+function getProgram2Templates() {
+  return [
+    {
+      programKey:'v-silhouette-2-upper-a',
+      name:'День 1 — Верх A',
+      type:'Силовая',
+      muscles:['Грудь','Спина','Плечи','Руки'],
+      notes:'~65–80 минут. Верх груди, ширина спины, боковая дельта. Если времени мало — обязательно первые пять упражнений; руки можно сократить до одного подхода.',
+      exercises:[
+        programExercise('ua-incline-db','Жим гантелей на наклонной скамье 20–30°',3,8,12,2,30,'double',1,'double_8_12','Лопатки стабильны, локти не разводить под 90°, не выгибаться чрезмерно.'),
+        programExercise('ua-gravitron-pullup','Подтягивания в гравитроне средним/нейтральным хватом',3,6,10,2,30,'assistance',2.5,'assist_6_10','Тяни локти вниз, грудь слегка вверх, не дёргай корпусом. В поле нагрузки указывай килограммы помощи гравитрона.'),
+        programExercise('ua-chest-row','Тяга с опорой грудью (тренажёр или гантели)',3,8,12,2,0,'double',2.5,'double_8_12','Не отрывай грудь от опоры, своди лопатки без переразгибания поясницы.'),
+        programExercise('ua-shoulder-press','Жим гантелей / в тренажёре сидя',2,8,12,2,0,'double',1,'double_8_12','Рёбра не выпячивать, предплечья вертикальны, работать без боли в плече.'),
+        programExercise('ua-cable-lateral','Отведение руки в сторону в кроссовере',3,12,20,1,15,'double',1,'double_12_20','Локоть ведёт движение, плечо не тянуть к уху, вес умеренный.'),
+        programExercise('ua-low-curl','Сгибание рук на нижнем блоке',2,10,15,1,15,'double',1,'double_10_15','Локти остаются возле корпуса, не помогать спиной.'),
+        programExercise('ua-rope-pressdown','Разгибание на трицепс с канатом',2,10,15,1,15,'double',1,'double_10_15','Локти фиксированы, внизу развести концы каната.'),
+      ],
+    },
+    {
+      programKey:'v-silhouette-2-lower-core',
+      name:'День 2 — Низ + кор',
+      type:'Силовая',
+      muscles:['Ноги','Ягодицы','Пресс'],
+      notes:'~60–75 минут. Ноги, ягодицы, задняя цепь и стабильность корпуса. При локальной боли в спине или у лопатки румынскую тягу заменить на hip thrust 3×8–12.',
+      exercises:[
+        programExercise('lc-leg-press','Жим ногами или гакк-присед',3,8,12,2,30,'double',5,'double_8_12','Таз не подкручивать внизу, колени идут по линии носков.'),
+        programExercise('lc-rdl','Румынская тяга с гантелями',3,8,12,2,30,'double',2,'double_8_12','Таз назад, гантели близко к ногам, остановиться до потери нейтрали спины. При боли заменить на ягодичный мост / hip thrust.'),
+        programExercise('lc-bulgarian','Болгарский сплит-присед',2,10,12,1,45,'double',1,'double_10_12','Опора устойчива, колено контролировать, не заваливаться корпусом. Повторы считаются на каждую ногу.'),
+        programExercise('lc-leg-curl','Сгибание ног сидя / лёжа',3,10,15,1,30,'double',1,'double_10_15','Пауза в сокращении, таз прижат к тренажёру.'),
+        programExercise('lc-calves','Подъём на носки стоя / сидя',3,12,20,1,15,'double',1,'double_12_20','Пауза внизу и наверху, без пружинящих повторов.'),
+        programExercise('lc-pallof','Pallof press',2,10,15,1,0,'double',1,'double_10_15','Корпус не поворачивается, выдох при выпрямлении рук. Повторы считаются на каждую сторону.'),
+        programExercise('lc-deadbug','Dead bug или планка',2,8,12,1,0,'reps',1,'custom','Dead bug: 8–12 на сторону. Планка: 30–60 секунд; после 60 секунд усложняй вариант. Поясница остаётся под контролем.'),
+      ],
+    },
+    {
+      programKey:'v-silhouette-2-upper-b',
+      name:'День 3 — Верх B',
+      type:'Силовая',
+      muscles:['Спина','Грудь','Плечи','Руки'],
+      notes:'~70–85 минут. Толщина спины, грудь, задняя и боковая дельта. Брусья — только в безболезненной технике; на гравитроне уменьшать помощь после 12/12 чистых повторов.',
+      exercises:[
+        programExercise('ub-incline-press','Жим штанги / тренажёра на наклонной скамье 20–30°',3,6,10,2,30,'double',2.5,'double_6_10','Лопатки сведены, касание контролируемое, не отбивать от груди.'),
+        programExercise('ub-lat-pulldown','Тяга верхнего блока нейтральным хватом',3,8,12,2,0,'double',2.5,'double_8_12','Не отклоняться далеко назад, локти тянуть к тазу.'),
+        programExercise('ub-wide-row','Горизонтальная тяга с опорой грудью, локти чуть шире',3,8,12,2,0,'double',2.5,'double_8_12','Акцент на верх спины, плечи не поднимать к ушам.'),
+        programExercise('ub-assisted-dips','Брусья с поддержкой / гравитрон',2,8,12,1,45,'assistance',2.5,'assist_8_12','Лёгкий наклон вперёд, не проваливаться в плечах, без боли. Указывай килограммы помощи; после 12/12 чистых повторов помощь уменьшается.'),
+        programExercise('ub-reverse-fly','Обратная «бабочка»',3,12,20,1,15,'double',1,'double_12_20','Руки ведут дугу, лопатки не зажимать чрезмерно.'),
+        programExercise('ub-lateral-machine','Разведения в стороны в тренажёре',3,12,20,1,15,'double',1,'double_12_20','Движение плавное, не бросать вес вниз.'),
+        programExercise('ub-hammer-curl','Молотковые сгибания',2,10,15,1,15,'double',1,'double_10_15','Кисть нейтрально, плечо не уходит вперёд.'),
+        programExercise('ub-overhead-rope','Разгибание каната из-за головы',2,10,15,1,15,'double',1,'double_10_15','Локти направлены вперёд, растяжение без боли.'),
+      ],
+    },
+    {
+      programKey:'v-silhouette-2-specialization',
+      name:'День 4 — Специализация',
+      type:'Силовая',
+      muscles:['Плечи','Руки','Грудь','Спина'],
+      notes:'~60–75 минут. Плечи, руки, лёгкий верх груди и широчайшие. Тяжёлый жим над головой не нужен: главный объём направлен в боковую и заднюю дельту.',
+      exercises:[
+        programExercise('sp-incline-machine','Жим в тренажёре под углом',2,8,12,2,0,'double',2.5,'double_8_12','Средняя нагрузка: это не ещё один тяжёлый день груди.'),
+        programExercise('sp-onearm-pulldown','Одноручная тяга верхнего блока',2,10,15,1,30,'double',1,'double_10_15','Позволяй лопатке тянуться вверх, затем веди локоть к боку. Повторы считаются на каждую сторону.'),
+        programExercise('sp-cable-lateral','Отведение руки в сторону в кроссовере',4,12,20,1,0,'double',1,'double_12_20','Главное упражнение дня: одинаковая траектория, без раскачки.'),
+        programExercise('sp-rear-delt','Обратная «бабочка» / задняя дельта',3,12,20,1,0,'double',1,'double_12_20','Плечо движется назад, трапеции не перехватывают работу.'),
+        programExercise('sp-scott-curl','Сгибание рук на скамье Скотта',3,8,12,1,30,'double',1,'double_8_12','Не разгибать локоть до болезненного «замка», без рывка со дна.'),
+        programExercise('sp-overhead-triceps','Разгибание на трицепс из-за головы в кроссовере',3,10,15,1,30,'double',1,'double_10_15','Длинная головка трицепса, корпус стабилен.'),
+        programExercise('sp-forearm-superset','Суперсет: сгибание запястий + обратные сгибания',4,15,20,0,50,'double',1,'double_15_20','Четыре строки подходов означают 2 подхода сгибаний запястий + 2 подхода обратных сгибаний. Малый вес, полный контроль; прекращай при боли в локте или кисти.'),
+      ],
+    },
+  ];
+}
+
+function mergeProgramTemplate(fresh, old, fallbackId) {
+  if (!old) return { ...fresh, id:fallbackId };
+  const oldExercises = old.exercises || [];
+  const exercises = fresh.exercises.map((freshEx, idx) => {
+    const oldEx = oldExercises.find(x => x.programExerciseKey && x.programExerciseKey === freshEx.programExerciseKey) || oldExercises[idx];
+    if (!oldEx) return freshEx;
+    return {
+      ...freshEx,
+      sets:(oldEx.sets && oldEx.sets.length) ? cloneSets(oldEx.sets) : freshEx.sets,
+      comment:oldEx.comment || freshEx.comment,
+    };
+  });
+  return { ...fresh, id:old.id, exercises };
+}
+
+function installProgram2(silent = false) {
+  const fresh = getProgram2Templates();
+  const hasExisting = fresh.some(t => data.templates.some(x => x.programKey === t.programKey));
+  if (!silent && hasExisting && !confirm('Обновить шаблоны V-силуэт 2.0? Рабочие веса и ваши комментарии сохранятся, структура и настройки прогрессии обновятся.')) return;
+
+  const now = Date.now();
+  fresh.forEach((tpl, idx) => {
+    const oldIdx = data.templates.findIndex(x => x.programKey === tpl.programKey);
+    const old = oldIdx >= 0 ? data.templates[oldIdx] : null;
+    const merged = mergeProgramTemplate(tpl, old, now + idx);
+    if (oldIdx >= 0) data.templates[oldIdx] = merged;
+    else data.templates.push(merged);
+  });
+  data.program2Installed = '2.0';
+  save();
+  renderTemplates();
+  if (!silent) toast(hasExisting ? '✅ Программа 2.0 обновлена' : '🎯 Программа 2.0 добавлена');
+}
+
 // ═══════════════ TEMPLATES ═══════════════
 let tplExCount = 0;
 let currentTplId = null; // selected template id when creating workout
@@ -2304,16 +2538,19 @@ function renderTemplates() {
 
 function renderTplCard(t, picker = false) {
   const exList = (t.exercises || []).map(e => {
+    const assisted = e.progType === 'assistance';
     const setsStr = (e.sets || []).filter(s => s && (s.w || s.r)).map(s => {
-      if (s.w && s.r) return `${s.w}кг×${s.r}`;
-      if (s.w) return `${s.w}кг`;
+      if (s.w && s.r) return assisted ? `${s.w}кг помощи×${s.r}` : `${s.w}кг×${s.r}`;
+      if (s.w) return assisted ? `${s.w}кг помощи` : `${s.w}кг`;
       if (s.r) return `×${s.r}`;
       return '—';
     }).join(' · ');
+    const comment = e.comment ? `<div style="font-size:11px;color:var(--muted);line-height:1.35;margin:2px 0 5px 22px">💬 ${escapeHtml(e.comment)}</div>` : '';
     return `<div class="tpl-ex-row">
-      <span class="tpl-ex-name">${e.name}</span>
+      <span class="tpl-ex-name">${escapeHtml(e.name)}</span>
+      ${assisted ? '<span class="assist-badge">помощь ↓</span>' : ''}
       ${setsStr ? `<span class="tpl-ex-sets">${setsStr}</span>` : ''}
-    </div>`;
+    </div>${comment}`;
   }).join('');
 
   const muscles = (t.muscles || []).join(', ');
@@ -2322,10 +2559,10 @@ function renderTplCard(t, picker = false) {
   if (picker) {
     return `<div class="tpl-card" onclick="selectTemplate(${t.id})">
       <div class="tpl-card-head">
-        <div class="tpl-letter">${letter}</div>
+        <div class="tpl-letter">${escapeHtml(letter)}</div>
         <div>
-          <div class="tpl-name">${t.name}</div>
-          <div class="tpl-meta">${t.type || 'Силовая'}${muscles ? ' · ' + muscles : ''} · ${(t.exercises||[]).length} упр.</div>
+          <div class="tpl-name">${escapeHtml(t.name)}</div>
+          <div class="tpl-meta">${escapeHtml(t.type || 'Силовая')}${muscles ? ' · ' + escapeHtml(muscles) : ''} · ${(t.exercises||[]).length} упр.</div>
         </div>
       </div>
       ${exList ? `<div class="tpl-ex-list">${exList}</div>` : ''}
@@ -2334,10 +2571,10 @@ function renderTplCard(t, picker = false) {
 
   return `<div class="tpl-card">
     <div class="tpl-card-head">
-      <div class="tpl-letter">${letter}</div>
+      <div class="tpl-letter">${escapeHtml(letter)}</div>
       <div style="flex:1">
-        <div class="tpl-name">${t.name}</div>
-        <div class="tpl-meta">${t.type || 'Силовая'}${muscles ? ' · ' + muscles : ''} · ${(t.exercises||[]).length} упр.</div>
+        <div class="tpl-name">${escapeHtml(t.name)}</div>
+        <div class="tpl-meta">${escapeHtml(t.type || 'Силовая')}${muscles ? ' · ' + escapeHtml(muscles) : ''} · ${(t.exercises||[]).length} упр.</div>
       </div>
       <div style="display:flex;gap:6px">
         <button class="btn btn-secondary" style="padding:6px 10px;font-size:11px" onclick="editTpl(${t.id})">✏️</button>
@@ -2345,7 +2582,7 @@ function renderTplCard(t, picker = false) {
       </div>
     </div>
     ${exList ? `<div class="tpl-ex-list">${exList}</div>` : ''}
-    ${t.notes ? `<div style="margin-top:8px;font-size:11px;color:var(--muted);font-style:italic">${t.notes}</div>` : ''}
+    ${t.notes ? `<div style="margin-top:8px;font-size:11px;color:var(--muted);font-style:italic">${escapeHtml(t.notes)}</div>` : ''}
     <div style="margin-top:10px;display:flex;gap:8px">
       <button class="btn btn-primary" style="flex:1;padding:10px;font-size:12px" onclick="launchWorkoutMode(${t.id})">▶ Тренироваться</button>
       <button class="btn btn-secondary" style="padding:10px 12px;font-size:12px" onclick="startWorkoutFromTpl(${t.id})">✏️ Вручную</button>
@@ -2398,28 +2635,36 @@ function addTplExercise(ex) {
   const progType = ex?.progType ?? 'double';
   const progStep = ex?.progStep ?? 2.5;
   const formulaPreset = ex?.formulaPreset ?? 'double_8_12';
+  const weightLabel = progType === 'assistance' ? 'помощь' : 'кг';
   div.draggable = true;
   div.innerHTML = `
     <div class="ex-head">
       <div class="ex-drag-handle" title="Перетащить">⠿</div>
       <div class="ex-num">${n}</div>
-      <input class="ex-name-input" placeholder="Название упражнения" id="tpl-ex-name-${n}" value="${ex?.name||''}">
+      <input class="ex-name-input" placeholder="Название упражнения" id="tpl-ex-name-${n}" value="${escapeAttr(ex?.name||'')}">
       <button class="btn-icon" onclick="confirmRemoveTplExercise(${n})" style="color:var(--accent)">✕</button>
+    </div>
+    <div class="field" style="margin:6px 0">
+      <label style="font-size:9px">💬 Комментарий к упражнению</label>
+      <textarea class="exercise-comment-input" id="tpl-ex${n}-comment" placeholder="Ключ техники, амплитуда, замена, индивидуальная подсказка…">${escapeHtml(ex?.comment||'')}</textarea>
     </div>
     <div style="display:grid;grid-template-columns:1fr;gap:6px;margin:6px 0">
       <div class="field" style="margin:0">
         <label style="font-size:9px">Главная формула</label>
         <select id="tpl-ex${n}-formula" class="formula-select" onchange="applyFormulaPreset(${n})">
           <option value="custom" ${formulaPreset==='custom'?'selected':''}>Своя настройка</option>
-          <option value="double_8_12" ${formulaPreset==='double_8_12'?'selected':''}>Двойная 8–12 + техника чистая</option>
-          <option value="double_6_10" ${formulaPreset==='double_6_10'?'selected':''}>Тяжёлые жимы/тяги: двойная 6–10</option>
-          <option value="double_8_10" ${formulaPreset==='double_8_10'?'selected':''}>Тяжёлая база: двойная 8–10</option>
-          <option value="double_12_15" ${formulaPreset==='double_12_15'?'selected':''}>Плечи/задняя дельта/бабочка: 12–15</option>
-          <option value="double_10_12" ${formulaPreset==='double_10_12'?'selected':''}>Бицепс/трицепс: 10–12</option>
-          <option value="double_10_15" ${formulaPreset==='double_10_15'?'selected':''}>Бицепс/трицепс: 10–15</option>
-          <option value="double_15_20" ${formulaPreset==='double_15_20'?'selected':''}>Икры/пресс: 15–20</option>
+          <option value="assist_6_10" ${formulaPreset==='assist_6_10'?'selected':''}>Гравитрон: 6–10, помощь ↓</option>
+          <option value="assist_8_12" ${formulaPreset==='assist_8_12'?'selected':''}>Гравитрон: 8–12, помощь ↓</option>
+          <option value="double_6_10" ${formulaPreset==='double_6_10'?'selected':''}>Тяжёлые жимы/тяги: 6–10</option>
+          <option value="double_8_10" ${formulaPreset==='double_8_10'?'selected':''}>Тяжёлая база: 8–10</option>
+          <option value="double_8_12" ${formulaPreset==='double_8_12'?'selected':''}>Двойная 8–12 + техника</option>
+          <option value="double_10_12" ${formulaPreset==='double_10_12'?'selected':''}>Диапазон 10–12</option>
+          <option value="double_10_15" ${formulaPreset==='double_10_15'?'selected':''}>Диапазон 10–15</option>
+          <option value="double_12_15" ${formulaPreset==='double_12_15'?'selected':''}>Диапазон 12–15</option>
+          <option value="double_12_20" ${formulaPreset==='double_12_20'?'selected':''}>Дельты/икры: 12–20</option>
+          <option value="double_15_20" ${formulaPreset==='double_15_20'?'selected':''}>Предплечья/икры: 15–20</option>
         </select>
-        <div class="formula-note">Вес повышается только после верхней границы во всех рабочих подходах и отметки чистой техники.</div>
+        <div class="formula-note">Обычная прогрессия повышает рабочий вес. Для гравитрона выбирай «помощь ↓»: после верхней границы программа уменьшит килограммы поддержки.</div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin:6px 0">
@@ -2445,17 +2690,18 @@ function addTplExercise(ex) {
         <label style="font-size:9px">📈 Прогрессия</label>
         <select id="tpl-ex${n}-prog" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px;width:100%;color:var(--text);font-size:12px" onchange="toggleProgStep(${n})">
           <option value="none" ${progType==='none'?'selected':''}>Без прогрессии</option>
-          <option value="weight" ${progType==='weight'?'selected':''}>Вес после цели</option>
+          <option value="weight" ${progType==='weight'?'selected':''}>Вес после цели ↑</option>
           <option value="reps" ${progType==='reps'?'selected':''}>Мягко +повтор</option>
-          <option value="double" ${progType==='double'?'selected':''}>Двойная по диапазону</option>
+          <option value="double" ${progType==='double'?'selected':''}>Двойная: повторы → вес ↑</option>
+          <option value="assistance" ${progType==='assistance'?'selected':''}>Гравитрон: повторы → помощь ↓</option>
         </select>
       </div>
       <div class="field" style="margin:0" id="tpl-ex${n}-step-wrap">
-        <label style="font-size:9px" id="tpl-ex${n}-step-lbl">${progType==='reps'?'Шаг (повт)':'Шаг (кг)'}</label>
+        <label style="font-size:9px" id="tpl-ex${n}-step-lbl">${progType==='reps'?'Шаг (повт)':progType==='assistance'?'Снизить помощь (кг)':'Шаг веса (кг)'}</label>
         <input type="number" class="set-input" style="background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px;width:100%;color:var(--accent3)" placeholder="${progType==='reps'?'1':'2.5'}" id="tpl-ex${n}-step" value="${progStep}" min="0.5" step="0.5">
       </div>
     </div>
-    <label class="technique-row"><input type="checkbox" id="ex${n}-technique" ${ex?.techniqueOk ? 'checked' : ''}> <span><strong>Техника чистая</strong> — только тогда программа разрешит прогрессию дальше</span></label>
+    <label class="technique-row"><input type="checkbox" id="tpl-ex${n}-technique" ${ex?.techniqueOk ? 'checked' : ''}> <span><strong>Техника чистая</strong> — стартовая отметка; в тренировке техника отмечается отдельно</span></label>
     <div class="sets-grid">
       ${[1,2,3,4,5].map(s => {
         const sv = ex?.sets?.[s-1];
@@ -2463,7 +2709,7 @@ function addTplExercise(ex) {
         const rv = sv && typeof sv === 'object' ? (sv.r||'') : (sv||'');
         return `<div class="set-cell">
           <div class="set-label">П${s}</div>
-          <div class="set-sublabel">кг</div>
+          <div class="set-sublabel" id="tpl-ex${n}-wlabel${s}">${weightLabel}</div>
           <input class="set-input" placeholder="—" id="tpl-ex${n}-w${s}" type="number" min="0" step="0.5" value="${wv}" style="color:var(--accent3)">
           <div class="set-divider"></div>
           <div class="set-sublabel">повт</div>
@@ -2474,6 +2720,7 @@ function addTplExercise(ex) {
   `;
   document.getElementById('tpl-exercises-list').appendChild(div);
   initDragRow(div, 'tpl-exercises-list');
+  toggleProgStep(n);
   if (!ex) div.querySelector('.ex-name-input').focus();
 }
 
@@ -2498,7 +2745,9 @@ function saveTpl() {
     const progType  = document.getElementById(`tpl-ex${i}-prog`)?.value || 'none';
     const progStep  = parseFloat(document.getElementById(`tpl-ex${i}-step`)?.value) || 0;
     const formulaPreset = document.getElementById(`tpl-ex${i}-formula`)?.value || 'custom';
-    exercises.push({ name: exName, sets, restMin, restSec, targetReps, targetMinReps, progType, progStep, formulaPreset });
+    const comment = document.getElementById(`tpl-ex${i}-comment`)?.value.trim() || '';
+    const techniqueOk = document.getElementById(`tpl-ex${i}-technique`)?.checked === true;
+    exercises.push({ name: exName, sets, restMin, restSec, targetReps, targetMinReps, progType, progStep, formulaPreset, comment, techniqueOk });
   }
   const muscles = [...document.querySelectorAll('#tpl-muscles-row .muscle-chip.selected')].map(c => c.textContent);
   const editId = document.getElementById('tpl-edit-id').value;
@@ -2649,13 +2898,16 @@ function hideNewWorkout() {
 
 function getFormulaPresetConfig(value) {
   const map = {
-    double_8_12: { min: 8,  max: 12, step: 2.5, label: 'Двойная 8–12 + техника чистая' },
-    double_6_10: { min: 6,  max: 10, step: 2.5, label: 'Тяжёлые жимы/тяги: двойная 6–10' },
-    double_8_10: { min: 8,  max: 10, step: 2.5, label: 'Тяжёлая база: двойная 8–10' },
-    double_12_15:{ min: 12, max: 15, step: 1,   label: 'Плечи/задняя дельта/бабочка: 12–15' },
-    double_10_12:{ min: 10, max: 12, step: 1,   label: 'Бицепс/трицепс: 10–12' },
-    double_10_15:{ min: 10, max: 15, step: 1,   label: 'Бицепс/трицепс: 10–15' },
-    double_15_20:{ min: 15, max: 20, step: 1,   label: 'Икры/пресс: 15–20' },
+    assist_6_10:  { min: 6,  max: 10, step: 2.5, prog:'assistance', label: 'Гравитрон 6–10, помощь вниз' },
+    assist_8_12:  { min: 8,  max: 12, step: 2.5, prog:'assistance', label: 'Гравитрон 8–12, помощь вниз' },
+    double_6_10:  { min: 6,  max: 10, step: 2.5, prog:'double', label: 'Тяжёлые жимы/тяги: двойная 6–10' },
+    double_8_10:  { min: 8,  max: 10, step: 2.5, prog:'double', label: 'Тяжёлая база: двойная 8–10' },
+    double_8_12:  { min: 8,  max: 12, step: 2.5, prog:'double', label: 'Двойная 8–12 + техника чистая' },
+    double_10_12: { min: 10, max: 12, step: 1,   prog:'double', label: 'Диапазон 10–12' },
+    double_10_15: { min: 10, max: 15, step: 1,   prog:'double', label: 'Диапазон 10–15' },
+    double_12_15: { min: 12, max: 15, step: 1,   prog:'double', label: 'Диапазон 12–15' },
+    double_12_20: { min: 12, max: 20, step: 1,   prog:'double', label: 'Дельты/икры: 12–20' },
+    double_15_20: { min: 15, max: 20, step: 1,   prog:'double', label: 'Предплечья/икры: 15–20' },
   };
   return map[value] || null;
 }
@@ -2668,10 +2920,10 @@ function applyFormulaPreset(n) {
   const rmin = document.getElementById(`tpl-ex${n}-rmin`);
   const rmax = document.getElementById(`tpl-ex${n}-treps`);
   const step = document.getElementById(`tpl-ex${n}-step`);
-  if (prog) prog.value = 'double';
+  if (prog) prog.value = cfg.prog || 'double';
   if (rmin) rmin.value = cfg.min;
   if (rmax) rmax.value = cfg.max;
-  if (step && (!step.value || Number(String(step.value).replace(',', '.')) === 0)) step.value = cfg.step;
+  if (step) step.value = cfg.step;
   toggleProgStep(n);
 }
 
@@ -2683,11 +2935,23 @@ function toggleProgStep(n) {
   if (!sel) return;
   const v = sel.value;
   if (v === 'none') {
-    wrap.style.opacity = '0.4';
+    if (wrap) wrap.style.opacity = '0.4';
   } else {
-    wrap.style.opacity = '1';
-    if (v === 'reps') { lbl.textContent = 'Шаг (повт)'; inp.placeholder = '1'; inp.step = '1'; }
-    else { lbl.textContent = 'Шаг (кг)'; inp.placeholder = '2.5'; inp.step = '0.5'; }
+    if (wrap) wrap.style.opacity = '1';
+    if (v === 'reps') {
+      if (lbl) lbl.textContent = 'Шаг (повт)';
+      if (inp) { inp.placeholder = '1'; inp.step = '1'; }
+    } else if (v === 'assistance') {
+      if (lbl) lbl.textContent = 'Снизить помощь (кг)';
+      if (inp) { inp.placeholder = '2.5'; inp.step = '0.5'; }
+    } else {
+      if (lbl) lbl.textContent = 'Шаг веса (кг)';
+      if (inp) { inp.placeholder = '2.5'; inp.step = '0.5'; }
+    }
+  }
+  for (let i=1;i<=5;i++) {
+    const lab = document.getElementById(`tpl-ex${n}-wlabel${i}`);
+    if (lab) lab.textContent = v === 'assistance' ? 'помощь' : 'кг';
   }
 }
 
@@ -2729,8 +2993,8 @@ function addOneRepSoft(baseSets, maxReps) {
 }
 
 function calcNextStep(ex, lastExercise, hasHistory = true) {
-  // Мягкая прогрессия: техника → повторы → вес.
-  // Вес повышается только после верхней границы повторов во всех рабочих подходах.
+  // Мягкая прогрессия: техника → повторы → изменение нагрузки.
+  // В обычных упражнениях нагрузка растёт, в гравитроне уменьшается помощь.
   if (!ex.progType || ex.progType === 'none') return null;
 
   const lastEx = Array.isArray(lastExercise) ? { sets: lastExercise, techniqueOk: true } : (lastExercise || {});
@@ -2742,17 +3006,33 @@ function calcNextStep(ex, lastExercise, hasHistory = true) {
   const maxReps = parseInt(ex.targetReps) || 12;
   const minReps = parseInt(ex.targetMinReps) || Math.max(1, maxReps - 4);
   const rangeText = minReps === maxReps ? `${maxReps}` : `${minReps}–${maxReps}`;
+  const isAssisted = ex.progType === 'assistance';
 
   if (!hasHistory) {
-    return { sets: baseSets, hint: `Старт: работаем в диапазоне ${rangeText} повт. Вес повышаем только после чистой техники.` };
+    return { sets: baseSets, hint: isAssisted
+      ? `Старт: ${rangeText} повт. При достижении верхней границы во всех подходах уменьшим помощь гравитрона.`
+      : `Старт: работаем в диапазоне ${rangeText} повт. Вес повышаем только после чистой техники.` };
   }
 
   if (lastEx.techniqueOk !== true) {
-    return { sets: baseSets, warn: true, hint: `Прогрессию не включаю: в прошлой тренировке не отмечена чистая техника. Сначала повтори этот вес качественно.` };
+    return { sets: baseSets, warn: true, hint: `Прогрессию не включаю: в прошлой тренировке не отмечена чистая техника. Повтори нагрузку качественно.` };
   }
 
   const completedAll = validSets.every(s => (parseSetNum(s.r) || 0) >= maxReps);
   const hasWeights = validSets.some(s => parseSetNum(s.w) !== null);
+
+  if (ex.progType === 'assistance') {
+    if (!completedAll) {
+      const sets = addOneRepSoft(baseSets, maxReps);
+      return { sets, hint: `Гравитрон: помощь пока сохраняем, добавляем +1 повтор в самом слабом подходе. Цель — ${maxReps} во всех подходах.` };
+    }
+    if (!hasWeights) return { sets: baseSets, warn: true, hint: `Повторы выполнены, но килограммы помощи не указаны — уменьшить поддержку автоматически нельзя.` };
+    const sets = baseSets.map(s => {
+      const w = parseSetNum(s.w);
+      return { w: w === null ? s.w : fmtNum(Math.max(0, w - step)), r: fmtNum(minReps) };
+    });
+    return { sets, hint: `Гравитрон: верхняя граница выполнена чисто → уменьшаем помощь на ${fmtNum(step)} кг и возвращаемся к ${minReps} повт.` };
+  }
 
   if (ex.progType === 'weight') {
     if (!completedAll) {
@@ -2764,15 +3044,15 @@ function calcNextStep(ex, lastExercise, hasHistory = true) {
       if (w === null) return s;
       return { w: fmtNum(w + step), r: fmtNum(minReps) };
     });
-    return { sets, hint: `Цель выполнена чисто. Мягко повышаем вес на ${fmtNum(step)} кг и возвращаемся к ${minReps} повт.` };
+    return { sets, hint: `Цель выполнена чисто. Повышаем вес на ${fmtNum(step)} кг и возвращаемся к ${minReps} повт.` };
   }
 
   if (ex.progType === 'reps') {
     if (completedAll) {
-      return { sets: baseSets, hint: `Верхняя граница ${maxReps} уже достигнута. Для роста дальше лучше перейти на двойную прогрессию и добавить вес.` };
+      return { sets: baseSets, hint: `Верхняя граница ${maxReps} достигнута. Для роста дальше можно перейти на двойную прогрессию и добавить вес.` };
     }
     const sets = addOneRepSoft(baseSets, maxReps);
-    return { sets, hint: `Мягкая прогрессия: вес оставляем, добавляем только +1 повтор в одном самом слабом подходе до ${maxReps}.` };
+    return { sets, hint: `Мягкая прогрессия: вес оставляем, добавляем +1 повтор в одном самом слабом подходе до ${maxReps}.` };
   }
 
   if (ex.progType === 'double') {
@@ -2796,7 +3076,7 @@ function buildProgressedExercise(tpl, ex, idx) {
   const last = getLastTemplateWorkout(tpl);
   const lastEx = last?.exercises?.[idx] || { sets: ex.sets };
   const next = calcNextStep(ex, lastEx, Boolean(last));
-  return { ...ex, sets: next?.sets || cloneSets(ex.sets) };
+  return { ...ex, sets: next?.sets || cloneSets(ex.sets), _progressHint: next?.hint || '', _progressWarn: next?.warn === true };
 }
 
 function renderProgressionHints(tpl) {
@@ -2917,15 +3197,21 @@ function addExercise(ex) {
   div.className = 'exercise-row';
   div.id = 'ex-' + n;
   div.draggable = true;
+  const assisted = ex?.progType === 'assistance';
+  const weightLabel = assisted ? 'помощь' : 'кг';
   div.innerHTML = `
     <div class="ex-head">
       <div class="ex-drag-handle" title="Перетащить">⠿</div>
       <div class="ex-num">${n}</div>
-      <input class="ex-name-input" placeholder="Название упражнения" id="ex-name-${n}" value="${ex?.name||''}">
+      <input class="ex-name-input" placeholder="Название упражнения" id="ex-name-${n}" value="${escapeAttr(ex?.name||'')}">
       <span class="ex-completed-badge">✓ Готово</span>
       <div class="ex-done-check" title="Отметить выполненным" onclick="toggleExDone(this)"></div>
       <button class="btn-icon" onclick="removeExercise(${n})" style="color:var(--accent)">✕</button>
     </div>
+    <input type="hidden" id="ex-comment-${n}" value="${escapeAttr(ex?.comment||'')}">
+    <input type="hidden" id="ex-prog-${n}" value="${escapeAttr(ex?.progType||'none')}">
+    ${ex?.comment ? `<div class="exercise-comment"><strong>Комментарий:</strong> ${escapeHtml(ex.comment)}</div>` : ''}
+    ${assisted ? '<div style="margin-bottom:8px"><span class="assist-badge">В поле веса указывай кг помощи гравитрона</span></div>' : ''}
     <div class="sets-grid">
       ${[1,2,3,4,5].map(s => {
         const sv = ex?.sets?.[s-1];
@@ -2933,7 +3219,7 @@ function addExercise(ex) {
         const rv = sv && typeof sv === 'object' ? (sv.r||'') : '';
         return `<div class="set-cell">
           <div class="set-label">П${s}</div>
-          <div class="set-sublabel">кг</div>
+          <div class="set-sublabel">${weightLabel}</div>
           <input class="set-input" placeholder="—" id="ex${n}-w${s}" type="number" min="0" step="0.5" value="${wv}" style="color:var(--accent3)">
           <div class="set-divider"></div>
           <div class="set-sublabel">повт</div>
@@ -2949,7 +3235,11 @@ function addExercise(ex) {
 
 function removeExercise(n) {
   const el = document.getElementById('ex-' + n);
-  if (el) el.remove();
+  if (!el) return;
+  const name = document.getElementById('ex-name-' + n)?.value.trim();
+  if (!confirm(`Удалить упражнение${name ? ` «${name}»` : ''} из текущей тренировки?`)) return;
+  el.remove();
+  toast('🗑 Упражнение удалено');
 }
 
 function toggleMuscle(el) { el.classList.toggle('selected'); }
@@ -2990,7 +3280,9 @@ function saveWorkout() {
       return legEl ? legEl.value.trim() : null;
     }).filter(x => x !== null && x !== '');
     const techniqueOk = document.getElementById(`ex${i}-technique`)?.checked === true;
-    exercises.push({ name, sets, techniqueOk });
+    const comment = document.getElementById(`ex-comment-${i}`)?.value || '';
+    const progType = document.getElementById(`ex-prog-${i}`)?.value || 'none';
+    exercises.push({ name, sets, techniqueOk, comment, progType });
   }
 
   const muscles = [...document.querySelectorAll('.muscle-chip.selected')].map(c => c.textContent);
@@ -3050,10 +3342,11 @@ function renderWorkoutsHistory() {
   const sorted = [...data.workouts].sort((a,b) => b.date.localeCompare(a.date));
   list.innerHTML = sorted.map(w => {
     const exRows = (w.exercises||[]).map(e => {
-      const setsStr = e.sets.filter(s=>s).map(s => {
+      const assisted = e.progType === 'assistance';
+      const setsStr = (e.sets||[]).filter(s=>s).map(s => {
         if (typeof s === 'object') {
-          if (s.w && s.r) return `${s.w}кг×${s.r}`;
-          if (s.w) return `${s.w}кг`;
+          if (s.w && s.r) return assisted ? `${s.w}кг помощи×${s.r}` : `${s.w}кг×${s.r}`;
+          if (s.w) return assisted ? `${s.w}кг помощи` : `${s.w}кг`;
           if (s.r) return `×${s.r}`;
           return '—';
         }
@@ -3061,7 +3354,7 @@ function renderWorkoutsHistory() {
       }).join(' · ');
       const exEncoded = encodeURIComponent(e.name || '');
       const techBadge = e.techniqueOk ? '<span title="Техника отмечена чистой" style="color:var(--success);font-size:11px;margin-left:4px">чисто</span>' : '<span title="Техника не отмечена" style="color:var(--muted);font-size:11px;margin-left:4px">без отметки</span>';
-      return `<div class="ex-detail-row"><span class="ex-detail-name">${e.name} ${techBadge}</span><span class="ex-detail-sets">${setsStr||'—'}</span><button class="ex-detail-chart-btn" onclick="openExerciseChartByName(decodeURIComponent('${exEncoded}'))">📈</button></div>`;
+      return `<div class="ex-detail-row"><span class="ex-detail-name">${escapeHtml(e.name)} ${techBadge}${assisted?' <span class="assist-badge">помощь ↓</span>':''}</span><span class="ex-detail-sets">${setsStr||'—'}</span><button class="ex-detail-chart-btn" onclick="openExerciseChartByName(decodeURIComponent('${exEncoded}'))">📈</button></div>${e.comment?`<div style="font-size:11px;color:var(--muted);padding:2px 0 7px 8px">💬 ${escapeHtml(e.comment)}</div>`:''}`;
     }).join('');
     const cardioStr = w.cardio && (w.cardio.time||w.cardio.dist) ?
       `<div style="margin-top:6px;font-size:12px;color:var(--accent3)">🏃 ${w.cardio.type||'Кардио'}: ${w.cardio.time||'—'} мин · ${w.cardio.dist||'—'} км · ${w.cardio.cals||'—'} ккал</div>` : '';
@@ -3160,17 +3453,23 @@ function addEditExercise(ex) {
   div.className = 'exercise-row';
   div.id = 'edit-ex-' + n;
   div.draggable = true;
+  const assisted = ex?.progType === 'assistance';
+  const weightLabel = assisted ? 'помощь' : 'кг';
   div.innerHTML = `
     <div class="ex-head">
       <div class="ex-drag-handle" title="Перетащить">⠿</div>
       <div class="ex-num">${n}</div>
-      <input class="ex-name-input" placeholder="Упражнение" id="edit-ex-name-${n}" value="${ex?.name||''}">
+      <input class="ex-name-input" placeholder="Упражнение" id="edit-ex-name-${n}" value="${escapeAttr(ex?.name||'')}">
       <label class="ex-technique-pill" title="Отметь только если техника была чистой">
         <input type="checkbox" id="edit-ex${n}-technique" ${ex?.techniqueOk ? 'checked' : ''} onclick="event.stopPropagation()">
         <span>Техника</span>
       </label>
       <button class="btn-icon" onclick="confirmRemoveEditExercise(${n})" style="color:var(--accent)">✕</button>
     </div>
+    <input type="hidden" id="edit-ex${n}-comment" value="${escapeAttr(ex?.comment||'')}">
+    <input type="hidden" id="edit-ex${n}-prog" value="${escapeAttr(ex?.progType||'none')}">
+    ${ex?.comment ? `<div class="exercise-comment"><strong>Комментарий из шаблона:</strong> ${escapeHtml(ex.comment)}</div>` : ''}
+    ${assisted ? '<div style="margin-bottom:8px"><span class="assist-badge">кг помощи гравитрона</span></div>' : ''}
     <div class="sets-grid">
       ${[1,2,3,4,5].map(s => {
         const setVal = ex?.sets?.[s-1];
@@ -3178,7 +3477,7 @@ function addEditExercise(ex) {
         const rVal = (setVal && typeof setVal === 'object') ? (setVal.r||'') : (setVal||'');
         return `<div class="set-cell">
           <div class="set-label">П${s}</div>
-          <div class="set-sublabel">кг</div>
+          <div class="set-sublabel">${weightLabel}</div>
           <input class="set-input" placeholder="—" id="edit-ex${n}-w${s}" type="number" min="0" step="0.5" value="${wVal}" style="color:var(--accent3)">
           <div class="set-divider"></div>
           <div class="set-sublabel">повт</div>
@@ -3219,7 +3518,9 @@ function saveEditedWorkout() {
       return legEl ? legEl.value.trim() : null;
     }).filter(x => x !== null && x !== '');
     const techniqueOk = document.getElementById(`edit-ex${i}-technique`)?.checked === true;
-    exercises.push({ name, sets, techniqueOk });
+    const comment = document.getElementById(`edit-ex${i}-comment`)?.value || '';
+    const progType = document.getElementById(`edit-ex${i}-prog`)?.value || 'none';
+    exercises.push({ name, sets, techniqueOk, comment, progType });
   }
 
   const muscles = [...document.querySelectorAll('#edit-muscles-row .muscle-chip.selected')].map(c => c.textContent);
@@ -4577,6 +4878,8 @@ function closeFoodCalendar() {
 }
 
 // ═══════════════ INIT ═══════════════
+if (data.program2Installed !== '2.0') installProgram2(true);
+renderBottomNav('home');
 renderHome();
 </script>
 </body>
