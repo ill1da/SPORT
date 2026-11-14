@@ -610,7 +610,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   padding: 12px; margin-bottom: 8px;
 }
 .wo-item-head { display: flex; align-items: flex-start; gap: 10px; }
-.wo-item-info { flex: 1; }
+.wo-item-info { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .wo-item-actions { display: flex; gap: 6px; flex-shrink: 0; }
 .btn-edit { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; color: var(--muted); font-size: 14px; cursor: pointer; transition: all 0.15s; }
 .btn-edit:hover, .btn-edit:active { border-color: var(--accent3); color: var(--accent3); }
@@ -1054,37 +1054,6 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 <!-- ═══════════════ WORKOUT MODE SCREEN ═══════════════ -->
 <div class="screen" id="screen-workout-mode" style="display:none;background:var(--bg)">
   <div id="wm-content" style="height:100%;display:flex;flex-direction:column"></div>
-</div>
-
-<!-- Modal: choose workout order mode -->
-<div class="modal-overlay" id="modal-wo-mode" onclick="closeModalOutside(event,'modal-wo-mode')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="wo-mode-tpl-name">РЕЖИМ ТРЕНИРОВКИ</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Выбери порядок выполнения упражнений</div>
-
-    <div id="wo-mode-A" class="tpl-card" style="margin-bottom:10px" onclick="selectWoMode('sequential')">
-      <div class="tpl-card-head">
-        <div class="tpl-letter" style="background:linear-gradient(135deg,#7c3aed,#ec4899);font-size:18px">A→B</div>
-        <div>
-          <div class="tpl-name">Упражнение за упражнением</div>
-          <div class="tpl-meta">Все подходы упражнения 1, затем все подходы упражнения 2…</div>
-        </div>
-      </div>
-    </div>
-
-    <div id="wo-mode-B" class="tpl-card" onclick="selectWoMode('circuit')">
-      <div class="tpl-card-head">
-        <div class="tpl-letter" style="background:linear-gradient(135deg,#059669,#0891b2);font-size:18px">↻</div>
-        <div>
-          <div class="tpl-name">Круговая тренировка</div>
-          <div class="tpl-meta">1 подход каждого упражнения по кругу, повторяем N раз</div>
-        </div>
-      </div>
-    </div>
-
-    <button class="btn btn-secondary" style="margin-top:14px" onclick="closeModal('modal-wo-mode')">Отмена</button>
-  </div>
 </div>
 
 <!-- Modal: template picker (from workout form) -->
@@ -1554,7 +1523,13 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 <div class="modal-overlay" id="modal-nav-settings" onclick="closeModalOutside(event,'modal-nav-settings')">
   <div class="modal" style="max-height:85vh;overflow-y:auto">
     <div class="modal-handle"></div>
-    <div class="modal-title">НИЖНЯЯ ПАНЕЛЬ</div>
+    <div class="modal-title">НАСТРОЙКИ</div>
+    <div class="card">
+      <div class="card-title"><span></span> НАЧАТЬ СНАЧАЛА</div>
+      <p style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px">Полностью удалить тренировки, замеры, питание, шаги, привычки, челленджи, профиль, свои шаблоны и настройки. Стандартная программа будет восстановлена. Отменить удаление нельзя.</p>
+      <button class="btn btn-secondary" style="color:var(--accent)" onclick="resetAllProgress()">Удалить весь прогресс</button>
+    </div>
+    <div class="card-title"><span></span> НИЖНЯЯ ПАНЕЛЬ</div>
     <div style="font-size:12px;color:var(--muted);line-height:1.45;margin-bottom:12px">Добавляй и убирай разделы переключателем, меняй порядок стрелками. Кнопка ⚙️ остаётся всегда, чтобы настройки не потерялись.</div>
     <div class="card" id="nav-settings-list"></div>
     <button class="btn btn-primary" style="margin-top:12px" onclick="saveNavSettings()">💾 Сохранить панель</button>
@@ -1592,6 +1567,21 @@ const DEFAULT_NAV = ['home','workouts','templates','food','params','charts','hab
 if (!Array.isArray(data.navConfig) || !data.navConfig.length) data.navConfig = [...DEFAULT_NAV];
 
 function save() { localStorage.setItem('workout_diary_v2', JSON.stringify(data)); }
+function resetAllProgress() {
+  if (!confirm('Удалить все данные FitLog и начать сначала?\n\nБудут удалены весь прогресс, профиль, свои шаблоны и настройки. Стандартная программа восстановится. Это действие нельзя отменить.')) return;
+  try {
+    localStorage.removeItem('workout_diary_v2');
+  } catch (error) {
+    toast('Не удалось удалить данные. Попробуй ещё раз.');
+    return;
+  }
+  stopWmTimers();
+  window.location.reload();
+}
+function normalizeRating(value) {
+  const rating = Number(value);
+  return Number.isFinite(rating) ? Math.max(0, Math.min(5, Math.round(rating))) : 0;
+}
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
 }
@@ -1612,12 +1602,13 @@ function renderBottomNav(activePage = document.querySelector('.screen.active')?.
     const item = NAV_SECTIONS.find(x => x.id === id);
     if (!item) return '';
     return `<button class="nav-btn ${activePage===id?'active':''}" id="nav-${id}" onclick="goTo('${id}')"><span class="ico">${item.icon}</span>${item.short}</button>`;
-  }).join('') + `<button class="nav-settings-btn" title="Настроить нижнюю панель" onclick="openNavSettings()">⚙️</button>`;
+  }).join('') + `<button class="nav-settings-btn" title="Настройки" onclick="openNavSettings()">⚙️</button>`;
 }
 function openNavSettings() {
   navDraft = getValidNavConfig();
   renderNavSettings();
   openModal('modal-nav-settings');
+  document.querySelector('#modal-nav-settings .modal').scrollTop = 0;
 }
 function renderNavSettings() {
   const list = document.getElementById('nav-settings-list');
@@ -1732,7 +1723,7 @@ function renderHome() {
           <div class="recent-name">${w.type || 'Тренировка'} ${w.muscles ? '· ' + w.muscles.join(', ') : ''}</div>
           <div class="recent-date">${formatDate(w.date)}</div>
         </div>
-        <div class="recent-score">${'★'.repeat(w.rating || 0)}</div>
+        <div class="recent-score">${'★'.repeat(normalizeRating(w.rating))}</div>
       </div>
     `).join('');
   }
@@ -1795,9 +1786,9 @@ function launchWorkoutMode(tplId) {
   const t = data.templates.find(x => x.id === tplId);
   if (!t || !t.exercises?.length) { toast('Шаблон пуст — добавь упражнения'); return; }
   const sessionExercises = t.exercises.map((ex, idx) => buildProgressedExercise(t, ex, idx));
-  wm = { tplId, sourceTpl: t, tpl: { ...t, exercises: sessionExercises }, mode: null };
-  document.getElementById('wo-mode-tpl-name').textContent = t.name.toUpperCase();
-  openModal('modal-wo-mode');
+  const returnPage = document.querySelector('.screen.active')?.id.replace('screen-', '') || 'templates';
+  wm = { tplId, sourceTpl: t, tpl: { ...t, exercises: sessionExercises }, returnPage };
+  startWorkoutSession();
 }
 
 function openQuickTrainModal() {
@@ -1840,42 +1831,24 @@ function closeQuickTrainModal() {
   if (el) el.remove();
 }
 
-function selectWoMode(mode) {
-  closeModal('modal-wo-mode');
-  wm.mode = mode; // 'sequential' | 'circuit'
-
+function startWorkoutSession() {
   // Build flat step list
   const t = wm.tpl;
-  const steps = []; // { type:'exercise'|'rest', exIdx, setIdx, ... }
+  const steps = []; // { type:'set'|'rest', exIdx, setIdx, ... }
 
-  if (mode === 'sequential') {
-    // All sets of ex[0], then all sets of ex[1]…
-    t.exercises.forEach((ex, ei) => {
-      const setCount = Math.max(ex.sets?.length || 0, 1);
-      for (let si = 0; si < setCount; si++) {
-        steps.push({ type:'set', exIdx:ei, setIdx:si });
-        if (si < setCount - 1 || ei < t.exercises.length - 1) {
-          // rest after set (skip last set of last exercise)
-          if (ex.restMin > 0 || ex.restSec > 0) {
-            steps.push({ type:'rest', exIdx:ei, setIdx:si, restMin:ex.restMin, restSec:ex.restSec });
-          }
+  // All sets of ex[0], then all sets of ex[1]…
+  t.exercises.forEach((ex, ei) => {
+    const setCount = Math.max(ex.sets?.length || 0, 1);
+    for (let si = 0; si < setCount; si++) {
+      steps.push({ type:'set', exIdx:ei, setIdx:si });
+      if (si < setCount - 1 || ei < t.exercises.length - 1) {
+        // rest after set (skip last set of last exercise)
+        if (ex.restMin > 0 || ex.restSec > 0) {
+          steps.push({ type:'rest', exIdx:ei, setIdx:si, restMin:ex.restMin, restSec:ex.restSec });
         }
       }
-    });
-  } else {
-    // Circuit: 1 set of each exercise, repeat
-    const maxSets = Math.max(...t.exercises.map(ex => ex.sets?.length || 1));
-    for (let si = 0; si < maxSets; si++) {
-      t.exercises.forEach((ex, ei) => {
-        if ((ex.sets?.length || 1) > si) {
-          steps.push({ type:'set', exIdx:ei, setIdx:si });
-          if (ex.restMin > 0 || ex.restSec > 0) {
-            steps.push({ type:'rest', exIdx:ei, setIdx:si, restMin:ex.restMin, restSec:ex.restSec });
-          }
-        }
-      });
     }
-  }
+  });
 
   // Remove trailing rest
   while (steps.length && steps[steps.length-1].type === 'rest') steps.pop();
@@ -1906,13 +1879,26 @@ function showWmScreen() {
   document.querySelector('.bottom-nav').style.display = 'none';
 }
 
-function hideWmScreen() {
+function stopWmTimers() {
+  if (!wm) return;
+  clearInterval(wm.timerInterval);
+  clearInterval(wm._elapsedTimer);
+  wm.timerInterval = null;
+  wm._elapsedTimer = null;
+}
+
+function hideWmScreen(page = 'workouts') {
+  stopWmTimers();
+  wm = null;
+  document.querySelectorAll('.screen').forEach(s => s.style.removeProperty('display'));
   document.getElementById('screen-workout-mode').style.display = 'none';
+  document.getElementById('wm-content').innerHTML = '';
   document.querySelector('.bottom-nav').style.display = 'flex';
-  goTo('workouts');
+  goTo(page);
 }
 
 function renderWmStep() {
+  stopWmTimers();
   const step = wm.steps[wm.stepIdx];
   const total = wm.steps.filter(s => s.type === 'set').length;
   const doneSets = wm.steps.slice(0, wm.stepIdx).filter(s => s.type === 'set').length;
@@ -1995,7 +1981,7 @@ function renderWmStep() {
         </div>
       </div>
       <div class="wm-footer">
-        <button class="btn btn-secondary" style="flex:0 0 50px;font-size:18px" onclick="wmStepBack()" ${wm.stepIdx===0?'disabled':''}>‹</button>
+        <button class="btn btn-secondary" style="flex:0 0 50px;font-size:18px" onclick="wmStepBack()" aria-label="${wm.stepIdx===0?'Выйти из тренировки':'Предыдущий подход'}">‹</button>
         <button class="btn btn-primary" style="flex:1;font-size:15px;font-weight:800" onclick="wmStepNext()">
           ${isLast ? '🏁 Завершить' : restTotal ? `Далее · ${restLabel}` : 'Далее ›'}
         </button>
@@ -2023,7 +2009,15 @@ function wmStepNext() {
 }
 
 function wmStepBack() {
-  if (wm.stepIdx > 0) { wm.stepIdx--; renderWmStep(); }
+  if (!wm) return;
+  if (wm.stepIdx === 0) {
+    if (confirm('Выйти из тренировки? Результаты текущей тренировки не будут сохранены.')) hideWmScreen(wm.returnPage);
+    return;
+  }
+  let previous = wm.stepIdx - 1;
+  while (previous > 0 && wm.steps[previous].type === 'rest') previous--;
+  wm.stepIdx = previous;
+  renderWmStep();
 }
 
 function formatElapsed() {
@@ -2076,6 +2070,10 @@ function startRestTimer(step) {
             <button class="btn btn-secondary" style="padding:12px 20px" onclick="skipRestTimer()">Пропустить ›</button>
             <button class="btn btn-secondary" style="padding:12px 20px" onclick="addRestTime(30)">+30с</button>
           </div>
+        </div>
+        <div class="wm-footer">
+          <button class="btn btn-secondary" style="flex:0 0 50px;font-size:18px" onclick="wmStepBack()" aria-label="Предыдущий подход">‹</button>
+          <button class="btn btn-primary" style="flex:1" onclick="skipRestTimer()">Продолжить ›</button>
         </div>
       </div>`;
   }
@@ -2237,9 +2235,6 @@ function saveWmWorkout() {
 
 function confirmAbortSave() {
   if (confirm('Отменить сохранение и выйти?')) {
-    if (wm.timerInterval) clearInterval(wm.timerInterval);
-    if (wm._elapsedTimer) clearInterval(wm._elapsedTimer);
-    wm = null;
     hideWmScreen();
   }
 }
@@ -3359,16 +3354,17 @@ function renderWorkoutsHistory() {
     const cardioStr = w.cardio && (w.cardio.time||w.cardio.dist) ?
       `<div style="margin-top:6px;font-size:12px;color:var(--accent3)">🏃 ${w.cardio.type||'Кардио'}: ${w.cardio.time||'—'} мин · ${w.cardio.dist||'—'} км · ${w.cardio.cals||'—'} ккал</div>` : '';
 
+    const rating = normalizeRating(w.rating);
     return `
       <div class="wo-item">
         <div class="wo-item-head">
           <div class="wo-item-info">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px">
               <span style="font-weight:800;font-size:15px">${w.type||'Тренировка'}</span>
               ${w.mood ? '<span>'+w.mood+'</span>' : ''}
-              ${w.rating ? '<span style="color:var(--gold);font-size:13px">${"★".repeat(w.rating)}</span>' : ''}
+              ${rating ? `<span class="workout-rating" aria-label="Оценка тренировки: ${rating} из 5" style="color:var(--gold);font-size:13px;white-space:nowrap">${'★'.repeat(rating)}</span>` : ''}
             </div>
-            <div style="font-size:12px;color:var(--muted)">${formatDate(w.date)}${w.sleep ? ' · Сон: '+w.sleep+' ч' : ''}${w.energy ? ' · '+w.energy : ''}</div>
+            <div style="font-size:12px;color:var(--muted)">${formatDate(w.date)}${w.sleep ? ' · Сон: '+w.sleep+' ч' : ''}${w.energy ? ' · Энергия: '+w.energy : ''}</div>
             ${w.muscles && w.muscles.length ? '<div style="margin-top:5px">'+w.muscles.map(m=>`<span class="badge blue" style="margin-right:3px;margin-bottom:2px;display:inline-block;font-size:10px">${m}</span>`).join('')+'</div>' : ''}
           </div>
           <div class="wo-item-actions">
@@ -4461,7 +4457,7 @@ function renderRecords() {
   const rows = [
     ['🔥', 'Лучшая серия', maxStreak + ' дней подряд'],
     ['💪', 'Любимая группа мышц', topMuscle ? `${topMuscle[0]} (${topMuscle[1]}×)` : '—'],
-    ['⭐', 'Лучшая тренировка', bestRated ? `${bestRated.type} ${formatDate(bestRated.date)} ${'★'.repeat(bestRated.rating)}` : '—'],
+    ['⭐', 'Лучшая тренировка', bestRated ? `${bestRated.type} ${formatDate(bestRated.date)} ${'★'.repeat(normalizeRating(bestRated.rating))}` : '—'],
     ['📅', 'Первая тренировка', sorted[0] ? formatDate(sorted[0].date) : '—'],
     ['🏆', 'Всего тренировок', data.workouts.length + ' штук'],
   ];
